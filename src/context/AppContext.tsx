@@ -81,10 +81,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Cities CRUD
-  const addCity = useCallback(async (city: Omit<City, 'id'>) => {
+  const addCity = useCallback(async (city: Omit<City, 'id'>): Promise<string | null> => {
     const { data, error } = await supabase.from('cities').insert({ name: city.name, state: city.state }).select().single();
-    if (error) { toast.error('Erro ao criar cidade'); return; }
+    if (error) { toast.error('Erro ao criar cidade'); return null; }
     setCities(prev => [...prev, { id: data.id, name: data.name, state: data.state }]);
+    return data.id;
   }, []);
 
   const updateCity = useCallback(async (city: City) => {
