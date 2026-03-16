@@ -97,9 +97,11 @@ export default function Dashboard() {
           <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
             <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
           </Button>
-          <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Novo Evento
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" /> Novo Evento
+            </Button>
+          )}
         </div>
       </div>
 
