@@ -56,6 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (ridersRes.data) setRiders(ridersRes.data.map(r => ({
         id: r.id, name: r.name, artistId: r.artist_id, equipment: r.equipment,
         soundSystem: r.sound_system, microphones: r.microphones, monitors: r.monitors, notes: r.notes,
+        riderFileName: r.rider_file_name, riderFileUrl: r.rider_file_url,
       })));
       if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
         id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
