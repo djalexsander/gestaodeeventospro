@@ -75,35 +75,35 @@ export function EventCalendar({ selectedDate, onSelectDate }: EventCalendarProps
           const selected = isSameDay(d, selectedDate);
           const today = isToday(d);
 
+          const hasEvents = dayEvents.length > 0;
+
           return (
             <button
               key={i}
               onClick={() => onSelectDate(d)}
               className={cn(
-                "relative flex flex-col items-center justify-start p-1 md:p-2 rounded-lg min-h-[48px] md:min-h-[64px] transition-all text-sm",
+                "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg min-h-[48px] md:min-h-[64px] transition-all text-sm",
                 !inMonth && "opacity-30",
                 selected && "bg-primary/10 ring-2 ring-primary",
-                today && !selected && "bg-accent/30",
-                !selected && inMonth && "hover:bg-muted"
+                today && !selected && !hasEvents && "bg-accent/30",
+                !selected && inMonth && !hasEvents && "hover:bg-muted",
+                hasEvents && !selected && "hover:bg-status-confirmed/20"
               )}
             >
-              <span className={cn("text-xs md:text-sm font-medium", selected && "text-primary font-bold")}>
+              <span
+                className={cn(
+                  "flex items-center justify-center text-xs md:text-sm font-medium rounded-full w-8 h-8 md:w-9 md:h-9 transition-all",
+                  selected && "text-primary font-bold",
+                  hasEvents && !selected && "bg-status-confirmed/20 text-status-confirmed font-bold ring-2 ring-status-confirmed/50",
+                  hasEvents && selected && "bg-primary/20 text-primary font-bold"
+                )}
+              >
                 {format(d, "d")}
               </span>
-              {dayEvents.length > 0 && (
-                <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
-                  {dayEvents.slice(0, 3).map((ev) => (
-                    <span
-                      key={ev.id}
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full",
-                        ev.status === "Confirmado" && "bg-status-confirmed",
-                        ev.status === "Pendente" && "bg-status-pending",
-                        ev.status === "Cancelado" && "bg-status-cancelled"
-                      )}
-                    />
-                  ))}
-                </div>
+              {hasEvents && (
+                <span className="text-[10px] text-status-confirmed font-semibold mt-0.5">
+                  {dayEvents.length} {dayEvents.length === 1 ? "evt" : "evts"}
+                </span>
               )}
             </button>
           );
