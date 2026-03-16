@@ -61,7 +61,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
         id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
         artistId: e.artist_id, riderId: e.rider_id, setupTime: e.setup_time,
-        showTime: e.show_time, notes: e.notes, status: e.status as EventStatus,
+        showTime: e.show_time, departureDate: (e as any).departure_date || null,
+        departureTime: (e as any).departure_time || '', notes: e.notes,
+        staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
       })));
       setLoading(false);
     }
