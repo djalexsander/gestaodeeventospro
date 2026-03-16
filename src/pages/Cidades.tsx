@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { City } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
