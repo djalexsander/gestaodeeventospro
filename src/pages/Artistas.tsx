@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { downloadRiderPdf } from "@/lib/downloadPdf";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { Artist } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X, Loader2 } fro
 
 export default function Artistas() {
   const { artists, addArtist, updateArtist, deleteArtist, uploadRiderFile } = useAppContext();
+  const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
@@ -67,7 +69,7 @@ export default function Artistas() {
           <Music className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Artistas</h2>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Artista</Button>
+        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Artista</Button>}
       </div>
 
       <div className="relative max-w-sm">
@@ -102,10 +104,12 @@ export default function Artistas() {
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteArtist(a.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                  </div>
+                  {isAdmin && (
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteArtist(a.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

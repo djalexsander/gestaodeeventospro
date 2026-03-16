@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { downloadRiderPdf } from "@/lib/downloadPdf";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { TechnicalRider } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Plus, Pencil, Trash2, Search, Mic2, FileUp, FileText, X, Loader2 } from
 
 export default function Riders() {
   const { riders, artists, addRider, updateRider, deleteRider, uploadRiderFile } = useAppContext();
+  const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<TechnicalRider | null>(null);
   const [search, setSearch] = useState("");
@@ -63,7 +65,7 @@ export default function Riders() {
           <Mic2 className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Riders Técnicos</h2>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Rider</Button>
+        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Rider</Button>}
       </div>
 
       <div className="relative max-w-sm">
@@ -98,10 +100,12 @@ export default function Riders() {
                     ) : "—"}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteRider(r.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                    </div>
+                    {isAdmin && (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteRider(r.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               );

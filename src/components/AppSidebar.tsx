@@ -1,6 +1,7 @@
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +14,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -25,6 +27,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { isAdmin, signOut, user } = useAuth();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -63,12 +66,38 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Admin">
+                    <NavLink
+                      to="/admin"
+                      className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                    >
+                      <Shield className="h-4 w-4" />
+                      {!collapsed && <span>Usuários</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-2">
+        {!collapsed && user && (
+          <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
+        )}
+        <Button
+          variant="ghost"
+          size={collapsed ? "icon" : "sm"}
+          onClick={signOut}
+          className="w-full text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/80"
+        >
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span className="ml-2">Sair</span>}
+        </Button>
         {!collapsed && (
           <p className="text-[10px] text-sidebar-foreground/40 text-center">
             © 2026 Estação Mix Eventos

@@ -5,6 +5,7 @@ import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } fr
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
 import { EventCalendar } from "@/components/EventCalendar";
 import { EventFormDrawer } from "@/components/EventFormDrawer";
@@ -15,6 +16,7 @@ import { exportMonthlyPdf } from "@/lib/exportPdf";
 
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
+  const { isAdmin } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -95,9 +97,11 @@ export default function Dashboard() {
           <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
             <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
           </Button>
-          <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Novo Evento
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" /> Novo Evento
+            </Button>
+          )}
         </div>
       </div>
 
@@ -193,14 +197,16 @@ export default function Dashboard() {
           {dayEvents.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-sm">Nenhum evento neste dia</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                onClick={() => { setEditingEvent(null); setFormOpen(true); }}
-              >
-                <Plus className="h-3 w-3 mr-1" /> Adicionar
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => { setEditingEvent(null); setFormOpen(true); }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
