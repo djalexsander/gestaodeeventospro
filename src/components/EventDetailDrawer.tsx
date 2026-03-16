@@ -3,7 +3,7 @@ import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil } from "lucide-react";
+import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users } from "lucide-react";
 
 interface EventDetailDrawerProps {
   open: boolean;
