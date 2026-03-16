@@ -65,7 +65,7 @@ export default function Riders() {
           <Mic2 className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Riders Técnicos</h2>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Rider</Button>
+        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Rider</Button>}
       </div>
 
       <div className="relative max-w-sm">
