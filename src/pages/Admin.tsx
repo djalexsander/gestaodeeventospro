@@ -168,7 +168,6 @@ export default function Admin() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteUser(u.id)}
-                      disabled={u.id === user?.id}
                     >
                       <Trash2 className="h-3 w-3 text-destructive" />
                     </Button>
