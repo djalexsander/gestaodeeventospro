@@ -83,14 +83,16 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t">
-            <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
-              <Pencil className="h-4 w-4 mr-2" /> Editar
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 mr-2" /> Excluir
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-3 pt-4 border-t">
+              <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
+                <Pencil className="h-4 w-4 mr-2" /> Editar
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" /> Excluir
+              </Button>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>

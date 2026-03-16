@@ -58,10 +58,12 @@ export default function Cidades() {
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell className="text-muted-foreground">{c.state}</TableCell>
                 <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteCity(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                  </div>
+                  {isAdmin && (
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteCity(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
