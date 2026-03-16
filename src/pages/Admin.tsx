@@ -75,11 +75,9 @@ export default function Admin() {
       // Update name in profile
       await supabase.from('profiles').update({ name: form.name }).eq('id', editingUser.id);
       // Update role
-      if (editingUser.id !== user?.id) {
-        await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
-      }
+      await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
       toast.success('Usuário atualizado');
-      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, name: form.name, role: editingUser.id === user?.id ? u.role : form.role } : u));
+      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, name: form.name, role: form.role } : u));
     } else {
       // Create user via edge function
       const { data: { session } } = await supabase.auth.getSession();
