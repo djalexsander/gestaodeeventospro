@@ -21,15 +21,23 @@ const App = () => (
       <Sonner />
       <AppProvider>
         <BrowserRouter>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/artistas" element={<Artistas />} />
-              <Route path="/riders" element={<Riders />} />
-              <Route path="/cidades" element={<Cidades />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
+          <Routes>
+            <Route path="/pdf-viewer" element={<PdfViewer />} />
+            <Route
+              path="*"
+              element={
+                <AppLayout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/artistas" element={<Artistas />} />
+                    <Route path="/riders" element={<Riders />} />
+                    <Route path="/cidades" element={<Cidades />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </AppLayout>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </AppProvider>
     </TooltipProvider>
