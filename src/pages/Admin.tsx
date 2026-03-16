@@ -226,7 +226,7 @@ export default function Admin() {
               <Select
                 value={form.role}
                 onValueChange={v => setForm(p => ({ ...p, role: v }))}
-                disabled={editingUser?.id === user?.id}
+                disabled={false}
               >
                 <SelectTrigger>
                   <SelectValue />
