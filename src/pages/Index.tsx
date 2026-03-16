@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
+import { format, setMonth, setYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
