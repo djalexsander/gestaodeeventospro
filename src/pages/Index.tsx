@@ -12,6 +12,7 @@ import { EventFormDrawer } from "@/components/EventFormDrawer";
 import { EventDetailDrawer } from "@/components/EventDetailDrawer";
 import { StatusBadge } from "@/components/StatusBadge";
 import { motion, AnimatePresence } from "framer-motion";
+import { exportMonthlyPdf } from "@/lib/exportPdf";
 
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
