@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadRiderPdf } from "@/lib/downloadPdf";
 import { useAppContext } from "@/context/AppContext";
 import { TechnicalRider } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -91,9 +92,9 @@ export default function Riders() {
                   <TableCell className="hidden md:table-cell text-muted-foreground">{artist?.name || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
                     {r.riderFileName ? (
-                      <a href={r.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                      <button onClick={() => downloadRiderPdf(r.riderFileUrl!, r.riderFileName!)} className="text-primary hover:underline flex items-center gap-1 text-sm">
                         <FileText className="h-3 w-3" />{r.riderFileName}
-                      </a>
+                      </button>
                     ) : "—"}
                   </TableCell>
                   <TableCell>
@@ -136,8 +137,8 @@ export default function Riders() {
                   <span className="text-sm truncate flex-1">{form.riderFileName}</span>
                   <div className="flex gap-1 shrink-0">
                     {form.riderFileUrl && (
-                      <Button type="button" variant="ghost" size="icon" asChild>
-                        <a href={form.riderFileUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-3 w-3" /></a>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => downloadRiderPdf(form.riderFileUrl!, form.riderFileName!)}>
+                        <FileText className="h-3 w-3" />
                       </Button>
                     )}
                     <Button type="button" variant="ghost" size="icon" onClick={removeFile}><X className="h-3 w-3 text-destructive" /></Button>
