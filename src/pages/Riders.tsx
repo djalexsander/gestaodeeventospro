@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { downloadRiderPdf } from "@/lib/downloadPdf";
 import { useAppContext } from "@/context/AppContext";
 import { TechnicalRider } from "@/types";
 import { Button } from "@/components/ui/button";
