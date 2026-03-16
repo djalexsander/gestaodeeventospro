@@ -6,7 +6,6 @@ export function downloadRiderPdf(fileUrl: string, fileName: string) {
     (async () => {
       const urlObj = new URL(fileUrl);
       const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/public\/riders\/(.+)/);
-
       if (!pathMatch) throw new Error('URL inválida');
 
       const filePath = pathMatch[1];
@@ -16,19 +15,12 @@ export function downloadRiderPdf(fileUrl: string, fileName: string) {
       const blob = new Blob([data], { type: 'application/pdf' });
       const blobUrl = URL.createObjectURL(blob);
 
-      // Force download
       const a = document.createElement('a');
       a.href = blobUrl;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      // Also open in internal viewer
-      setTimeout(() => {
-        const params = new URLSearchParams({ url: fileUrl, name: fileName });
-        window.open(`/pdf-viewer?${params.toString()}`, '_blank');
-      }, 500);
 
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     })(),
