@@ -110,15 +110,22 @@ export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetail
   doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 25);
   doc.setTextColor(0);
 
-  // Event title + status
+  // Event title
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text(event.name, 14, 40);
 
+  // Status on the right side
   doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(99, 102, 241);
-  doc.text(event.status, 14 + doc.getTextWidth(event.name) + 6, 40);
+  doc.setFont('helvetica', 'bold');
+  const statusColors: Record<string, [number, number, number]> = {
+    'Confirmado': [34, 197, 94],
+    'Pendente': [234, 179, 8],
+    'Cancelado': [239, 68, 68],
+  };
+  const color = statusColors[event.status] || [99, 102, 241];
+  doc.setTextColor(...color);
+  doc.text(event.status, 196, 40, { align: 'right' });
   doc.setTextColor(0);
 
   // Details table
