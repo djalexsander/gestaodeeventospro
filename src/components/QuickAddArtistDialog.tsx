@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function QuickAddArtistDialog({ open, onOpenChange, onCreated }: Props) {
-  const { addArtist, artists } = useAppContext();
+  const { addArtist } = useAppContext();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,7 @@ export function QuickAddArtistDialog({ open, onOpenChange, onCreated }: Props) {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
-    await addArtist({
+    const newId = await addArtist({
       name: name.trim(),
       musicalStyle: "",
       contact: "",
@@ -30,15 +30,9 @@ export function QuickAddArtistDialog({ open, onOpenChange, onCreated }: Props) {
       notes: "",
     });
     setLoading(false);
+    if (newId && onCreated) onCreated(newId);
     setName("");
-    // Find newly created artist
-    // We need to wait for context update, so use a small timeout
-    setTimeout(() => {
-      // The latest artist with this name
-      const found = artists.find(a => a.name === name.trim());
-      if (found && onCreated) onCreated(found.id);
-      onOpenChange(false);
-    }, 500);
+    onOpenChange(false);
   };
 
   return (
