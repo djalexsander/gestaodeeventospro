@@ -69,7 +69,7 @@ export default function Artistas() {
           <Music className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Artistas</h2>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Artista</Button>
+        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Novo Artista</Button>}
       </div>
 
       <div className="relative max-w-sm">
