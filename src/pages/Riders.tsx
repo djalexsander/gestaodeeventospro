@@ -92,9 +92,9 @@ export default function Riders() {
                   <TableCell className="hidden md:table-cell text-muted-foreground">{artist?.name || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
                     {r.riderFileName ? (
-                      <a href={r.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                      <button onClick={() => downloadRiderPdf(r.riderFileUrl!, r.riderFileName!)} className="text-primary hover:underline flex items-center gap-1 text-sm">
                         <FileText className="h-3 w-3" />{r.riderFileName}
-                      </a>
+                      </button>
                     ) : "—"}
                   </TableCell>
                   <TableCell>
