@@ -13,6 +13,7 @@ import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X, Loader2 } fro
 
 export default function Artistas() {
   const { artists, addArtist, updateArtist, deleteArtist, uploadRiderFile } = useAppContext();
+  const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
