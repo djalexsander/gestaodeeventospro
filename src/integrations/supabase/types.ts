@@ -14,7 +14,183 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      artists: {
+        Row: {
+          contact: string
+          created_at: string
+          id: string
+          musical_style: string
+          name: string
+          notes: string
+          rider_file_name: string | null
+          rider_file_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact?: string
+          created_at?: string
+          id?: string
+          musical_style?: string
+          name: string
+          notes?: string
+          rider_file_name?: string | null
+          rider_file_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          id?: string
+          musical_style?: string
+          name?: string
+          notes?: string
+          rider_file_name?: string | null
+          rider_file_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cities: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          artist_id: string
+          city_id: string
+          created_at: string
+          date: string
+          id: string
+          name: string
+          notes: string
+          rider_id: string | null
+          setup_time: string
+          show_time: string
+          status: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          artist_id: string
+          city_id: string
+          created_at?: string
+          date: string
+          id?: string
+          name: string
+          notes?: string
+          rider_id?: string | null
+          setup_time?: string
+          show_time?: string
+          status?: string
+          updated_at?: string
+          venue?: string
+        }
+        Update: {
+          artist_id?: string
+          city_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          name?: string
+          notes?: string
+          rider_id?: string | null
+          setup_time?: string
+          show_time?: string
+          status?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "technical_riders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_riders: {
+        Row: {
+          artist_id: string | null
+          created_at: string
+          equipment: string
+          id: string
+          microphones: string
+          monitors: string
+          name: string
+          notes: string
+          sound_system: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id?: string | null
+          created_at?: string
+          equipment?: string
+          id?: string
+          microphones?: string
+          monitors?: string
+          name: string
+          notes?: string
+          sound_system?: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string | null
+          created_at?: string
+          equipment?: string
+          id?: string
+          microphones?: string
+          monitors?: string
+          name?: string
+          notes?: string
+          sound_system?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_riders_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
