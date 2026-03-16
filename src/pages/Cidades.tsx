@@ -17,6 +17,7 @@ const STATES = [
 
 export default function Cidades() {
   const { cities, addCity, updateCity, deleteCity } = useAppContext();
+  const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<City | null>(null);
   const [form, setForm] = useState({ name: "", state: "" });
