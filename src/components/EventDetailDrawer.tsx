@@ -29,6 +29,21 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
     onOpenChange(false);
   };
 
+  const handleExportPdf = () => {
+    const rider = event.riderId ? getRiderById(event.riderId) : null;
+    exportSingleEventPdf({
+      event,
+      artistName: artist?.name || '—',
+      cityLabel: city ? `${city.name} - ${city.state}` : '—',
+      riderDetails: rider ? {
+        equipment: rider.equipment || '',
+        soundSystem: rider.soundSystem || '',
+        microphones: rider.microphones || '',
+        monitors: rider.monitors || '',
+      } : null,
+    });
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
