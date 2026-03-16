@@ -5,39 +5,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Search, Music } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X } from "lucide-react";
 
 export default function Artistas() {
-  const { artists, riders, addArtist, updateArtist, deleteArtist } = useAppContext();
+  const { artists, addArtist, updateArtist, deleteArtist } = useAppContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
 
-  const [form, setForm] = useState({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", notes: "" });
+  const [form, setForm] = useState({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: "" as string | null, riderFileUrl: "" as string | null, notes: "" });
 
   const openNew = () => {
     setEditing(null);
-    setForm({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", notes: "" });
-    setDialogOpen(true);
+    setForm({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: null, riderFileUrl: null, notes: "" });
   };
 
   const openEdit = (a: Artist) => {
     setEditing(a);
-    setForm({ name: a.name, musicalStyle: a.musicalStyle, contact: a.contact, defaultRiderId: a.defaultRiderId || "", notes: a.notes });
+    setForm({ name: a.name, musicalStyle: a.musicalStyle, contact: a.contact, defaultRiderId: a.defaultRiderId || "", riderFileName: a.riderFileName, riderFileUrl: a.riderFileUrl, notes: a.notes });
     setDialogOpen(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const data = { ...form, defaultRiderId: form.defaultRiderId || null, riderFileName: form.riderFileName || null, riderFileUrl: form.riderFileUrl || null };
     if (editing) {
-      updateArtist({ ...editing, ...form, defaultRiderId: form.defaultRiderId || null });
+      updateArtist({ ...editing, ...data });
     } else {
-      addArtist({ ...form, defaultRiderId: form.defaultRiderId || null });
+      addArtist(data);
     }
     setDialogOpen(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      setForm(p => ({ ...p, riderFileName: file.name, riderFileUrl: url }));
+    }
+  };
+
+  const removeFile = () => {
+    setForm(p => ({ ...p, riderFileName: null, riderFileUrl: null }));
   };
 
   const filtered = artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
@@ -64,7 +75,7 @@ export default function Artistas() {
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Estilo</TableHead>
               <TableHead className="hidden md:table-cell">Contato</TableHead>
-              <TableHead className="hidden lg:table-cell">Rider Padrão</TableHead>
+              <TableHead className="hidden lg:table-cell">Rider (PDF)</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,13 +83,18 @@ export default function Artistas() {
             {filtered.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum artista cadastrado</TableCell></TableRow>
             ) : filtered.map(a => {
-              const rider = riders.find(r => r.id === a.defaultRiderId);
               return (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.name}</TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">{a.musicalStyle}</TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">{a.contact}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">{rider?.name || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground">
+                    {a.riderFileName ? (
+                      <a href={a.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        <FileText className="h-3 w-3" />{a.riderFileName}
+                      </a>
+                    ) : "—"}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
@@ -100,13 +116,27 @@ export default function Artistas() {
             <div className="space-y-2"><Label>Estilo Musical</Label><Input value={form.musicalStyle} onChange={e => setForm(p => ({ ...p, musicalStyle: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Contato</Label><Input value={form.contact} onChange={e => setForm(p => ({ ...p, contact: e.target.value }))} /></div>
             <div className="space-y-2">
-              <Label>Rider Técnico Padrão</Label>
-              <Select value={form.defaultRiderId} onValueChange={v => setForm(p => ({ ...p, defaultRiderId: v }))}>
-                <SelectTrigger><SelectValue placeholder="Selecione um rider" /></SelectTrigger>
-                <SelectContent>
-                  {riders.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label>Rider Técnico (PDF)</Label>
+              {form.riderFileName ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
+                  <FileText className="h-5 w-5 text-primary shrink-0" />
+                  <span className="text-sm truncate flex-1">{form.riderFileName}</span>
+                  <div className="flex gap-1 shrink-0">
+                    {form.riderFileUrl && (
+                      <Button type="button" variant="ghost" size="icon" asChild>
+                        <a href={form.riderFileUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-3 w-3" /></a>
+                      </Button>
+                    )}
+                    <Button type="button" variant="ghost" size="icon" onClick={removeFile}><X className="h-3 w-3 text-destructive" /></Button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 p-3 rounded-lg border border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+                  <FileUp className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Clique para enviar PDF do rider</span>
+                  <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileChange} />
+                </label>
+              )}
             </div>
             <div className="space-y-2"><Label>Observações</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} /></div>
             <div className="flex gap-3"><Button type="submit" className="flex-1">{editing ? "Salvar" : "Criar"}</Button><Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button></div>

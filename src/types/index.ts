@@ -23,6 +23,8 @@ export interface Artist {
   musicalStyle: string;
   contact: string;
   defaultRiderId: string | null;
+  riderFileName: string | null;
+  riderFileUrl: string | null;
   notes: string;
 }
 
