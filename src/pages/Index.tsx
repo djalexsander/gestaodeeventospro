@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
+import { format, setMonth, setYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
@@ -24,6 +25,8 @@ export default function Dashboard() {
   const [viewingEvent, setViewingEvent] = useState<EventItem | null>(null);
   const [filterCity, setFilterCity] = useState("all");
   const [filterArtist, setFilterArtist] = useState("all");
+  const [exportMonth, setExportMonth] = useState(String(new Date().getMonth()));
+  const [exportYear, setExportYear] = useState(String(new Date().getFullYear()));
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const hasActiveFilter = filterCity !== "all" || filterArtist !== "all";
@@ -94,9 +97,56 @@ export default function Dashboard() {
         )}
 
         <div className="ml-auto flex gap-2">
-          <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
-            <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-4" align="end">
+              <div className="space-y-3">
+                <h4 className="font-heading text-sm font-semibold">Exportar Agenda Mensal</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Mês</label>
+                    <Select value={exportMonth} onValueChange={setExportMonth}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+                          "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+                        ].map((m, i) => (
+                          <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Ano</label>
+                    <Select value={exportYear} onValueChange={setExportYear}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 5 }, (_, i) => {
+                          const y = new Date().getFullYear() - 1 + i;
+                          return <SelectItem key={y} value={String(y)}>{y}</SelectItem>;
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Button
+                  className="w-full"
+                  size="sm"
+                  onClick={() => {
+                    const exportDate = setYear(setMonth(new Date(), Number(exportMonth)), Number(exportYear));
+                    exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
+                  }}
+                >
+                  <FileDown className="h-4 w-4 mr-2" /> Gerar PDF
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
           {isAdmin && (
             <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Novo Evento
