@@ -137,8 +137,8 @@ export default function Riders() {
                   <span className="text-sm truncate flex-1">{form.riderFileName}</span>
                   <div className="flex gap-1 shrink-0">
                     {form.riderFileUrl && (
-                      <Button type="button" variant="ghost" size="icon" asChild>
-                        <a href={form.riderFileUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-3 w-3" /></a>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => downloadRiderPdf(form.riderFileUrl!, form.riderFileName!)}>
+                        <FileText className="h-3 w-3" />
                       </Button>
                     )}
                     <Button type="button" variant="ghost" size="icon" onClick={removeFile}><X className="h-3 w-3 text-destructive" /></Button>
