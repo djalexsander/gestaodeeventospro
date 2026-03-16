@@ -12,7 +12,7 @@ interface AppContextType {
   addCity: (city: Omit<City, 'id'>) => Promise<string | null>;
   updateCity: (city: City) => Promise<void>;
   deleteCity: (id: string) => Promise<void>;
-  addArtist: (artist: Omit<Artist, 'id'>) => Promise<void>;
+  addArtist: (artist: Omit<Artist, 'id'>) => Promise<string | null>;
   updateArtist: (artist: Artist) => Promise<void>;
   deleteArtist: (id: string) => Promise<void>;
   addRider: (rider: Omit<TechnicalRider, 'id'>) => Promise<void>;
