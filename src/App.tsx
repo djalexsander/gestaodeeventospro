@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Artistas from "./pages/Artistas";
 import Riders from "./pages/Riders";
 import Cidades from "./pages/Cidades";
+import PdfViewer from "./pages/PdfViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
