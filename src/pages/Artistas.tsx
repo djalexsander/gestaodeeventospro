@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X } from "lucide-react";
 
 export default function Artistas() {
-  const { artists, riders, addArtist, updateArtist, deleteArtist } = useAppContext();
+  const { artists, addArtist, updateArtist, deleteArtist } = useAppContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
