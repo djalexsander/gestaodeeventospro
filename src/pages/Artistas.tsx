@@ -24,7 +24,7 @@ export default function Artistas() {
 
   const openEdit = (a: Artist) => {
     setEditing(a);
-    setForm({ name: a.name, musicalStyle: a.musicalStyle, contact: a.contact, defaultRiderId: a.defaultRiderId || "", notes: a.notes });
+    setForm({ name: a.name, musicalStyle: a.musicalStyle, contact: a.contact, defaultRiderId: a.defaultRiderId || "", riderFileName: a.riderFileName, riderFileUrl: a.riderFileUrl, notes: a.notes });
     setDialogOpen(true);
   };
 
