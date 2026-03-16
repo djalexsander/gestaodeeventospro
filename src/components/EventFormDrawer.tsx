@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { SearchableSelect } from "@/components/SearchableSelect";
+import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
+import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
 
 interface EventFormDrawerProps {
   open: boolean;
