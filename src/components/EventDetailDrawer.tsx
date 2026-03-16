@@ -15,6 +15,7 @@ interface EventDetailDrawerProps {
 
 export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDetailDrawerProps) {
   const { getArtistById, getCityById, getRiderById, deleteEvent } = useAppContext();
+  const { isAdmin } = useAuth();
 
   if (!event) return null;
 
