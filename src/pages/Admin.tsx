@@ -75,11 +75,9 @@ export default function Admin() {
       // Update name in profile
       await supabase.from('profiles').update({ name: form.name }).eq('id', editingUser.id);
       // Update role
-      if (editingUser.id !== user?.id) {
-        await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
-      }
+      await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
       toast.success('Usuário atualizado');
-      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, name: form.name, role: editingUser.id === user?.id ? u.role : form.role } : u));
+      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, name: form.name, role: form.role } : u));
     } else {
       // Create user via edge function
       const { data: { session } } = await supabase.auth.getSession();
@@ -100,10 +98,6 @@ export default function Admin() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (userId === user?.id) {
-      toast.error('Você não pode excluir sua própria conta');
-      return;
-    }
 
     const res = await supabase.functions.invoke('delete-user', {
       body: { userId },
@@ -174,7 +168,6 @@ export default function Admin() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteUser(u.id)}
-                      disabled={u.id === user?.id}
                     >
                       <Trash2 className="h-3 w-3 text-destructive" />
                     </Button>
@@ -233,7 +226,7 @@ export default function Admin() {
               <Select
                 value={form.role}
                 onValueChange={v => setForm(p => ({ ...p, role: v }))}
-                disabled={editingUser?.id === user?.id}
+                disabled={false}
               >
                 <SelectTrigger>
                   <SelectValue />
