@@ -21,6 +21,8 @@ interface EventFormDrawerProps {
 
 export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: EventFormDrawerProps) {
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
+  const [showAddArtist, setShowAddArtist] = useState(false);
+  const [showAddCity, setShowAddCity] = useState(false);
 
   const [form, setForm] = useState({
     date: "",
