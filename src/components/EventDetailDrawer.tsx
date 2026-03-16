@@ -4,7 +4,8 @@ import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users } from "lucide-react";
+import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download } from "lucide-react";
+import { exportSingleEventPdf } from "@/lib/exportPdf";
 
 interface EventDetailDrawerProps {
   open: boolean;
@@ -26,6 +27,21 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
   const handleDelete = () => {
     deleteEvent(event.id);
     onOpenChange(false);
+  };
+
+  const handleExportPdf = () => {
+    const rider = event.riderId ? getRiderById(event.riderId) : null;
+    exportSingleEventPdf({
+      event,
+      artistName: artist?.name || '—',
+      cityLabel: city ? `${city.name} - ${city.state}` : '—',
+      riderDetails: rider ? {
+        equipment: rider.equipment || '',
+        soundSystem: rider.soundSystem || '',
+        microphones: rider.microphones || '',
+        monitors: rider.monitors || '',
+      } : null,
+    });
   };
 
   return (
@@ -83,16 +99,21 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
             </div>
           )}
 
-          {isAdmin && (
-            <div className="flex gap-3 pt-4 border-t">
-              <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
-                <Pencil className="h-4 w-4 mr-2" /> Editar
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4 mr-2" /> Excluir
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={handleExportPdf} className="flex-1">
+              <Download className="h-4 w-4 mr-2" /> Exportar PDF
+            </Button>
+            {isAdmin && (
+              <>
+                <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
+                  <Pencil className="h-4 w-4 mr-2" /> Editar
+                </Button>
+                <Button variant="destructive" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
