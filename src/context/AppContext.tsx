@@ -130,11 +130,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.from('technical_riders').insert({
       name: rider.name, artist_id: rider.artistId, equipment: rider.equipment,
       sound_system: rider.soundSystem, microphones: rider.microphones, monitors: rider.monitors, notes: rider.notes,
+      rider_file_name: rider.riderFileName, rider_file_url: rider.riderFileUrl,
     }).select().single();
     if (error) { toast.error('Erro ao criar rider'); return; }
     setRiders(prev => [...prev, {
       id: data.id, name: data.name, artistId: data.artist_id, equipment: data.equipment,
       soundSystem: data.sound_system, microphones: data.microphones, monitors: data.monitors, notes: data.notes,
+      riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url,
     }]);
   }, []);
 
