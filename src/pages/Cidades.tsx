@@ -38,7 +38,7 @@ export default function Cidades() {
           <MapPin className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Cidades</h2>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Cidade</Button>
+        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Cidade</Button>}
       </div>
 
       <div className="bg-card rounded-xl border overflow-hidden">
