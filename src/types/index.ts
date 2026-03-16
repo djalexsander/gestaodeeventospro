@@ -14,6 +14,8 @@ export interface TechnicalRider {
   soundSystem: string;
   microphones: string;
   monitors: string;
+  riderFileName: string | null;
+  riderFileUrl: string | null;
   notes: string;
 }
 

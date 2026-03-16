@@ -56,6 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (ridersRes.data) setRiders(ridersRes.data.map(r => ({
         id: r.id, name: r.name, artistId: r.artist_id, equipment: r.equipment,
         soundSystem: r.sound_system, microphones: r.microphones, monitors: r.monitors, notes: r.notes,
+        riderFileName: r.rider_file_name, riderFileUrl: r.rider_file_url,
       })));
       if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
         id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
@@ -129,11 +130,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.from('technical_riders').insert({
       name: rider.name, artist_id: rider.artistId, equipment: rider.equipment,
       sound_system: rider.soundSystem, microphones: rider.microphones, monitors: rider.monitors, notes: rider.notes,
+      rider_file_name: rider.riderFileName, rider_file_url: rider.riderFileUrl,
     }).select().single();
     if (error) { toast.error('Erro ao criar rider'); return; }
     setRiders(prev => [...prev, {
       id: data.id, name: data.name, artistId: data.artist_id, equipment: data.equipment,
       soundSystem: data.sound_system, microphones: data.microphones, monitors: data.monitors, notes: data.notes,
+      riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url,
     }]);
   }, []);
 
@@ -141,6 +144,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.from('technical_riders').update({
       name: rider.name, artist_id: rider.artistId, equipment: rider.equipment,
       sound_system: rider.soundSystem, microphones: rider.microphones, monitors: rider.monitors, notes: rider.notes,
+      rider_file_name: rider.riderFileName, rider_file_url: rider.riderFileUrl,
     }).eq('id', rider.id);
     if (error) { toast.error('Erro ao atualizar rider'); return; }
     setRiders(prev => prev.map(r => r.id === rider.id ? rider : r));

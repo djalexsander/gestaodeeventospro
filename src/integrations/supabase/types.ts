@@ -154,6 +154,8 @@ export type Database = {
           monitors: string
           name: string
           notes: string
+          rider_file_name: string | null
+          rider_file_url: string | null
           sound_system: string
           updated_at: string
         }
@@ -166,6 +168,8 @@ export type Database = {
           monitors?: string
           name: string
           notes?: string
+          rider_file_name?: string | null
+          rider_file_url?: string | null
           sound_system?: string
           updated_at?: string
         }
@@ -178,6 +182,8 @@ export type Database = {
           monitors?: string
           name?: string
           notes?: string
+          rider_file_name?: string | null
+          rider_file_url?: string | null
           sound_system?: string
           updated_at?: string
         }
