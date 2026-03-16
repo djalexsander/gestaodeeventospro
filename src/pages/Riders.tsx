@@ -14,6 +14,7 @@ import { Plus, Pencil, Trash2, Search, Mic2, FileUp, FileText, X, Loader2 } from
 
 export default function Riders() {
   const { riders, artists, addRider, updateRider, deleteRider, uploadRiderFile } = useAppContext();
+  const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<TechnicalRider | null>(null);
   const [search, setSearch] = useState("");
