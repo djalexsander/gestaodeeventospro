@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 interface EventFormDrawerProps {
   open: boolean;
@@ -27,7 +28,10 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     riderId: "",
     setupTime: "",
     showTime: "",
+    departureDate: "",
+    departureTime: "",
     notes: "",
+    staffNotes: "",
     status: "Pendente" as EventStatus,
   });
 
@@ -42,7 +46,10 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         riderId: event.riderId || "",
         setupTime: event.setupTime,
         showTime: event.showTime,
+        departureDate: event.departureDate || "",
+        departureTime: event.departureTime || "",
         notes: event.notes,
+        staffNotes: event.staffNotes || "",
         status: event.status,
       });
     } else {
@@ -55,7 +62,10 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         riderId: "",
         setupTime: "",
         showTime: "",
+        departureDate: "",
+        departureTime: "",
         notes: "",
+        staffNotes: "",
         status: "Pendente",
       });
     }
@@ -75,10 +85,15 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...form,
+      riderId: form.riderId || null,
+      departureDate: form.departureDate || null,
+    };
     if (event) {
-      updateEvent({ ...form, id: event.id, riderId: form.riderId || null });
+      updateEvent({ ...payload, id: event.id });
     } else {
-      addEvent({ ...form, riderId: form.riderId || null });
+      addEvent(payload);
     }
     onOpenChange(false);
   };
@@ -159,9 +174,36 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
             </div>
           </div>
 
+          {/* Saída */}
+          <Separator />
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+            <h4 className="text-sm font-heading font-semibold text-foreground">Saída / Logística</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data de Saída</Label>
+                <Input type="date" value={form.departureDate} onChange={e => setForm(p => ({ ...p, departureDate: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Horário de Saída</Label>
+                <Input type="time" value={form.departureTime} onChange={e => setForm(p => ({ ...p, departureTime: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Observações</Label>
             <Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} />
+          </div>
+
+          {/* Info para funcionários */}
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-2">
+            <h4 className="text-sm font-heading font-semibold text-primary">Informações para Funcionários</h4>
+            <Textarea
+              value={form.staffNotes}
+              onChange={e => setForm(p => ({ ...p, staffNotes: e.target.value }))}
+              rows={3}
+              placeholder="Instruções internas, contatos, logística..."
+            />
           </div>
 
           <div className="flex gap-3 pt-4">

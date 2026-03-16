@@ -80,12 +80,15 @@ export type Database = {
           city_id: string
           created_at: string
           date: string
+          departure_date: string | null
+          departure_time: string
           id: string
           name: string
           notes: string
           rider_id: string | null
           setup_time: string
           show_time: string
+          staff_notes: string
           status: string
           updated_at: string
           venue: string
@@ -95,12 +98,15 @@ export type Database = {
           city_id: string
           created_at?: string
           date: string
+          departure_date?: string | null
+          departure_time?: string
           id?: string
           name: string
           notes?: string
           rider_id?: string | null
           setup_time?: string
           show_time?: string
+          staff_notes?: string
           status?: string
           updated_at?: string
           venue?: string
@@ -110,12 +116,15 @@ export type Database = {
           city_id?: string
           created_at?: string
           date?: string
+          departure_date?: string | null
+          departure_time?: string
           id?: string
           name?: string
           notes?: string
           rider_id?: string | null
           setup_time?: string
           show_time?: string
+          staff_notes?: string
           status?: string
           updated_at?: string
           venue?: string

@@ -40,6 +40,9 @@ export interface EventItem {
   riderId: string | null;
   setupTime: string;
   showTime: string;
+  departureDate: string | null;
+  departureTime: string;
   notes: string;
+  staffNotes: string;
   status: EventStatus;
 }
