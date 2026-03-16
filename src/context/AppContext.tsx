@@ -164,12 +164,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       date: event.date, name: event.name, city_id: event.cityId, venue: event.venue,
       artist_id: event.artistId, rider_id: event.riderId, setup_time: event.setupTime,
       show_time: event.showTime, notes: event.notes, status: event.status,
-    }).select().single();
+      departure_date: event.departureDate, departure_time: event.departureTime,
+      staff_notes: event.staffNotes,
+    } as any).select().single();
     if (error) { toast.error('Erro ao criar evento'); return; }
     setEvents(prev => [...prev, {
       id: data.id, date: data.date, name: data.name, cityId: data.city_id, venue: data.venue,
       artistId: data.artist_id, riderId: data.rider_id, setupTime: data.setup_time,
-      showTime: data.show_time, notes: data.notes, status: data.status as EventStatus,
+      showTime: data.show_time, departureDate: (data as any).departure_date || null,
+      departureTime: (data as any).departure_time || '', notes: data.notes,
+      staffNotes: (data as any).staff_notes || '', status: data.status as EventStatus,
     }]);
   }, []);
 
