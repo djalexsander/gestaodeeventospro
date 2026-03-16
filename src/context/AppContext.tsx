@@ -101,16 +101,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Artists CRUD
-  const addArtist = useCallback(async (artist: Omit<Artist, 'id'>) => {
+  const addArtist = useCallback(async (artist: Omit<Artist, 'id'>): Promise<string | null> => {
     const { data, error } = await supabase.from('artists').insert({
       name: artist.name, musical_style: artist.musicalStyle, contact: artist.contact,
       rider_file_name: artist.riderFileName, rider_file_url: artist.riderFileUrl, notes: artist.notes,
     }).select().single();
-    if (error) { toast.error('Erro ao criar artista'); return; }
+    if (error) { toast.error('Erro ao criar artista'); return null; }
     setArtists(prev => [...prev, {
       id: data.id, name: data.name, musicalStyle: data.musical_style, contact: data.contact,
       defaultRiderId: null, riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url, notes: data.notes,
     }]);
+    return data.id;
   }, []);
 
   const updateArtist = useCallback(async (artist: Artist) => {
