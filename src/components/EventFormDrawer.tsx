@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { SearchableSelect } from "@/components/SearchableSelect";
+import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
+import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
 
 interface EventFormDrawerProps {
   open: boolean;
@@ -18,6 +21,8 @@ interface EventFormDrawerProps {
 
 export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: EventFormDrawerProps) {
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
+  const [showAddArtist, setShowAddArtist] = useState(false);
+  const [showAddCity, setShowAddCity] = useState(false);
 
   const [form, setForm] = useState({
     date: "",
@@ -130,22 +135,30 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
 
           <div className="space-y-2">
             <Label>Artista</Label>
-            <Select value={form.artistId} onValueChange={handleArtistChange}>
-              <SelectTrigger><SelectValue placeholder="Selecione um artista" /></SelectTrigger>
-              <SelectContent>
-                {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.artistId}
+              onValueChange={handleArtistChange}
+              options={artists.map(a => ({ value: a.id, label: a.name }))}
+              placeholder="Selecione um artista"
+              searchPlaceholder="Buscar artista..."
+              emptyText="Nenhum artista encontrado."
+              onAddNew={() => setShowAddArtist(true)}
+              addNewLabel="Adicionar novo artista"
+            />
           </div>
 
           <div className="space-y-2">
             <Label>Cidade</Label>
-            <Select value={form.cityId} onValueChange={v => setForm(p => ({ ...p, cityId: v }))}>
-              <SelectTrigger><SelectValue placeholder="Selecione uma cidade" /></SelectTrigger>
-              <SelectContent>
-                {cities.map(c => <SelectItem key={c.id} value={c.id}>{c.name} - {c.state}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.cityId}
+              onValueChange={v => setForm(p => ({ ...p, cityId: v }))}
+              options={cities.map(c => ({ value: c.id, label: `${c.name} - ${c.state}` }))}
+              placeholder="Selecione uma cidade"
+              searchPlaceholder="Buscar cidade..."
+              emptyText="Nenhuma cidade encontrada."
+              onAddNew={() => setShowAddCity(true)}
+              addNewLabel="Adicionar nova cidade"
+            />
           </div>
 
           <div className="space-y-2">
@@ -212,6 +225,17 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           </div>
         </form>
       </SheetContent>
+
+      <QuickAddArtistDialog
+        open={showAddArtist}
+        onOpenChange={setShowAddArtist}
+        onCreated={(id) => handleArtistChange(id)}
+      />
+      <QuickAddCityDialog
+        open={showAddCity}
+        onOpenChange={setShowAddCity}
+        onCreated={(id) => setForm(p => ({ ...p, cityId: id }))}
+      />
     </Sheet>
   );
 }
