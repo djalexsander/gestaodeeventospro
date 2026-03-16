@@ -144,6 +144,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.from('technical_riders').update({
       name: rider.name, artist_id: rider.artistId, equipment: rider.equipment,
       sound_system: rider.soundSystem, microphones: rider.microphones, monitors: rider.monitors, notes: rider.notes,
+      rider_file_name: rider.riderFileName, rider_file_url: rider.riderFileUrl,
     }).eq('id', rider.id);
     if (error) { toast.error('Erro ao atualizar rider'); return; }
     setRiders(prev => prev.map(r => r.id === rider.id ? rider : r));
