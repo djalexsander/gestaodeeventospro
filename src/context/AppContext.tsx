@@ -182,7 +182,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       date: event.date, name: event.name, city_id: event.cityId, venue: event.venue,
       artist_id: event.artistId, rider_id: event.riderId, setup_time: event.setupTime,
       show_time: event.showTime, notes: event.notes, status: event.status,
-    }).eq('id', event.id);
+      departure_date: event.departureDate, departure_time: event.departureTime,
+      staff_notes: event.staffNotes,
+    } as any).eq('id', event.id);
     if (error) { toast.error('Erro ao atualizar evento'); return; }
     setEvents(prev => prev.map(e => e.id === event.id ? event : e));
   }, []);
