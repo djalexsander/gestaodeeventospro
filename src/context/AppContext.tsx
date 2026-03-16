@@ -9,7 +9,7 @@ interface AppContextType {
   riders: TechnicalRider[];
   events: EventItem[];
   loading: boolean;
-  addCity: (city: Omit<City, 'id'>) => Promise<void>;
+  addCity: (city: Omit<City, 'id'>) => Promise<string | null>;
   updateCity: (city: City) => Promise<void>;
   deleteCity: (id: string) => Promise<void>;
   addArtist: (artist: Omit<Artist, 'id'>) => Promise<void>;
