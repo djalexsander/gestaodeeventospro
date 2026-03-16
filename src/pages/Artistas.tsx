@@ -30,12 +30,25 @@ export default function Artistas() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const data = { ...form, defaultRiderId: form.defaultRiderId || null, riderFileName: form.riderFileName || null, riderFileUrl: form.riderFileUrl || null };
     if (editing) {
-      updateArtist({ ...editing, ...form, defaultRiderId: form.defaultRiderId || null });
+      updateArtist({ ...editing, ...data });
     } else {
-      addArtist({ ...form, defaultRiderId: form.defaultRiderId || null });
+      addArtist(data);
     }
     setDialogOpen(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      setForm(p => ({ ...p, riderFileName: file.name, riderFileUrl: url }));
+    }
+  };
+
+  const removeFile = () => {
+    setForm(p => ({ ...p, riderFileName: null, riderFileUrl: null }));
   };
 
   const filtered = artists.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
