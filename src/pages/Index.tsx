@@ -197,14 +197,16 @@ export default function Dashboard() {
           {dayEvents.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-sm">Nenhum evento neste dia</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                onClick={() => { setEditingEvent(null); setFormOpen(true); }}
-              >
-                <Plus className="h-3 w-3 mr-1" /> Adicionar
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => { setEditingEvent(null); setFormOpen(true); }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Adicionar
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
