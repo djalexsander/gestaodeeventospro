@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Filter, FileDown } from "lucide-react";
+import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppContext } from "@/context/AppContext";
 import { EventItem } from "@/types";
@@ -25,7 +24,17 @@ export default function Dashboard() {
   const [filterArtist, setFilterArtist] = useState("all");
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
+  const hasActiveFilter = filterCity !== "all" || filterArtist !== "all";
 
+  // Filtered events across ALL dates (for the filter results panel)
+  const filteredEvents = useMemo(() => {
+    let result = [...events];
+    if (filterCity !== "all") result = result.filter(e => e.cityId === filterCity);
+    if (filterArtist !== "all") result = result.filter(e => e.artistId === filterArtist);
+    return result.sort((a, b) => a.date.localeCompare(b.date));
+  }, [events, filterCity, filterArtist]);
+
+  // Day events for the daily agenda (no filter, shows all for selected day)
   let dayEvents = events.filter(e => e.date === dateStr);
   if (filterCity !== "all") dayEvents = dayEvents.filter(e => e.cityId === filterCity);
   if (filterArtist !== "all") dayEvents = dayEvents.filter(e => e.artistId === filterArtist);
@@ -34,6 +43,24 @@ export default function Dashboard() {
     setEditingEvent(ev);
     setFormOpen(true);
   };
+
+  const clearFilters = () => {
+    setFilterCity("all");
+    setFilterArtist("all");
+  };
+
+  const selectedCityName = filterCity !== "all" ? getCityById(filterCity)?.name : null;
+  const selectedArtistName = filterArtist !== "all" ? getArtistById(filterArtist)?.name : null;
+
+  // Group filtered events by date
+  const groupedEvents = useMemo(() => {
+    const groups: Record<string, EventItem[]> = {};
+    filteredEvents.forEach(ev => {
+      if (!groups[ev.date]) groups[ev.date] = [];
+      groups[ev.date].push(ev);
+    });
+    return groups;
+  }, [filteredEvents]);
 
   return (
     <div className="space-y-6">
@@ -57,6 +84,13 @@ export default function Dashboard() {
             {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
+
+        {hasActiveFilter && (
+          <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4 mr-1" /> Limpar
+          </Button>
+        )}
+
         <div className="ml-auto flex gap-2">
           <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
             <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
@@ -66,6 +100,82 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Filter Results Panel */}
+      <AnimatePresence>
+        {hasActiveFilter && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-card rounded-xl border p-4 md:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  {selectedCityName && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {selectedCityName}
+                    </span>
+                  )}
+                  {selectedArtistName && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium">
+                      <Music className="h-3.5 w-3.5" />
+                      {selectedArtistName}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {filteredEvents.length} evento{filteredEvents.length !== 1 ? "s" : ""} encontrado{filteredEvents.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {filteredEvents.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">
+                  Nenhum evento encontrado para este filtro.
+                </p>
+              ) : (
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                  {Object.entries(groupedEvents).map(([date, evts]) => (
+                    <div key={date}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          {format(new Date(date + "T12:00:00"), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {evts.map(ev => {
+                          const artist = getArtistById(ev.artistId);
+                          const city = getCityById(ev.cityId);
+                          return (
+                            <motion.div
+                              key={ev.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="p-3 rounded-lg border bg-background cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
+                              onClick={() => { setViewingEvent(ev); setDetailOpen(true); }}
+                            >
+                              <div className="flex items-start justify-between mb-1">
+                                <h4 className="text-sm font-semibold truncate">{ev.name}</h4>
+                                <StatusBadge status={ev.status} />
+                              </div>
+                              <p className="text-xs text-muted-foreground">{artist?.name || "—"}</p>
+                              <p className="text-xs text-muted-foreground">{city?.name || "—"} • {ev.venue}</p>
+                              <p className="text-xs text-muted-foreground mt-1">🕐 {ev.showTime || "—"}</p>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
