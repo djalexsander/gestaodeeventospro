@@ -15,7 +15,7 @@ export default function Artistas() {
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
 
-  const [form, setForm] = useState({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", notes: "" });
+  const [form, setForm] = useState({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: "" as string | null, riderFileUrl: "" as string | null, notes: "" });
 
   const openNew = () => {
     setEditing(null);
