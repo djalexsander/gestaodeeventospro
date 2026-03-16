@@ -111,13 +111,27 @@ export default function Artistas() {
             <div className="space-y-2"><Label>Estilo Musical</Label><Input value={form.musicalStyle} onChange={e => setForm(p => ({ ...p, musicalStyle: e.target.value }))} /></div>
             <div className="space-y-2"><Label>Contato</Label><Input value={form.contact} onChange={e => setForm(p => ({ ...p, contact: e.target.value }))} /></div>
             <div className="space-y-2">
-              <Label>Rider Técnico Padrão</Label>
-              <Select value={form.defaultRiderId} onValueChange={v => setForm(p => ({ ...p, defaultRiderId: v }))}>
-                <SelectTrigger><SelectValue placeholder="Selecione um rider" /></SelectTrigger>
-                <SelectContent>
-                  {riders.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label>Rider Técnico (PDF)</Label>
+              {form.riderFileName ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
+                  <FileText className="h-5 w-5 text-primary shrink-0" />
+                  <span className="text-sm truncate flex-1">{form.riderFileName}</span>
+                  <div className="flex gap-1 shrink-0">
+                    {form.riderFileUrl && (
+                      <Button type="button" variant="ghost" size="icon" asChild>
+                        <a href={form.riderFileUrl} target="_blank" rel="noopener noreferrer"><FileText className="h-3 w-3" /></a>
+                      </Button>
+                    )}
+                    <Button type="button" variant="ghost" size="icon" onClick={removeFile}><X className="h-3 w-3 text-destructive" /></Button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 p-3 rounded-lg border border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+                  <FileUp className="h-5 w-5 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Clique para enviar PDF do rider</span>
+                  <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileChange} />
+                </label>
+              )}
             </div>
             <div className="space-y-2"><Label>Observações</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} /></div>
             <div className="flex gap-3"><Button type="submit" className="flex-1">{editing ? "Salvar" : "Criar"}</Button><Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button></div>
