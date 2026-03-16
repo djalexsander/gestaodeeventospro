@@ -225,6 +225,17 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           </div>
         </form>
       </SheetContent>
+
+      <QuickAddArtistDialog
+        open={showAddArtist}
+        onOpenChange={setShowAddArtist}
+        onCreated={(id) => handleArtistChange(id)}
+      />
+      <QuickAddCityDialog
+        open={showAddCity}
+        onOpenChange={setShowAddCity}
+        onCreated={(id) => setForm(p => ({ ...p, cityId: id }))}
+      />
     </Sheet>
   );
 }
