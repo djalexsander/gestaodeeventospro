@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { downloadRiderPdf } from "@/lib/downloadPdf";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { Artist } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
