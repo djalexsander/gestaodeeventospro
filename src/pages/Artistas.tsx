@@ -19,8 +19,7 @@ export default function Artistas() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", notes: "" });
-    setDialogOpen(true);
+    setForm({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: null, riderFileUrl: null, notes: "" });
   };
 
   const openEdit = (a: Artist) => {
