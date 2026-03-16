@@ -7,19 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Music, FileUp, FileText, X, Loader2 } from "lucide-react";
 
 export default function Artistas() {
-  const { artists, addArtist, updateArtist, deleteArtist } = useAppContext();
+  const { artists, addArtist, updateArtist, deleteArtist, uploadRiderFile } = useAppContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Artist | null>(null);
   const [search, setSearch] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: "" as string | null, riderFileUrl: "" as string | null, notes: "" });
 
   const openNew = () => {
     setEditing(null);
     setForm({ name: "", musicalStyle: "", contact: "", defaultRiderId: "", riderFileName: null, riderFileUrl: null, notes: "" });
+    setDialogOpen(true);
   };
 
   const openEdit = (a: Artist) => {
@@ -28,22 +30,26 @@ export default function Artistas() {
     setDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = { ...form, defaultRiderId: form.defaultRiderId || null, riderFileName: form.riderFileName || null, riderFileUrl: form.riderFileUrl || null };
     if (editing) {
-      updateArtist({ ...editing, ...data });
+      await updateArtist({ ...editing, ...data });
     } else {
-      addArtist(data);
+      await addArtist(data);
     }
     setDialogOpen(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      setForm(p => ({ ...p, riderFileName: file.name, riderFileUrl: url }));
+      setUploading(true);
+      const result = await uploadRiderFile(file);
+      if (result) {
+        setForm(p => ({ ...p, riderFileName: result.fileName, riderFileUrl: result.fileUrl }));
+      }
+      setUploading(false);
     }
   };
 
@@ -82,28 +88,26 @@ export default function Artistas() {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum artista cadastrado</TableCell></TableRow>
-            ) : filtered.map(a => {
-              return (
-                <TableRow key={a.id}>
-                  <TableCell className="font-medium">{a.name}</TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">{a.musicalStyle}</TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">{a.contact}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">
-                    {a.riderFileName ? (
-                      <a href={a.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                        <FileText className="h-3 w-3" />{a.riderFileName}
-                      </a>
-                    ) : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteArtist(a.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            ) : filtered.map(a => (
+              <TableRow key={a.id}>
+                <TableCell className="font-medium">{a.name}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{a.musicalStyle}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{a.contact}</TableCell>
+                <TableCell className="hidden lg:table-cell text-muted-foreground">
+                  {a.riderFileName ? (
+                    <a href={a.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                      <FileText className="h-3 w-3" />{a.riderFileName}
+                    </a>
+                  ) : "—"}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteArtist(a.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>
@@ -117,7 +121,12 @@ export default function Artistas() {
             <div className="space-y-2"><Label>Contato</Label><Input value={form.contact} onChange={e => setForm(p => ({ ...p, contact: e.target.value }))} /></div>
             <div className="space-y-2">
               <Label>Rider Técnico (PDF)</Label>
-              {form.riderFileName ? (
+              {uploading ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
+                  <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                  <span className="text-sm text-muted-foreground">Enviando PDF...</span>
+                </div>
+              ) : form.riderFileName ? (
                 <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/50">
                   <FileText className="h-5 w-5 text-primary shrink-0" />
                   <span className="text-sm truncate flex-1">{form.riderFileName}</span>
@@ -139,7 +148,7 @@ export default function Artistas() {
               )}
             </div>
             <div className="space-y-2"><Label>Observações</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={3} /></div>
-            <div className="flex gap-3"><Button type="submit" className="flex-1">{editing ? "Salvar" : "Criar"}</Button><Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button></div>
+            <div className="flex gap-3"><Button type="submit" className="flex-1" disabled={uploading}>{editing ? "Salvar" : "Criar"}</Button><Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button></div>
           </form>
         </DialogContent>
       </Dialog>
