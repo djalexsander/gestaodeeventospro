@@ -75,7 +75,7 @@ export default function Artistas() {
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Estilo</TableHead>
               <TableHead className="hidden md:table-cell">Contato</TableHead>
-              <TableHead className="hidden lg:table-cell">Rider Padrão</TableHead>
+              <TableHead className="hidden lg:table-cell">Rider (PDF)</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -83,13 +83,18 @@ export default function Artistas() {
             {filtered.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum artista cadastrado</TableCell></TableRow>
             ) : filtered.map(a => {
-              const rider = riders.find(r => r.id === a.defaultRiderId);
               return (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.name}</TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">{a.musicalStyle}</TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground">{a.contact}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">{rider?.name || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-muted-foreground">
+                    {a.riderFileName ? (
+                      <a href={a.riderFileUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                        <FileText className="h-3 w-3" />{a.riderFileName}
+                      </a>
+                    ) : "—"}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
