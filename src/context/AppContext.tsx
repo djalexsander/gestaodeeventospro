@@ -9,10 +9,10 @@ interface AppContextType {
   riders: TechnicalRider[];
   events: EventItem[];
   loading: boolean;
-  addCity: (city: Omit<City, 'id'>) => Promise<void>;
+  addCity: (city: Omit<City, 'id'>) => Promise<string | null>;
   updateCity: (city: City) => Promise<void>;
   deleteCity: (id: string) => Promise<void>;
-  addArtist: (artist: Omit<Artist, 'id'>) => Promise<void>;
+  addArtist: (artist: Omit<Artist, 'id'>) => Promise<string | null>;
   updateArtist: (artist: Artist) => Promise<void>;
   deleteArtist: (id: string) => Promise<void>;
   addRider: (rider: Omit<TechnicalRider, 'id'>) => Promise<void>;
@@ -81,10 +81,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Cities CRUD
-  const addCity = useCallback(async (city: Omit<City, 'id'>) => {
+  const addCity = useCallback(async (city: Omit<City, 'id'>): Promise<string | null> => {
     const { data, error } = await supabase.from('cities').insert({ name: city.name, state: city.state }).select().single();
-    if (error) { toast.error('Erro ao criar cidade'); return; }
+    if (error) { toast.error('Erro ao criar cidade'); return null; }
     setCities(prev => [...prev, { id: data.id, name: data.name, state: data.state }]);
+    return data.id;
   }, []);
 
   const updateCity = useCallback(async (city: City) => {
@@ -100,16 +101,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Artists CRUD
-  const addArtist = useCallback(async (artist: Omit<Artist, 'id'>) => {
+  const addArtist = useCallback(async (artist: Omit<Artist, 'id'>): Promise<string | null> => {
     const { data, error } = await supabase.from('artists').insert({
       name: artist.name, musical_style: artist.musicalStyle, contact: artist.contact,
       rider_file_name: artist.riderFileName, rider_file_url: artist.riderFileUrl, notes: artist.notes,
     }).select().single();
-    if (error) { toast.error('Erro ao criar artista'); return; }
+    if (error) { toast.error('Erro ao criar artista'); return null; }
     setArtists(prev => [...prev, {
       id: data.id, name: data.name, musicalStyle: data.musical_style, contact: data.contact,
       defaultRiderId: null, riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url, notes: data.notes,
     }]);
+    return data.id;
   }, []);
 
   const updateArtist = useCallback(async (artist: Artist) => {

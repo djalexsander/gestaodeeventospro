@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function QuickAddCityDialog({ open, onOpenChange, onCreated }: Props) {
-  const { addCity, cities } = useAppContext();
+  const { addCity } = useAppContext();
   const [name, setName] = useState("");
   const [state, setState] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,15 +21,12 @@ export function QuickAddCityDialog({ open, onOpenChange, onCreated }: Props) {
     e.preventDefault();
     if (!name.trim() || !state.trim()) return;
     setLoading(true);
-    await addCity({ name: name.trim(), state: state.trim() });
+    const newId = await addCity({ name: name.trim(), state: state.trim().toUpperCase() });
     setLoading(false);
+    if (newId && onCreated) onCreated(newId);
     setName("");
     setState("");
-    setTimeout(() => {
-      const found = cities.find(c => c.name === name.trim() && c.state === state.trim());
-      if (found && onCreated) onCreated(found.id);
-      onOpenChange(false);
-    }, 500);
+    onOpenChange(false);
   };
 
   return (
