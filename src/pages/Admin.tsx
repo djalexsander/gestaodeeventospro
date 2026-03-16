@@ -98,10 +98,6 @@ export default function Admin() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (userId === user?.id) {
-      toast.error('Você não pode excluir sua própria conta');
-      return;
-    }
 
     const res = await supabase.functions.invoke('delete-user', {
       body: { userId },
