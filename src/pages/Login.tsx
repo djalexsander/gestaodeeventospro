@@ -8,11 +8,9 @@ import { Calendar, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Login() {
-  const { session, loading, signIn, signUp } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const { session, loading, signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) {
@@ -28,19 +26,9 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-
-    if (isSignUp) {
-      const { error } = await signUp(email, password, name);
-      if (error) {
-        toast.error(error);
-      } else {
-        toast.success('Conta criada com sucesso!');
-      }
-    } else {
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast.error('Email ou senha inválidos');
-      }
+    const { error } = await signIn(email, password);
+    if (error) {
+      toast.error('Email ou senha inválidos');
     }
     setSubmitting(false);
   };
@@ -48,7 +36,6 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-8">
-        {/* Logo */}
         <div className="text-center space-y-2">
           <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary mx-auto">
             <Calendar className="h-7 w-7 text-primary-foreground" />
@@ -57,25 +44,10 @@ export default function Login() {
           <p className="text-sm text-muted-foreground">Gestão de Eventos</p>
         </div>
 
-        {/* Form */}
         <div className="bg-card rounded-xl border p-6 shadow-sm">
-          <h2 className="font-heading text-lg font-semibold mb-6 text-center">
-            {isSignUp ? 'Criar Conta' : 'Entrar'}
-          </h2>
+          <h2 className="font-heading text-lg font-semibold mb-6 text-center">Entrar</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="Seu nome completo"
-                  required
-                />
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -101,22 +73,14 @@ export default function Login() {
             </div>
 
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {isSignUp ? 'Criar Conta' : 'Entrar'}
+              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Entrar
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-primary hover:underline"
-            >
-              {isSignUp ? 'Já tem conta? Entrar' : 'Não tem conta? Criar'}
-            </button>
-          </div>
+          <p className="mt-4 text-xs text-center text-muted-foreground">
+            Acesso restrito. Solicite ao administrador.
+          </p>
         </div>
       </div>
     </div>
