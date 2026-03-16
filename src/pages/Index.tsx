@@ -5,6 +5,7 @@ import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } fr
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppContext } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
 import { EventCalendar } from "@/components/EventCalendar";
 import { EventFormDrawer } from "@/components/EventFormDrawer";
