@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Filter } from "lucide-react";
+import { Plus, Filter, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import { EventFormDrawer } from "@/components/EventFormDrawer";
 import { EventDetailDrawer } from "@/components/EventDetailDrawer";
 import { StatusBadge } from "@/components/StatusBadge";
 import { motion, AnimatePresence } from "framer-motion";
+import { exportMonthlyPdf } from "@/lib/exportPdf";
 
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
@@ -56,7 +57,10 @@ export default function Dashboard() {
             {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
+            <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
+          </Button>
           <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" /> Novo Evento
           </Button>
