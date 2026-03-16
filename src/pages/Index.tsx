@@ -57,7 +57,10 @@ export default function Dashboard() {
             {artists.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" onClick={() => exportMonthlyPdf({ events, month: selectedDate, getArtistById, getCityById })}>
+            <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
+          </Button>
           <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" /> Novo Evento
           </Button>
