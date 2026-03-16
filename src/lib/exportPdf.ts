@@ -88,3 +88,94 @@ export function exportMonthlyPdf({ events, month, getArtistById, getCityById }: 
 
   doc.save(`agenda-${format(month, 'yyyy-MM')}.pdf`);
 }
+
+interface ExportSingleEventParams {
+  event: EventItem;
+  artistName: string;
+  cityLabel: string;
+  riderDetails?: { equipment: string; soundSystem: string; microphones: string; monitors: string } | null;
+}
+
+export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
+  const doc = new jsPDF();
+  const dateFormatted = format(new Date(event.date + 'T00:00:00'), 'dd/MM/yyyy');
+
+  // Header
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Estação Mix Eventos', 14, 18);
+
+  doc.setFontSize(8);
+  doc.setTextColor(130);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 25);
+  doc.setTextColor(0);
+
+  // Event title + status
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text(event.name, 14, 40);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(99, 102, 241);
+  doc.text(event.status, 14 + doc.getTextWidth(event.name) + 6, 40);
+  doc.setTextColor(0);
+
+  // Details table
+  const details: string[][] = [
+    ['Data', dateFormatted],
+    ['Artista', artistName],
+    ['Cidade', cityLabel],
+    ['Local', event.venue || '—'],
+    ['Montagem', event.setupTime || '—'],
+    ['Show', event.showTime || '—'],
+  ];
+
+  if (event.departureDate) {
+    details.push(['Data de Saída', event.departureDate.split('-').reverse().join('/')]);
+  }
+  if (event.departureTime) {
+    details.push(['Horário de Saída', event.departureTime]);
+  }
+  if (event.notes) {
+    details.push(['Observações', event.notes]);
+  }
+  if (event.staffNotes) {
+    details.push(['Info Funcionários', event.staffNotes]);
+  }
+
+  autoTable(doc, {
+    startY: 48,
+    body: details,
+    theme: 'grid',
+    styles: { fontSize: 10, cellPadding: 4 },
+    columnStyles: {
+      0: { fontStyle: 'bold', cellWidth: 50, fillColor: [248, 250, 252] },
+    },
+  });
+
+  // Rider details
+  if (riderDetails) {
+    const riderY = (doc as any).lastAutoTable?.finalY + 10 || 120;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detalhes do Rider Técnico', 14, riderY);
+
+    autoTable(doc, {
+      startY: riderY + 4,
+      body: [
+        ['Equipamentos', riderDetails.equipment || '—'],
+        ['Som', riderDetails.soundSystem || '—'],
+        ['Microfones', riderDetails.microphones || '—'],
+        ['Monitores', riderDetails.monitors || '—'],
+      ],
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 4 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 50, fillColor: [248, 250, 252] },
+      },
+    });
+  }
+
+  doc.save(`evento-${event.name.replace(/\s+/g, '-').toLowerCase()}-${dateFormatted.replace(/\//g, '-')}.pdf`);
+}
