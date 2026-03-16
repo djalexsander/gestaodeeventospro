@@ -3,7 +3,7 @@ import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil } from "lucide-react";
+import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users } from "lucide-react";
 
 interface EventDetailDrawerProps {
   open: boolean;
@@ -54,8 +54,31 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
             </div>
           )}
 
+          {(event.departureDate || event.departureTime) && (
+            <div className="bg-muted rounded-lg p-4 space-y-2">
+              <h4 className="font-heading text-sm font-semibold flex items-center gap-2">
+                <LogOut className="h-4 w-4" /> Saída / Logística
+              </h4>
+              {event.departureDate && (
+                <p className="text-xs text-muted-foreground"><strong>Data de Saída:</strong> {event.departureDate.split('-').reverse().join('/')}</p>
+              )}
+              {event.departureTime && (
+                <p className="text-xs text-muted-foreground"><strong>Horário de Saída:</strong> {event.departureTime}</p>
+              )}
+            </div>
+          )}
+
           {event.notes && (
             <DetailRow icon={FileText} label="Observações" value={event.notes} />
+          )}
+
+          {event.staffNotes && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-2">
+              <h4 className="font-heading text-sm font-semibold text-primary flex items-center gap-2">
+                <Users className="h-4 w-4" /> Informações para Funcionários
+              </h4>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{event.staffNotes}</p>
+            </div>
           )}
 
           <div className="flex gap-3 pt-4 border-t">
