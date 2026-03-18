@@ -26,11 +26,12 @@ serve(async (req) => {
       });
     }
 
+    // Check caller is admin_master or company_admin
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.id)
-      .in("role", ["admin", "admin_master", "company_admin"])
+      .in("role", ["admin_master", "company_admin"])
       .limit(1);
 
     if (!roleData || roleData.length === 0) {
@@ -39,29 +40,44 @@ serve(async (req) => {
       });
     }
 
-    const { userId } = await req.json();
+    const { email, name, password, role, company_id } = await req.json();
 
-    if (!userId) {
-      return new Response(JSON.stringify({ error: "userId é obrigatório" }), {
+    if (!email || !name || !password) {
+      return new Response(JSON.stringify({ error: "Email, nome e senha são obrigatórios" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    if (userId === caller.id) {
-      return new Response(JSON.stringify({ error: "Você não pode excluir sua própria conta" }), {
+    if (password.length < 6) {
+      return new Response(JSON.stringify({ error: "Senha deve ter no mínimo 6 caracteres" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (!company_id) {
+      return new Response(JSON.stringify({ error: "Empresa é obrigatória" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    const validRoles = ["company_admin", "user"];
+    const finalRole = validRoles.includes(role) ? role : "user";
+
+    // Create user with password directly
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name, role: finalRole, company_id },
+    });
+
+    if (createError) {
+      return new Response(JSON.stringify({ error: createError.message }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ user: newUser.user }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
