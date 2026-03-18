@@ -8,13 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface CompanyRow {
   id: string;
   name: string;
   logo_url: string | null;
+  email: string;
+  phone: string;
 }
 
 export default function Empresas() {
@@ -24,8 +26,9 @@ export default function Empresas() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CompanyRow | null>(null);
-  const [form, setForm] = useState({ name: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchCompanies = async () => {
@@ -39,11 +42,31 @@ export default function Empresas() {
     if (isAdminMaster) fetchCompanies();
   }, [isAdminMaster]);
 
+  useEffect(() => {
+    if (logoFile) {
+      const url = URL.createObjectURL(logoFile);
+      setLogoPreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setLogoPreview(null);
+  }, [logoFile]);
+
   if (authLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!isAdminMaster) return <Navigate to="/" replace />;
 
-  const openNew = () => { setEditing(null); setForm({ name: "" }); setLogoFile(null); setDialogOpen(true); };
-  const openEdit = (c: CompanyRow) => { setEditing(c); setForm({ name: c.name }); setLogoFile(null); setDialogOpen(true); };
+  const openNew = () => {
+    setEditing(null);
+    setForm({ name: "", email: "", phone: "" });
+    setLogoFile(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (c: CompanyRow) => {
+    setEditing(c);
+    setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
+    setLogoFile(null);
+    setDialogOpen(true);
+  };
 
   const uploadLogo = async (file: File): Promise<string | null> => {
     const ext = file.name.split(".").pop();
@@ -63,12 +86,14 @@ export default function Empresas() {
       if (url) logoUrl = url;
     }
 
+    const payload = { name: form.name, logo_url: logoUrl, email: form.email, phone: form.phone } as any;
+
     if (editing) {
-      const { error } = await supabase.from("companies").update({ name: form.name, logo_url: logoUrl } as any).eq("id", editing.id);
+      const { error } = await supabase.from("companies").update(payload).eq("id", editing.id);
       if (error) toast.error("Erro ao atualizar empresa");
       else { toast.success("Empresa atualizada"); await fetchCompanies(); await refreshCompanies(); }
     } else {
-      const { error } = await supabase.from("companies").insert({ name: form.name, logo_url: logoUrl } as any);
+      const { error } = await supabase.from("companies").insert(payload);
       if (error) toast.error("Erro ao criar empresa");
       else { toast.success("Empresa criada"); await fetchCompanies(); await refreshCompanies(); }
     }
@@ -81,6 +106,8 @@ export default function Empresas() {
     if (error) toast.error("Erro ao excluir empresa");
     else { toast.success("Empresa excluída"); setCompanies(prev => prev.filter(c => c.id !== id)); await refreshCompanies(); }
   };
+
+  const displayLogo = logoPreview || editing?.logo_url;
 
   return (
     <div className="space-y-6">
@@ -98,14 +125,16 @@ export default function Empresas() {
             <TableRow>
               <TableHead className="w-[60px]">Logo</TableHead>
               <TableHead>Nome</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead className="hidden md:table-cell">Telefone</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={3} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
             ) : companies.length === 0 ? (
-              <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
             ) : companies.map(c => (
               <TableRow key={c.id}>
                 <TableCell>
@@ -118,6 +147,8 @@ export default function Empresas() {
                   )}
                 </TableCell>
                 <TableCell className="font-medium">{c.name}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
@@ -131,24 +162,54 @@ export default function Empresas() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle className="font-heading">{editing ? "Editar Empresa" : "Nova Empresa"}</DialogTitle></DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2"><Label>Nome</Label><Input value={form.name} onChange={e => setForm({ name: e.target.value })} required /></div>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">{editing ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Logo upload */}
             <div className="space-y-2">
-              <Label>Logo</Label>
-              <div className="flex items-center gap-3">
-                {(editing?.logo_url || logoFile) && (
-                  <img src={logoFile ? URL.createObjectURL(logoFile) : editing?.logo_url!} alt="Logo" className="h-10 w-10 rounded object-cover" />
-                )}
-                <label className="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer hover:bg-muted transition-colors text-sm">
-                  <Upload className="h-4 w-4" />
-                  {logoFile ? logoFile.name : "Selecionar arquivo"}
-                  <input type="file" accept="image/*" className="hidden" onChange={e => setLogoFile(e.target.files?.[0] || null)} />
-                </label>
+              <Label>Logo da Empresa</Label>
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 overflow-hidden">
+                  {displayLogo ? (
+                    <img src={displayLogo} alt="Logo" className="h-full w-full object-cover" />
+                  ) : (
+                    <ImageIcon className="h-6 w-6 text-muted-foreground/40" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <label className="flex items-center gap-2 px-4 py-2 rounded-md border cursor-pointer hover:bg-muted transition-colors text-sm font-medium">
+                    <Upload className="h-4 w-4" />
+                    Upload
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/svg+xml"
+                      className="hidden"
+                      onChange={e => setLogoFile(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                  <p className="text-[11px] text-muted-foreground">PNG, JPG ou SVG • Máx 2MB</p>
+                </div>
               </div>
             </div>
-            <div className="flex gap-3">
+
+            <div className="space-y-2">
+              <Label>Nome da Empresa <span className="text-destructive">*</span></Label>
+              <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="contato@empresa.com" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Telefone</Label>
+              <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
+            </div>
+
+            <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {editing ? "Salvar" : "Criar"}

@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCompany } from "@/context/CompanyContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sidebar,
@@ -42,12 +44,25 @@ export function AppSidebar() {
   const location = useLocation();
   const { isAdmin, isAdminMaster, signOut, user } = useAuth();
   const { companies, activeCompany, activeCompanyId, setActiveCompanyId } = useCompany();
+  const [platformName, setPlatformName] = useState("Gestão de Eventos Pro");
+  const [platformLogoUrl, setPlatformLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('system_settings' as any).select('*').limit(1).single().then(({ data }) => {
+      if (data) {
+        setPlatformName((data as any).platform_name || "Gestão de Eventos Pro");
+        setPlatformLogoUrl((data as any).platform_logo_url || null);
+      }
+    });
+  }, []);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          {activeCompany?.logoUrl ? (
+          {platformLogoUrl ? (
+            <img src={platformLogoUrl} alt={platformName} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+          ) : activeCompany?.logoUrl ? (
             <img src={activeCompany.logoUrl} alt={activeCompany.name} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
           ) : (
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
@@ -57,7 +72,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-heading text-sm font-bold text-sidebar-foreground truncate">
-                {isAdminMaster ? "Gestão de Eventos Pro" : (activeCompany?.name || "Estação Mix")}
+                {platformName}
               </span>
               <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
             </div>

@@ -99,21 +99,27 @@ export type Database = {
       companies: {
         Row: {
           created_at: string
+          email: string | null
           id: string
           logo_url: string | null
           name: string
+          phone: string | null
         }
         Insert: {
           created_at?: string
+          email?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          phone?: string | null
         }
         Update: {
           created_at?: string
+          email?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          phone?: string | null
         }
         Relationships: []
       }
@@ -317,6 +323,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_settings: {
+        Row: {
+          id: string
+          platform_logo_url: string | null
+          platform_name: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          platform_logo_url?: string | null
+          platform_name?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          platform_logo_url?: string | null
+          platform_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       technical_riders: {
         Row: {
