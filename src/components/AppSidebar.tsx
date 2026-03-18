@@ -135,11 +135,11 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {isAdmin && !isAdminMaster && (
+              {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Usuários">
                     <NavLink
-                      to="/admin"
+                      to="/usuarios"
                       className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                     >

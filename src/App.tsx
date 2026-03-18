@@ -15,6 +15,7 @@ import Cidades from "./pages/Cidades";
 import Admin from "./pages/Admin";
 import Funcionarios from "./pages/Funcionarios";
 import Empresas from "./pages/Empresas";
+import Usuarios from "./pages/Usuarios";
 import PainelMaster from "./pages/PainelMaster";
 import Configuracoes from "./pages/Configuracoes";
 import Login from "./pages/Login";
@@ -46,6 +47,7 @@ function AppRoutes() {
       <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />
       <Route path="/cidades" element={<ProtectedRoute><AppLayout><Cidades /></AppLayout></ProtectedRoute>} />
       <Route path="/funcionarios" element={<ProtectedRoute><AppLayout><Funcionarios /></AppLayout></ProtectedRoute>} />
+      <Route path="/usuarios" element={<ProtectedRoute><AppLayout><Usuarios /></AppLayout></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
       <Route path="/empresas" element={<ProtectedRoute><AppLayout><Empresas /></AppLayout></ProtectedRoute>} />
       <Route path="/master" element={<ProtectedRoute><AppLayout><PainelMaster /></AppLayout></ProtectedRoute>} />
