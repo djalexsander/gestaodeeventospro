@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, Rea
 import { supabase } from '@/integrations/supabase/client';
 import { City, Artist, TechnicalRider, EventItem, EventStatus } from '@/types';
 import { useCompany } from '@/context/CompanyContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
 interface AppContextType {
