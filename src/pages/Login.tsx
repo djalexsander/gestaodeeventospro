@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -13,6 +13,17 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [platformName, setPlatformName] = useState('Gestão de Eventos Pro');
+  const [platformLogoUrl, setPlatformLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('system_settings' as any).select('*').limit(1).single().then(({ data }) => {
+      if (data) {
+        setPlatformName((data as any).platform_name || 'Gestão de Eventos Pro');
+        setPlatformLogoUrl((data as any).platform_logo_url || null);
+      }
+    });
+  }, []);
 
   if (loading) {
     return (
