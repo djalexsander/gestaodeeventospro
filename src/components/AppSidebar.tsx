@@ -110,22 +110,6 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {/* Company selector for admin_master */}
-        {isAdminMaster && !collapsed && companies.length > 0 && (
-          <div className="px-2 py-2">
-            <Separator className="mb-3 bg-sidebar-border/50" />
-            <Select value={activeCompanyId || ""} onValueChange={setActiveCompanyId}>
-              <SelectTrigger className="h-8 text-xs bg-sidebar-accent/40 border-sidebar-border/50">
-                <SelectValue placeholder="Selecionar empresa" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         {/* EMPRESA section */}
         <SidebarGroup>
