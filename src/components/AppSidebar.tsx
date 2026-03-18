@@ -1,4 +1,4 @@
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -21,6 +21,7 @@ const items = [
   { title: "Artistas", url: "/artistas", icon: Music },
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
+  { title: "Funcionários", url: "/funcionarios", icon: Users },
 ];
 
 export function AppSidebar() {

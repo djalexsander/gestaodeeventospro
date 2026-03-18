@@ -174,6 +174,39 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_members: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string
+          phone: string
+          role: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string
+          phone?: string
+          role?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string
+          phone?: string
+          role?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       technical_riders: {
         Row: {
           artist_id: string | null
