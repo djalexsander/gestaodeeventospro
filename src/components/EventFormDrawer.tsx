@@ -170,7 +170,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Data</Label>
-              <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} required />
+              <Input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
