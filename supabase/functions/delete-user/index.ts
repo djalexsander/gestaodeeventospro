@@ -31,7 +31,7 @@ serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.id)
-      .in("role", ["admin", "admin_master"])
+      .eq("role", "admin")
       .single();
 
     if (!roleData) {
