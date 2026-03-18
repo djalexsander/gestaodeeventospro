@@ -95,7 +95,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })));
     setLoading(false);
     setHasUpdates(false);
-  }, [activeCompanyId]);
+  }, [activeCompanyId, isAdminMaster]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
