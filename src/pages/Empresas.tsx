@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, Users } from "lucide-react";
 import { toast } from "sonner";
+import { CompanyUsers } from "@/components/CompanyUsers";
 
 interface CompanyRow {
   id: string;
@@ -111,55 +113,72 @@ export default function Empresas() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Building2 className="h-6 w-6 text-primary" />
-          <h2 className="font-heading text-2xl font-bold">Empresas</h2>
-        </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Empresa</Button>
-      </div>
+      <Tabs defaultValue="empresas">
+        <TabsList>
+          <TabsTrigger value="empresas" className="gap-2">
+            <Building2 className="h-4 w-4" /> Empresas
+          </TabsTrigger>
+          <TabsTrigger value="usuarios" className="gap-2">
+            <Users className="h-4 w-4" /> Usuários
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="bg-card rounded-xl border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[60px]">Logo</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="hidden md:table-cell">Telefone</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
-            ) : companies.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
-            ) : companies.map(c => (
-              <TableRow key={c.id}>
-                <TableCell>
-                  {c.logo_url ? (
-                    <img src={c.logo_url} alt={c.name} className="h-8 w-8 rounded object-cover" />
-                  ) : (
-                    <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="font-medium">{c.name}</TableCell>
-                <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
-                <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+        <TabsContent value="empresas" className="space-y-6 mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Building2 className="h-6 w-6 text-primary" />
+              <h2 className="font-heading text-2xl font-bold">Empresas</h2>
+            </div>
+            <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Empresa</Button>
+          </div>
+
+          <div className="bg-card rounded-xl border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[60px]">Logo</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead className="hidden md:table-cell">Email</TableHead>
+                  <TableHead className="hidden md:table-cell">Telefone</TableHead>
+                  <TableHead className="w-[100px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+                ) : companies.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
+                ) : companies.map(c => (
+                  <TableRow key={c.id}>
+                    <TableCell>
+                      {c.logo_url ? (
+                        <img src={c.logo_url} alt={c.name} className="h-8 w-8 rounded object-cover" />
+                      ) : (
+                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="usuarios" className="mt-6">
+          <CompanyUsers />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -167,7 +186,6 @@ export default function Empresas() {
             <DialogTitle className="font-heading">{editing ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Logo upload */}
             <div className="space-y-2">
               <Label>Logo da Empresa</Label>
               <div className="flex items-center gap-4">
@@ -182,33 +200,24 @@ export default function Empresas() {
                   <label className="flex items-center gap-2 px-4 py-2 rounded-md border cursor-pointer hover:bg-muted transition-colors text-sm font-medium">
                     <Upload className="h-4 w-4" />
                     Upload
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/svg+xml"
-                      className="hidden"
-                      onChange={e => setLogoFile(e.target.files?.[0] || null)}
-                    />
+                    <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden" onChange={e => setLogoFile(e.target.files?.[0] || null)} />
                   </label>
                   <p className="text-[11px] text-muted-foreground">PNG, JPG ou SVG • Máx 2MB</p>
                 </div>
               </div>
             </div>
-
             <div className="space-y-2">
               <Label>Nome da Empresa <span className="text-destructive">*</span></Label>
               <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
             </div>
-
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="contato@empresa.com" />
             </div>
-
             <div className="space-y-2">
               <Label>Telefone</Label>
               <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
             </div>
-
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
