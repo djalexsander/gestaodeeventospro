@@ -141,17 +141,15 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
       updateEvent({ ...payload, id: event.id });
       eventId = event.id;
     } else {
-      const newEvent = addEvent(payload);
-      // We need to wait a bit for the event to be created in DB
-      // The addEvent returns void, so we handle staff separately
+      eventId = await addEvent(payload);
     }
 
-    // Save staff assignments if editing
-    if (event) {
-      await supabase.from("event_staff").delete().eq("event_id", event.id);
+    // Save staff assignments
+    if (eventId) {
+      await supabase.from("event_staff").delete().eq("event_id", eventId);
       if (selectedStaffIds.length > 0) {
         await supabase.from("event_staff").insert(
-          selectedStaffIds.map(sid => ({ event_id: event.id, staff_member_id: sid }))
+          selectedStaffIds.map(sid => ({ event_id: eventId, staff_member_id: sid }))
         );
       }
     }
