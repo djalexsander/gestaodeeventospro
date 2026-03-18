@@ -45,8 +45,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { isAdminMaster } = useAuth();
 
   const fetchAll = useCallback(async () => {
-    // Admin master without a selected company should see no company data
-    if (isAdminMaster && !activeCompanyId) {
+    // Admin master always sees empty data (preview mode)
+    if (isAdminMaster) {
       setCities([]);
       setArtists([]);
       setRiders([]);

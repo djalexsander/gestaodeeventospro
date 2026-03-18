@@ -49,13 +49,13 @@ function MasterRoute({ children }: { children: React.ReactNode }) {
 }
 
 function DefaultRedirect() {
-  const { isAdminMaster, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   );
-  return isAdminMaster ? <Navigate to="/master" replace /> : <Index />;
+  return <Index />;
 }
 
 function AppRoutes() {
