@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, Users } from "lucide-react";
 import { toast } from "sonner";
+import CompanyUsersTab from "@/components/CompanyUsersTab";
 
 interface CompanyRow {
   id: string;
@@ -30,6 +32,10 @@ export default function Empresas() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Detail dialog for viewing company with tabs
+  const [detailCompany, setDetailCompany] = useState<CompanyRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -66,6 +72,11 @@ export default function Empresas() {
     setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setLogoFile(null);
     setDialogOpen(true);
+  };
+
+  const openDetail = (c: CompanyRow) => {
+    setDetailCompany(c);
+    setDetailOpen(true);
   };
 
   const uploadLogo = async (file: File): Promise<string | null> => {
@@ -127,7 +138,7 @@ export default function Empresas() {
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="hidden md:table-cell">Telefone</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead className="w-[140px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -151,8 +162,15 @@ export default function Empresas() {
                 <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => openDetail(c)} title="Usuários">
+                      <Users className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}>
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -161,13 +179,13 @@ export default function Empresas() {
         </Table>
       </div>
 
+      {/* Company Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-heading">{editing ? "Editar Empresa" : "Nova Empresa"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Logo upload */}
             <div className="space-y-2">
               <Label>Logo da Empresa</Label>
               <div className="flex items-center gap-4">
@@ -193,22 +211,18 @@ export default function Empresas() {
                 </div>
               </div>
             </div>
-
             <div className="space-y-2">
               <Label>Nome da Empresa <span className="text-destructive">*</span></Label>
               <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
             </div>
-
             <div className="space-y-2">
               <Label>Email</Label>
               <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="contato@empresa.com" />
             </div>
-
             <div className="space-y-2">
               <Label>Telefone</Label>
               <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
             </div>
-
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
@@ -217,6 +231,19 @@ export default function Empresas() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Company Users Dialog */}
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Usuários — {detailCompany?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {detailCompany && <CompanyUsersTab companyId={detailCompany.id} />}
         </DialogContent>
       </Dialog>
     </div>
