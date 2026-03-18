@@ -76,7 +76,7 @@ export default function Admin() {
 
   const openEdit = (u: UserRow) => {
     setEditingUser(u);
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, company_id: u.company_id || '' });
+    setForm({ name: u.name, email: u.email, role: u.role, company_id: u.company_id || '' });
     setDialogOpen(true);
   };
 
