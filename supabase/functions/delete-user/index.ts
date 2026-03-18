@@ -16,7 +16,7 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify the caller is an admin
+    // Verify the caller is an admin or admin_master
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data: { user: caller } } = await supabaseAdmin.auth.getUser(token);
@@ -31,10 +31,10 @@ serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.id)
-      .eq("role", "admin")
       .single();
 
-    if (!roleData) {
+    const callerRole = roleData?.role;
+    if (callerRole !== 'admin' && callerRole !== 'admin_master' && callerRole !== 'company_admin') {
       return new Response(JSON.stringify({ error: "Acesso negado" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
