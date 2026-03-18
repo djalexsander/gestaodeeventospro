@@ -173,7 +173,7 @@ export default function Funcionarios() {
         {isAdmin && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={openAdd}>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar
               </Button>
@@ -181,7 +181,7 @@ export default function Funcionarios() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  Adicionar {activeTab === "equipe" ? "Membro da Equipe" : "Freelancer"}
+                  {editingMember ? "Editar Funcionário" : `Adicionar ${activeTab === "equipe" ? "Membro da Equipe" : "Freelancer"}`}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
