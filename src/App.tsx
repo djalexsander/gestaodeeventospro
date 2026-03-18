@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import Funcionarios from "./pages/Funcionarios";
 import Empresas from "./pages/Empresas";
 import Login from "./pages/Login";
+import SetPassword from "./pages/SetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
