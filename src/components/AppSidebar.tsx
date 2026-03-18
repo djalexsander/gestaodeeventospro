@@ -24,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 
 const empresaItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Central de Eventos", url: "/eventos", icon: Calendar },
   { title: "Artistas", url: "/artistas", icon: Music },
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
