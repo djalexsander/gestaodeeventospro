@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       artists: {
         Row: {
+          company_id: string | null
           contact: string
           created_at: string
           id: string
@@ -27,6 +28,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           contact?: string
           created_at?: string
           id?: string
@@ -38,6 +40,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           contact?: string
           created_at?: string
           id?: string
@@ -48,10 +51,19 @@ export type Database = {
           rider_file_url?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "artists_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cities: {
         Row: {
+          company_id: string | null
           created_at: string
           id: string
           name: string
@@ -59,6 +71,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           id?: string
           name: string
@@ -66,11 +79,41 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           id?: string
           name?: string
           state?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
         }
         Relationships: []
       }
@@ -114,6 +157,7 @@ export type Database = {
         Row: {
           artist_id: string
           city_id: string
+          company_id: string | null
           created_at: string
           date: string
           departure_date: string | null
@@ -132,6 +176,7 @@ export type Database = {
         Insert: {
           artist_id: string
           city_id: string
+          company_id?: string | null
           created_at?: string
           date: string
           departure_date?: string | null
@@ -150,6 +195,7 @@ export type Database = {
         Update: {
           artist_id?: string
           city_id?: string
+          company_id?: string | null
           created_at?: string
           date?: string
           departure_date?: string | null
@@ -181,6 +227,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "events_rider_id_fkey"
             columns: ["rider_id"]
             isOneToOne: false
@@ -191,27 +244,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_id: string | null
           created_at: string
           email: string
           id: string
           name: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           email?: string
           id: string
           name?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           email?: string
           id?: string
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_members: {
         Row: {
+          company_id: string | null
           created_at: string
           id: string
           name: string
@@ -222,6 +287,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           id?: string
           name: string
@@ -232,6 +298,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -241,11 +308,20 @@ export type Database = {
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       technical_riders: {
         Row: {
           artist_id: string | null
+          company_id: string | null
           created_at: string
           equipment: string
           id: string
@@ -260,6 +336,7 @@ export type Database = {
         }
         Insert: {
           artist_id?: string | null
+          company_id?: string | null
           created_at?: string
           equipment?: string
           id?: string
@@ -274,6 +351,7 @@ export type Database = {
         }
         Update: {
           artist_id?: string | null
+          company_id?: string | null
           created_at?: string
           equipment?: string
           id?: string
@@ -292,6 +370,13 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_riders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
