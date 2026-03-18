@@ -36,6 +36,7 @@ export default function Admin() {
   const [submitting, setSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [form, setForm] = useState({ name: '', email: '', role: 'user', company_id: '' });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -115,7 +116,10 @@ export default function Admin() {
     setDialogOpen(false);
   };
 
+
   const deleteUser = async (userId: string) => {
+    if (deletingId) return;
+    setDeletingId(userId);
     const res = await supabase.functions.invoke('delete-user', {
       body: { userId },
     });
@@ -126,6 +130,7 @@ export default function Admin() {
       toast.success('Usuário excluído');
       setUsers(prev => prev.filter(u => u.id !== userId));
     }
+    setDeletingId(null);
   };
 
   const getCompanyName = (companyId: string | null) => {
