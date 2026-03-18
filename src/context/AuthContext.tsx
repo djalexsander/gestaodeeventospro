@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 
-type AppRole = 'admin' | 'user';
+type AppRole = 'admin' | 'user' | 'admin_master' | 'company_admin';
 
 interface AuthContextType {
   session: Session | null;
@@ -10,6 +10,7 @@ interface AuthContextType {
   role: AppRole | null;
   loading: boolean;
   isAdmin: boolean;
+  isAdminMaster: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -40,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        // Only fetch role on sign-in or initial session, not on token refresh
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || session.user.id !== currentUserId) {
           currentUserId = session.user.id;
           setTimeout(() => fetchRole(session.user.id), 0);
@@ -89,7 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       session, user, role, loading,
-      isAdmin: role === 'admin',
+      isAdmin: role === 'admin' || role === 'admin_master' || role === 'company_admin',
+      isAdminMaster: role === 'admin_master',
       signIn, signUp, signOut,
     }}>
       {children}

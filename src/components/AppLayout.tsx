@@ -12,7 +12,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center border-b bg-card px-4 gap-4 shrink-0">
             <SidebarTrigger />
             <h1 className="font-heading text-lg font-bold text-foreground truncate">
-              Agenda Estação Mix Eventos
+              Central de Eventos
             </h1>
           </header>
           <UpdateBanner />

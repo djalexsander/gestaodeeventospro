@@ -46,3 +46,9 @@ export interface EventItem {
   staffNotes: string;
   status: EventStatus;
 }
+
+export interface Company {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+}

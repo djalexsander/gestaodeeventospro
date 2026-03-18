@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { CompanyProvider } from "@/context/CompanyContext";
 import { AppProvider } from "@/context/AppContext";
 import { AppLayout } from "@/components/AppLayout";
 import { Loader2 } from "lucide-react";
@@ -13,6 +14,7 @@ import Riders from "./pages/Riders";
 import Cidades from "./pages/Cidades";
 import Admin from "./pages/Admin";
 import Funcionarios from "./pages/Funcionarios";
+import Empresas from "./pages/Empresas";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +41,7 @@ function AppRoutes() {
       <Route path="/cidades" element={<ProtectedRoute><AppLayout><Cidades /></AppLayout></ProtectedRoute>} />
       <Route path="/funcionarios" element={<ProtectedRoute><AppLayout><Funcionarios /></AppLayout></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
+      <Route path="/empresas" element={<ProtectedRoute><AppLayout><Empresas /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -50,11 +53,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <AppProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AppProvider>
+        <CompanyProvider>
+          <AppProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </AppProvider>
+        </CompanyProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

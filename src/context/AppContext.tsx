@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { City, Artist, TechnicalRider, EventItem, EventStatus } from '@/types';
+import { useCompany } from '@/context/CompanyContext';
 import { toast } from 'sonner';
 
 interface AppContextType {
@@ -39,14 +40,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasUpdates, setHasUpdates] = useState(false);
+  const { activeCompanyId } = useCompany();
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
+    const companyFilter = activeCompanyId
+      ? `company_id.eq.${activeCompanyId},company_id.is.null`
+      : undefined;
+
+    let citiesQ = supabase.from('cities').select('*').order('name');
+    let artistsQ = supabase.from('artists').select('*').order('name');
+    let ridersQ = supabase.from('technical_riders').select('*').order('name');
+    let eventsQ = supabase.from('events').select('*').order('date');
+
+    if (companyFilter) {
+      citiesQ = citiesQ.or(companyFilter);
+      artistsQ = artistsQ.or(companyFilter);
+      ridersQ = ridersQ.or(companyFilter);
+      eventsQ = eventsQ.or(companyFilter);
+    }
+
     const [citiesRes, artistsRes, ridersRes, eventsRes] = await Promise.all([
-      supabase.from('cities').select('*').order('name'),
-      supabase.from('artists').select('*').order('name'),
-      supabase.from('technical_riders').select('*').order('name'),
-      supabase.from('events').select('*').order('date'),
+      citiesQ, artistsQ, ridersQ, eventsQ,
     ]);
 
     if (citiesRes.data) setCities(citiesRes.data.map(c => ({ id: c.id, name: c.name, state: c.state })));
@@ -68,12 +83,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })));
     setLoading(false);
     setHasUpdates(false);
-  }, []);
+  }, [activeCompanyId]);
 
-  // Fetch all data on mount
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Listen for realtime changes and show update banner
   useEffect(() => {
     const channel = supabase
       .channel('data-changes')
@@ -84,15 +97,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_members' }, () => setHasUpdates(true))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_staff' }, () => setHasUpdates(true))
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const refreshData = useCallback(async () => {
-    await fetchAll();
-  }, [fetchAll]);
+  const refreshData = useCallback(async () => { await fetchAll(); }, [fetchAll]);
 
-  // Upload rider PDF to storage
   const uploadRiderFile = useCallback(async (file: File): Promise<{ fileName: string; fileUrl: string } | null> => {
     const ext = file.name.split('.').pop();
     const path = `${crypto.randomUUID()}.${ext}`;
@@ -104,11 +113,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Cities CRUD
   const addCity = useCallback(async (city: Omit<City, 'id'>): Promise<string | null> => {
-    const { data, error } = await supabase.from('cities').insert({ name: city.name, state: city.state }).select().single();
+    const insertData: any = { name: city.name, state: city.state };
+    if (activeCompanyId) insertData.company_id = activeCompanyId;
+    const { data, error } = await supabase.from('cities').insert(insertData).select().single();
     if (error) { toast.error('Erro ao criar cidade'); return null; }
     setCities(prev => [...prev, { id: data.id, name: data.name, state: data.state }]);
     return data.id;
-  }, []);
+  }, [activeCompanyId]);
 
   const updateCity = useCallback(async (city: City) => {
     const { error } = await supabase.from('cities').update({ name: city.name, state: city.state }).eq('id', city.id);
@@ -124,17 +135,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Artists CRUD
   const addArtist = useCallback(async (artist: Omit<Artist, 'id'>): Promise<string | null> => {
-    const { data, error } = await supabase.from('artists').insert({
+    const insertData: any = {
       name: artist.name, musical_style: artist.musicalStyle, contact: artist.contact,
       rider_file_name: artist.riderFileName, rider_file_url: artist.riderFileUrl, notes: artist.notes,
-    }).select().single();
+    };
+    if (activeCompanyId) insertData.company_id = activeCompanyId;
+    const { data, error } = await supabase.from('artists').insert(insertData).select().single();
     if (error) { toast.error('Erro ao criar artista'); return null; }
     setArtists(prev => [...prev, {
       id: data.id, name: data.name, musicalStyle: data.musical_style, contact: data.contact,
       defaultRiderId: null, riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url, notes: data.notes,
     }]);
     return data.id;
-  }, []);
+  }, [activeCompanyId]);
 
   const updateArtist = useCallback(async (artist: Artist) => {
     const { error } = await supabase.from('artists').update({
@@ -153,18 +166,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Riders CRUD
   const addRider = useCallback(async (rider: Omit<TechnicalRider, 'id'>) => {
-    const { data, error } = await supabase.from('technical_riders').insert({
+    const insertData: any = {
       name: rider.name, artist_id: rider.artistId, equipment: rider.equipment,
       sound_system: rider.soundSystem, microphones: rider.microphones, monitors: rider.monitors, notes: rider.notes,
       rider_file_name: rider.riderFileName, rider_file_url: rider.riderFileUrl,
-    }).select().single();
+    };
+    if (activeCompanyId) insertData.company_id = activeCompanyId;
+    const { data, error } = await supabase.from('technical_riders').insert(insertData).select().single();
     if (error) { toast.error('Erro ao criar rider'); return; }
     setRiders(prev => [...prev, {
       id: data.id, name: data.name, artistId: data.artist_id, equipment: data.equipment,
       soundSystem: data.sound_system, microphones: data.microphones, monitors: data.monitors, notes: data.notes,
       riderFileName: data.rider_file_name, riderFileUrl: data.rider_file_url,
     }]);
-  }, []);
+  }, [activeCompanyId]);
 
   const updateRider = useCallback(async (rider: TechnicalRider) => {
     const { error } = await supabase.from('technical_riders').update({
@@ -184,13 +199,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Events CRUD
   const addEvent = useCallback(async (event: Omit<EventItem, 'id'>): Promise<string | undefined> => {
-    const { data, error } = await supabase.from('events').insert({
+    const insertData: any = {
       date: event.date, name: event.name, city_id: event.cityId, venue: event.venue,
       artist_id: event.artistId, rider_id: event.riderId, setup_time: event.setupTime,
       show_time: event.showTime, notes: event.notes, status: event.status,
       departure_date: event.departureDate, departure_time: event.departureTime,
       staff_notes: event.staffNotes,
-    } as any).select().single();
+    };
+    if (activeCompanyId) insertData.company_id = activeCompanyId;
+    const { data, error } = await supabase.from('events').insert(insertData).select().single();
     if (error) { toast.error('Erro ao criar evento'); return undefined; }
     setEvents(prev => [...prev, {
       id: data.id, date: data.date, name: data.name, cityId: data.city_id, venue: data.venue,
@@ -200,7 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       staffNotes: (data as any).staff_notes || '', status: data.status as EventStatus,
     }]);
     return data.id;
-  }, []);
+  }, [activeCompanyId]);
 
   const updateEvent = useCallback(async (event: EventItem) => {
     const { error } = await supabase.from('events').update({
