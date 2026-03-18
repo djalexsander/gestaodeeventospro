@@ -12,6 +12,7 @@ import Artistas from "./pages/Artistas";
 import Riders from "./pages/Riders";
 import Cidades from "./pages/Cidades";
 import Admin from "./pages/Admin";
+import Funcionarios from "./pages/Funcionarios";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
