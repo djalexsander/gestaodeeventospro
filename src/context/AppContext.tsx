@@ -9,6 +9,8 @@ interface AppContextType {
   riders: TechnicalRider[];
   events: EventItem[];
   loading: boolean;
+  hasUpdates: boolean;
+  refreshData: () => Promise<void>;
   addCity: (city: Omit<City, 'id'>) => Promise<string | null>;
   updateCity: (city: City) => Promise<void>;
   deleteCity: (id: string) => Promise<void>;
@@ -36,39 +38,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [riders, setRiders] = useState<TechnicalRider[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasUpdates, setHasUpdates] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    const [citiesRes, artistsRes, ridersRes, eventsRes] = await Promise.all([
+      supabase.from('cities').select('*').order('name'),
+      supabase.from('artists').select('*').order('name'),
+      supabase.from('technical_riders').select('*').order('name'),
+      supabase.from('events').select('*').order('date'),
+    ]);
+
+    if (citiesRes.data) setCities(citiesRes.data.map(c => ({ id: c.id, name: c.name, state: c.state })));
+    if (artistsRes.data) setArtists(artistsRes.data.map(a => ({
+      id: a.id, name: a.name, musicalStyle: a.musical_style, contact: a.contact,
+      defaultRiderId: null, riderFileName: a.rider_file_name, riderFileUrl: a.rider_file_url, notes: a.notes,
+    })));
+    if (ridersRes.data) setRiders(ridersRes.data.map(r => ({
+      id: r.id, name: r.name, artistId: r.artist_id, equipment: r.equipment,
+      soundSystem: r.sound_system, microphones: r.microphones, monitors: r.monitors, notes: r.notes,
+      riderFileName: r.rider_file_name, riderFileUrl: r.rider_file_url,
+    })));
+    if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
+      id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
+      artistId: e.artist_id, riderId: e.rider_id, setupTime: e.setup_time,
+      showTime: e.show_time, departureDate: (e as any).departure_date || null,
+      departureTime: (e as any).departure_time || '', notes: e.notes,
+      staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
+    })));
+    setLoading(false);
+    setHasUpdates(false);
+  }, []);
 
   // Fetch all data on mount
-  useEffect(() => {
-    async function fetchAll() {
-      setLoading(true);
-      const [citiesRes, artistsRes, ridersRes, eventsRes] = await Promise.all([
-        supabase.from('cities').select('*').order('name'),
-        supabase.from('artists').select('*').order('name'),
-        supabase.from('technical_riders').select('*').order('name'),
-        supabase.from('events').select('*').order('date'),
-      ]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-      if (citiesRes.data) setCities(citiesRes.data.map(c => ({ id: c.id, name: c.name, state: c.state })));
-      if (artistsRes.data) setArtists(artistsRes.data.map(a => ({
-        id: a.id, name: a.name, musicalStyle: a.musical_style, contact: a.contact,
-        defaultRiderId: null, riderFileName: a.rider_file_name, riderFileUrl: a.rider_file_url, notes: a.notes,
-      })));
-      if (ridersRes.data) setRiders(ridersRes.data.map(r => ({
-        id: r.id, name: r.name, artistId: r.artist_id, equipment: r.equipment,
-        soundSystem: r.sound_system, microphones: r.microphones, monitors: r.monitors, notes: r.notes,
-        riderFileName: r.rider_file_name, riderFileUrl: r.rider_file_url,
-      })));
-      if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
-        id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
-        artistId: e.artist_id, riderId: e.rider_id, setupTime: e.setup_time,
-        showTime: e.show_time, departureDate: (e as any).departure_date || null,
-        departureTime: (e as any).departure_time || '', notes: e.notes,
-        staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
-      })));
-      setLoading(false);
-    }
-    fetchAll();
+  // Listen for realtime changes and show update banner
+  useEffect(() => {
+    const channel = supabase
+      .channel('data-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cities' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'artists' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'technical_riders' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_members' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_staff' }, () => setHasUpdates(true))
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const refreshData = useCallback(async () => {
+    await fetchAll();
+  }, [fetchAll]);
 
   // Upload rider PDF to storage
   const uploadRiderFile = useCallback(async (file: File): Promise<{ fileName: string; fileUrl: string } | null> => {
@@ -205,7 +227,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      cities, artists, riders, events, loading,
+      cities, artists, riders, events, loading, hasUpdates, refreshData,
       addCity, updateCity, deleteCity,
       addArtist, updateArtist, deleteArtist,
       addRider, updateRider, deleteRider,
