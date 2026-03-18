@@ -116,7 +116,6 @@ export default function Admin() {
     setDialogOpen(false);
   };
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const deleteUser = async (userId: string) => {
     if (deletingId) return;
