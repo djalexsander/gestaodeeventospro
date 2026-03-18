@@ -31,16 +31,16 @@ serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", caller.id)
-      .eq("role", "admin")
-      .single();
+      .in("role", ["admin", "admin_master", "company_admin"])
+      .limit(1);
 
-    if (!roleData) {
+    if (!roleData || roleData.length === 0) {
       return new Response(JSON.stringify({ error: "Acesso negado" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { email, password, name, role } = await req.json();
+    const { email, password, name, role, company_id } = await req.json();
 
     if (!email || !password || !name) {
       return new Response(JSON.stringify({ error: "Email, senha e nome são obrigatórios" }), {
@@ -53,7 +53,7 @@ serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { name },
+      user_metadata: { name, role: role || "user", company_id: company_id || "" },
     });
 
     if (createError) {
@@ -62,12 +62,21 @@ serve(async (req) => {
       });
     }
 
-    // The trigger will create profile and role, but we may need to update the role
-    if (role === "admin" && newUser.user) {
+    // The trigger handles profile + role creation via user_metadata
+    // Update role if trigger set a different one
+    if (role && role !== "user" && newUser.user) {
       await supabaseAdmin
         .from("user_roles")
-        .update({ role: "admin" })
+        .update({ role })
         .eq("user_id", newUser.user.id);
+    }
+
+    // Update company_id on profile if provided
+    if (company_id && newUser.user) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ company_id })
+        .eq("id", newUser.user.id);
     }
 
     return new Response(JSON.stringify({ user: newUser.user }), {
