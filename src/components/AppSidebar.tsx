@@ -111,47 +111,49 @@ export function AppSidebar() {
         )}
 
 
-        {/* EMPRESA section */}
-        <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-2 mb-1">
-              Empresa
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {empresaItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              {isAdmin && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Usuários">
-                    <NavLink
-                      to="/usuarios"
-                      className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                    >
-                      <Shield className="h-4 w-4" />
-                      {!collapsed && <span>Usuários</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* EMPRESA section — hidden for admin_master */}
+        {!isAdminMaster && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-2 mb-1">
+                Empresa
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {empresaItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/"}
+                        className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                {isAdmin && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Usuários">
+                      <NavLink
+                        to="/usuarios"
+                        className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      >
+                        <Shield className="h-4 w-4" />
+                        {!collapsed && <span>Usuários</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-2">

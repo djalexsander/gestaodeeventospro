@@ -35,23 +35,51 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Blocks admin_master from company-level routes */
+function CompanyRoute({ children }: { children: React.ReactNode }) {
+  const { isAdminMaster, loading } = useAuth();
+  if (loading) return null;
+  if (isAdminMaster) return <Navigate to="/master" replace />;
+  return <>{children}</>;
+}
+
+/** Blocks company users from master-level routes */
+function MasterRoute({ children }: { children: React.ReactNode }) {
+  const { isAdminMaster, loading } = useAuth();
+  if (loading) return null;
+  if (!isAdminMaster) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function DefaultRedirect() {
+  const { isAdminMaster, loading } = useAuth();
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+  return isAdminMaster ? <Navigate to="/master" replace /> : <Index />;
+}
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/set-password" element={<SetPassword />} />
-      <Route path="/" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
-      <Route path="/eventos" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
-      <Route path="/artistas" element={<ProtectedRoute><AppLayout><Artistas /></AppLayout></ProtectedRoute>} />
-      <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />
-      <Route path="/cidades" element={<ProtectedRoute><AppLayout><Cidades /></AppLayout></ProtectedRoute>} />
-      <Route path="/funcionarios" element={<ProtectedRoute><AppLayout><Funcionarios /></AppLayout></ProtectedRoute>} />
-      <Route path="/usuarios" element={<ProtectedRoute><AppLayout><Usuarios /></AppLayout></ProtectedRoute>} />
-      <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
-      <Route path="/empresas" element={<ProtectedRoute><AppLayout><Empresas /></AppLayout></ProtectedRoute>} />
-      <Route path="/master" element={<ProtectedRoute><AppLayout><PainelMaster /></AppLayout></ProtectedRoute>} />
-      <Route path="/configuracoes" element={<ProtectedRoute><AppLayout><Configuracoes /></AppLayout></ProtectedRoute>} />
+      {/* Default route: redirect based on role */}
+      <Route path="/" element={<ProtectedRoute><AppLayout><DefaultRedirect /></AppLayout></ProtectedRoute>} />
+      {/* Company routes — blocked for admin_master */}
+      <Route path="/eventos" element={<ProtectedRoute><CompanyRoute><AppLayout><Index /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      <Route path="/artistas" element={<ProtectedRoute><CompanyRoute><AppLayout><Artistas /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      <Route path="/riders" element={<ProtectedRoute><CompanyRoute><AppLayout><Riders /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      <Route path="/cidades" element={<ProtectedRoute><CompanyRoute><AppLayout><Cidades /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      <Route path="/funcionarios" element={<ProtectedRoute><CompanyRoute><AppLayout><Funcionarios /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      <Route path="/usuarios" element={<ProtectedRoute><CompanyRoute><AppLayout><Usuarios /></AppLayout></CompanyRoute></ProtectedRoute>} />
+      {/* Master routes — blocked for company users */}
+      <Route path="/master" element={<ProtectedRoute><MasterRoute><AppLayout><PainelMaster /></AppLayout></MasterRoute></ProtectedRoute>} />
+      <Route path="/empresas" element={<ProtectedRoute><MasterRoute><AppLayout><Empresas /></AppLayout></MasterRoute></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><MasterRoute><AppLayout><Admin /></AppLayout></MasterRoute></ProtectedRoute>} />
+      <Route path="/configuracoes" element={<ProtectedRoute><MasterRoute><AppLayout><Configuracoes /></AppLayout></MasterRoute></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
