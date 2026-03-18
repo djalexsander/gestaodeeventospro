@@ -15,6 +15,7 @@ import Cidades from "./pages/Cidades";
 import Admin from "./pages/Admin";
 import Funcionarios from "./pages/Funcionarios";
 import Empresas from "./pages/Empresas";
+import Usuarios from "./pages/Usuarios";
 import PainelMaster from "./pages/PainelMaster";
 import Configuracoes from "./pages/Configuracoes";
 import Login from "./pages/Login";
