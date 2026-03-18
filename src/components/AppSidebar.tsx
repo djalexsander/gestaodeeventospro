@@ -1,4 +1,4 @@
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
