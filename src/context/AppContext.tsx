@@ -18,7 +18,7 @@ interface AppContextType {
   addRider: (rider: Omit<TechnicalRider, 'id'>) => Promise<void>;
   updateRider: (rider: TechnicalRider) => Promise<void>;
   deleteRider: (id: string) => Promise<void>;
-  addEvent: (event: Omit<EventItem, 'id'>) => Promise<void>;
+  addEvent: (event: Omit<EventItem, 'id'>) => Promise<string | undefined>;
   updateEvent: (event: EventItem) => Promise<void>;
   deleteEvent: (id: string) => Promise<void>;
   getArtistById: (id: string) => Artist | undefined;
