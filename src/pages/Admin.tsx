@@ -98,7 +98,7 @@ export default function Admin() {
     } else {
       const res = await supabase.functions.invoke('create-user', {
         body: {
-          email: form.email, password: form.password, name: form.name,
+          email: form.email, name: form.name,
           role: form.role, company_id: form.company_id || null,
         },
       });
@@ -106,7 +106,7 @@ export default function Admin() {
       if (res.error || res.data?.error) {
         toast.error(res.data?.error || 'Erro ao criar usuário');
       } else {
-        toast.success('Usuário criado com sucesso');
+        toast.success('Convite enviado! O usuário receberá um email para definir sua senha.');
         await fetchUsers();
       }
     }
