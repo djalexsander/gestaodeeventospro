@@ -9,6 +9,8 @@ interface AppContextType {
   riders: TechnicalRider[];
   events: EventItem[];
   loading: boolean;
+  hasUpdates: boolean;
+  refreshData: () => Promise<void>;
   addCity: (city: Omit<City, 'id'>) => Promise<string | null>;
   updateCity: (city: City) => Promise<void>;
   deleteCity: (id: string) => Promise<void>;
