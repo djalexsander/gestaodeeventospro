@@ -70,7 +70,7 @@ export default function Admin() {
 
   const openNew = () => {
     setEditingUser(null);
-    setForm({ name: '', email: '', password: '', role: 'user', company_id: '' });
+    setForm({ name: '', email: '', role: 'user', company_id: '' });
     setDialogOpen(true);
   };
 
