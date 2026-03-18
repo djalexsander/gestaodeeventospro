@@ -57,7 +57,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-heading text-sm font-bold text-sidebar-foreground truncate">
-                {activeCompany?.name || "Estação Mix"}
+                {isAdminMaster ? "Gestão de Eventos Pro" : (activeCompany?.name || "Estação Mix")}
               </span>
               <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
             </div>
