@@ -74,6 +74,42 @@ export type Database = {
         }
         Relationships: []
       }
+      event_staff: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          staff_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          staff_member_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          staff_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_staff_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_staff_staff_member_id_fkey"
+            columns: ["staff_member_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           artist_id: string
