@@ -60,7 +60,9 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          {activeCompany?.logoUrl ? (
+          {platformLogoUrl ? (
+            <img src={platformLogoUrl} alt={platformName} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+          ) : activeCompany?.logoUrl ? (
             <img src={activeCompany.logoUrl} alt={activeCompany.name} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
           ) : (
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
@@ -70,7 +72,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-heading text-sm font-bold text-sidebar-foreground truncate">
-                {isAdminMaster ? "Gestão de Eventos Pro" : (activeCompany?.name || "Estação Mix")}
+                {platformName}
               </span>
               <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
             </div>
