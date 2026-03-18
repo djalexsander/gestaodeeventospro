@@ -161,7 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Events CRUD
-  const addEvent = useCallback(async (event: Omit<EventItem, 'id'>) => {
+  const addEvent = useCallback(async (event: Omit<EventItem, 'id'>): Promise<string | undefined> => {
     const { data, error } = await supabase.from('events').insert({
       date: event.date, name: event.name, city_id: event.cityId, venue: event.venue,
       artist_id: event.artistId, rider_id: event.riderId, setup_time: event.setupTime,
@@ -169,7 +169,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       departure_date: event.departureDate, departure_time: event.departureTime,
       staff_notes: event.staffNotes,
     } as any).select().single();
-    if (error) { toast.error('Erro ao criar evento'); return; }
+    if (error) { toast.error('Erro ao criar evento'); return undefined; }
     setEvents(prev => [...prev, {
       id: data.id, date: data.date, name: data.name, cityId: data.city_id, venue: data.venue,
       artistId: data.artist_id, riderId: data.rider_id, setupTime: data.setup_time,
@@ -177,6 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       departureTime: (data as any).departure_time || '', notes: data.notes,
       staffNotes: (data as any).staff_notes || '', status: data.status as EventStatus,
     }]);
+    return data.id;
   }, []);
 
   const updateEvent = useCallback(async (event: EventItem) => {
