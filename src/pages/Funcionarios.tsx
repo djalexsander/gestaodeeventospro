@@ -223,7 +223,7 @@ export default function Funcionarios() {
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleAdd}>Salvar</Button>
+                <Button onClick={handleSave}>{editingMember ? "Salvar" : "Adicionar"}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
