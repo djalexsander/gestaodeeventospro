@@ -48,12 +48,16 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-8">
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary mx-auto">
-            <Calendar className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">Estação Mix</h1>
-          <p className="text-sm text-muted-foreground">Gestão de Eventos</p>
+         <div className="text-center space-y-2">
+          {platformLogoUrl ? (
+            <img src={platformLogoUrl} alt={platformName} className="h-14 w-14 rounded-2xl object-cover mx-auto" />
+          ) : (
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary mx-auto">
+              <Calendar className="h-7 w-7 text-primary-foreground" />
+            </div>
+          )}
+           <h1 className="font-heading text-2xl font-bold text-foreground">{platformName}</h1>
+           <p className="text-sm text-muted-foreground">Gestão de Eventos</p>
         </div>
 
         <div className="bg-card rounded-xl border p-6 shadow-sm">
