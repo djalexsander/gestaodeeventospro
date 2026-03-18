@@ -52,6 +52,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setRiders([]);
       setEvents([]);
       setLoading(false);
+      setHasUpdates(false);
       return;
     }
 
