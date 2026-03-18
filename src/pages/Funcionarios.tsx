@@ -139,14 +139,23 @@ export default function Funcionarios() {
               )}
             </div>
             {isAdmin && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2"
-                onClick={() => handleDelete(member.id, member.name)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => openEdit(member)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                  onClick={() => handleDelete(member.id, member.name)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
