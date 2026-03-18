@@ -227,7 +227,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      cities, artists, riders, events, loading,
+      cities, artists, riders, events, loading, hasUpdates, refreshData,
       addCity, updateCity, deleteCity,
       addArtist, updateArtist, deleteArtist,
       addRider, updateRider, deleteRider,
