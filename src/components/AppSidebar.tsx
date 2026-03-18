@@ -158,7 +158,10 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 space-y-2">
         {!collapsed && user && (
-          <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
+          <div className="space-y-0.5">
+            <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
+            <p className="text-[10px] text-sidebar-foreground/40">v1.0.0</p>
+          </div>
         )}
         <Button
           variant="ghost"
@@ -171,7 +174,7 @@ export function AppSidebar() {
         </Button>
         {!collapsed && (
           <p className="text-[10px] text-sidebar-foreground/40 text-center">
-            © 2026 Estação Mix
+            © 2026 Gestão de Eventos Pro
           </p>
         )}
       </SidebarFooter>
