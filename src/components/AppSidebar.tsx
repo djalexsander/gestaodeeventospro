@@ -111,8 +111,8 @@ export function AppSidebar() {
         )}
 
 
-        {/* EMPRESA section — hidden for admin_master */}
-        {!isAdminMaster && (
+        {/* EMPRESA section — visible for all roles */}
+        {(
           <SidebarGroup>
             {!collapsed && (
               <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-2 mb-1">

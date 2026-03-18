@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UpdateBanner } from "@/components/UpdateBanner";
+import { AdminPreviewBanner } from "@/components/AdminPreviewBanner";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               Central de Eventos
             </h1>
           </header>
+          <AdminPreviewBanner />
           <UpdateBanner />
           <main className="flex-1 overflow-auto p-4 md:p-6">
             {children}
