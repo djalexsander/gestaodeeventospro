@@ -42,8 +42,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [hasUpdates, setHasUpdates] = useState(false);
   const { activeCompanyId } = useCompany();
+  const { isAdminMaster } = useAuth();
 
   const fetchAll = useCallback(async () => {
+    // Admin master without a selected company should see no company data
+    if (isAdminMaster && !activeCompanyId) {
+      setCities([]);
+      setArtists([]);
+      setRiders([]);
+      setEvents([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const companyFilter = activeCompanyId
       ? `company_id.eq.${activeCompanyId},company_id.is.null`
