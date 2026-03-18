@@ -46,8 +46,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/set-password" element={<SetPassword />} />
-      <Route path="/" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
-      <Route path="/eventos" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
+      <Route path="/" element={<ProtectedRoute><MasterRedirect><AppLayout><Index /></AppLayout></MasterRedirect></ProtectedRoute>} />
+      <Route path="/eventos" element={<ProtectedRoute><MasterRedirect><AppLayout><Index /></AppLayout></MasterRedirect></ProtectedRoute>} />
       <Route path="/artistas" element={<ProtectedRoute><AppLayout><Artistas /></AppLayout></ProtectedRoute>} />
       <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />
       <Route path="/cidades" element={<ProtectedRoute><AppLayout><Cidades /></AppLayout></ProtectedRoute>} />
