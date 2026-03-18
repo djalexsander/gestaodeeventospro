@@ -37,6 +37,7 @@ function AppRoutes() {
       <Route path="/artistas" element={<ProtectedRoute><AppLayout><Artistas /></AppLayout></ProtectedRoute>} />
       <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />
       <Route path="/cidades" element={<ProtectedRoute><AppLayout><Cidades /></AppLayout></ProtectedRoute>} />
+      <Route path="/funcionarios" element={<ProtectedRoute><AppLayout><Funcionarios /></AppLayout></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AppLayout><Admin /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

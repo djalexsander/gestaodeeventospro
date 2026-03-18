@@ -21,6 +21,7 @@ const items = [
   { title: "Artistas", url: "/artistas", icon: Music },
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
+  { title: "Funcionários", url: "/funcionarios", icon: Users },
 ];
 
 export function AppSidebar() {
