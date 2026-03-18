@@ -111,72 +111,56 @@ export default function Empresas() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="empresas">
-        <TabsList>
-          <TabsTrigger value="empresas" className="gap-2">
-            <Building2 className="h-4 w-4" /> Empresas
-          </TabsTrigger>
-          <TabsTrigger value="usuarios" className="gap-2">
-            <Users className="h-4 w-4" /> Usuários
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Building2 className="h-6 w-6 text-primary" />
+          <h2 className="font-heading text-2xl font-bold">Empresas</h2>
+        </div>
+        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Empresa</Button>
+      </div>
 
-        <TabsContent value="empresas" className="space-y-6 mt-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Building2 className="h-6 w-6 text-primary" />
-              <h2 className="font-heading text-2xl font-bold">Empresas</h2>
-            </div>
-            <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Empresa</Button>
-          </div>
+      <div className="bg-card rounded-xl border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[60px]">Logo</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead className="hidden md:table-cell">Email</TableHead>
+              <TableHead className="hidden md:table-cell">Telefone</TableHead>
+              <TableHead className="w-[100px]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+            ) : companies.length === 0 ? (
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
+            ) : companies.map(c => (
+              <TableRow key={c.id}>
+                <TableCell>
+                  {c.logo_url ? (
+                    <img src={c.logo_url} alt={c.name} className="h-8 w-8 rounded object-cover" />
+                  ) : (
+                    <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell className="font-medium">{c.name}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-          <div className="bg-card rounded-xl border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">Logo</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="hidden md:table-cell">Email</TableHead>
-                  <TableHead className="hidden md:table-cell">Telefone</TableHead>
-                  <TableHead className="w-[100px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
-                ) : companies.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
-                ) : companies.map(c => (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      {c.logo_url ? (
-                        <img src={c.logo_url} alt={c.name} className="h-8 w-8 rounded object-cover" />
-                      ) : (
-                        <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{c.name}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="usuarios" className="mt-6">
-          <CompanyUsers />
-        </TabsContent>
-      </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
