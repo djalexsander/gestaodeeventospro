@@ -36,6 +36,7 @@ export default function Admin() {
   const [submitting, setSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [form, setForm] = useState({ name: '', email: '', role: 'user', company_id: '' });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
