@@ -78,9 +78,25 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="mt-4 text-xs text-center text-muted-foreground">
-            Acesso restrito. Solicite ao administrador.
-          </p>
+          <div className="mt-4 text-center space-y-2">
+            <button
+              type="button"
+              onClick={async () => {
+                if (!email) { toast.error('Preencha o email primeiro'); return; }
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                  redirectTo: `${window.location.origin}/set-password`,
+                });
+                if (error) toast.error(error.message);
+                else toast.success('Email de recuperação enviado!');
+              }}
+              className="text-xs text-primary hover:underline"
+            >
+              Esqueceu sua senha?
+            </button>
+            <p className="text-xs text-muted-foreground">
+              Acesso restrito. Solicite ao administrador.
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -36,6 +36,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/set-password" element={<SetPassword />} />
       <Route path="/" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
       <Route path="/artistas" element={<ProtectedRoute><AppLayout><Artistas /></AppLayout></ProtectedRoute>} />
       <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />

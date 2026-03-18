@@ -40,20 +40,18 @@ serve(async (req) => {
       });
     }
 
-    const { email, password, name, role, company_id } = await req.json();
+    const { email, name, role, company_id } = await req.json();
 
-    if (!email || !password || !name) {
-      return new Response(JSON.stringify({ error: "Email, senha e nome são obrigatórios" }), {
+    if (!email || !name) {
+      return new Response(JSON.stringify({ error: "Email e nome são obrigatórios" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Create user with admin API (auto-confirms email)
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { name, role: role || "user", company_id: company_id || "" },
+    // Create user via invite — sends email with link to set password
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      data: { name, role: role || "user", company_id: company_id || "" },
+      redirectTo: `${req.headers.get("origin") || supabaseUrl}/set-password`,
     });
 
     if (createError) {
@@ -62,8 +60,7 @@ serve(async (req) => {
       });
     }
 
-    // The trigger handles profile + role creation via user_metadata
-    // Update role if trigger set a different one
+    // Update role if needed
     if (role && role !== "user" && newUser.user) {
       await supabaseAdmin
         .from("user_roles")

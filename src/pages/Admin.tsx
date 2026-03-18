@@ -225,16 +225,11 @@ export default function Admin() {
               <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" required />
             </div>
             {!editingUser && (
-              <>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Senha</Label>
-                  <Input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} placeholder="Mínimo 6 caracteres" required minLength={6} />
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" required />
+                <p className="text-xs text-muted-foreground">O usuário receberá um email para definir sua senha.</p>
+              </div>
             )}
             <div className="space-y-2">
               <Label>Papel</Label>
