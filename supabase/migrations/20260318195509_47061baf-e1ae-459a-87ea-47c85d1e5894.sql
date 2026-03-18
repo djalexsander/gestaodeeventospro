@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can view settings" ON public.system_settings FOR SELECT TO anon USING (true)
