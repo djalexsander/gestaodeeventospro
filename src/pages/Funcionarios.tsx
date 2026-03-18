@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Users, UserPlus, Phone, Briefcase } from "lucide-react";
+import { Plus, Trash2, Users, UserPlus, Phone, Briefcase, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface StaffMember {
@@ -25,6 +25,7 @@ export default function Funcionarios() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState<"equipe" | "freelancer">("equipe");
   const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "" });
 
@@ -45,25 +46,52 @@ export default function Funcionarios() {
     fetchStaff();
   }, []);
 
-  const handleAdd = async () => {
+  const openAdd = () => {
+    setEditingMember(null);
+    setForm({ name: "", phone: "", role: "", notes: "" });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (member: StaffMember) => {
+    setEditingMember(member);
+    setForm({ name: member.name, phone: member.phone, role: member.role, notes: member.notes });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error("Nome é obrigatório");
       return;
     }
-    const { error } = await supabase.from("staff_members").insert({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      role: form.role.trim(),
-      type: activeTab,
-      notes: form.notes.trim(),
-    });
-    if (error) {
-      toast.error("Erro ao adicionar funcionário");
+    if (editingMember) {
+      const { error } = await supabase.from("staff_members").update({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        role: form.role.trim(),
+        notes: form.notes.trim(),
+      }).eq("id", editingMember.id);
+      if (error) {
+        toast.error("Erro ao atualizar funcionário");
+      } else {
+        toast.success("Funcionário atualizado!");
+        setDialogOpen(false);
+        fetchStaff();
+      }
     } else {
-      toast.success("Funcionário adicionado!");
-      setForm({ name: "", phone: "", role: "", notes: "" });
-      setDialogOpen(false);
-      fetchStaff();
+      const { error } = await supabase.from("staff_members").insert({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        role: form.role.trim(),
+        type: activeTab,
+        notes: form.notes.trim(),
+      });
+      if (error) {
+        toast.error("Erro ao adicionar funcionário");
+      } else {
+        toast.success("Funcionário adicionado!");
+        setDialogOpen(false);
+        fetchStaff();
+      }
     }
   };
 
@@ -111,14 +139,23 @@ export default function Funcionarios() {
               )}
             </div>
             {isAdmin && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2"
-                onClick={() => handleDelete(member.id, member.name)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => openEdit(member)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                  onClick={() => handleDelete(member.id, member.name)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -136,7 +173,7 @@ export default function Funcionarios() {
         {isAdmin && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={openAdd}>
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar
               </Button>
@@ -144,7 +181,7 @@ export default function Funcionarios() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  Adicionar {activeTab === "equipe" ? "Membro da Equipe" : "Freelancer"}
+                  {editingMember ? "Editar Funcionário" : `Adicionar ${activeTab === "equipe" ? "Membro da Equipe" : "Freelancer"}`}
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
@@ -186,7 +223,7 @@ export default function Funcionarios() {
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button onClick={handleAdd}>Salvar</Button>
+                <Button onClick={handleSave}>{editingMember ? "Salvar" : "Adicionar"}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
