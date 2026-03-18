@@ -35,7 +35,7 @@ export default function Admin() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user', company_id: '' });
+  const [form, setForm] = useState({ name: '', email: '', role: 'user', company_id: '' });
 
   const fetchUsers = async () => {
     setLoading(true);
