@@ -1,4 +1,4 @@
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2 } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -17,13 +18,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
-const items = [
+const empresaItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Central de Eventos", url: "/eventos", icon: Calendar },
   { title: "Artistas", url: "/artistas", icon: Music },
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
   { title: "Funcionários", url: "/funcionarios", icon: Users },
+];
+
+const masterItems = [
+  { title: "Painel Master", url: "/master", icon: Crown },
+  { title: "Empresas", url: "/empresas", icon: Building2 },
+  { title: "Usuários Globais", url: "/admin", icon: Shield },
+  { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -47,17 +57,51 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-heading text-sm font-bold text-sidebar-foreground truncate">
-                {activeCompany?.name || "Central de Eventos"}
+                {activeCompany?.name || "Estação Mix"}
               </span>
-              <span className="text-xs text-sidebar-foreground/60">Eventos</span>
+              <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
             </div>
           )}
         </div>
+      </SidebarHeader>
+
+      <SidebarContent className="px-2">
+        {/* MASTER section — only visible to admin_master */}
+        {isAdminMaster && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-2 mb-1">
+                Master
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {masterItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/master"}
+                        className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         {/* Company selector for admin_master */}
-        {isAdminMaster && !collapsed && companies.length > 1 && (
-          <div className="mt-3">
+        {isAdminMaster && !collapsed && companies.length > 0 && (
+          <div className="px-2 py-2">
+            <Separator className="mb-3 bg-sidebar-border/50" />
             <Select value={activeCompanyId || ""} onValueChange={setActiveCompanyId}>
-              <SelectTrigger className="h-8 text-xs">
+              <SelectTrigger className="h-8 text-xs bg-sidebar-accent/40 border-sidebar-border/50">
                 <SelectValue placeholder="Selecionar empresa" />
               </SelectTrigger>
               <SelectContent>
@@ -68,13 +112,17 @@ export function AppSidebar() {
             </Select>
           </div>
         )}
-      </SidebarHeader>
 
-      <SidebarContent className="px-2">
+        {/* EMPRESA section */}
         <SidebarGroup>
+          {!collapsed && (
+            <SidebarGroupLabel className="text-[11px] uppercase tracking-wider text-sidebar-foreground/40 font-semibold px-2 mb-1">
+              Empresa
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {empresaItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
@@ -89,7 +137,7 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {isAdmin && (
+              {isAdmin && !isAdminMaster && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Usuários">
                     <NavLink
@@ -99,20 +147,6 @@ export function AppSidebar() {
                     >
                       <Shield className="h-4 w-4" />
                       {!collapsed && <span>Usuários</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
-              {isAdminMaster && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Empresas">
-                    <NavLink
-                      to="/empresas"
-                      className="hover:bg-sidebar-accent/80 rounded-lg transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                    >
-                      <Building2 className="h-4 w-4" />
-                      {!collapsed && <span>Empresas</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -137,7 +171,7 @@ export function AppSidebar() {
         </Button>
         {!collapsed && (
           <p className="text-[10px] text-sidebar-foreground/40 text-center">
-            © 2026 Central de Eventos
+            © 2026 Estação Mix
           </p>
         )}
       </SidebarFooter>
