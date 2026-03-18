@@ -46,25 +46,52 @@ export default function Funcionarios() {
     fetchStaff();
   }, []);
 
-  const handleAdd = async () => {
+  const openAdd = () => {
+    setEditingMember(null);
+    setForm({ name: "", phone: "", role: "", notes: "" });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (member: StaffMember) => {
+    setEditingMember(member);
+    setForm({ name: member.name, phone: member.phone, role: member.role, notes: member.notes });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!form.name.trim()) {
       toast.error("Nome é obrigatório");
       return;
     }
-    const { error } = await supabase.from("staff_members").insert({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      role: form.role.trim(),
-      type: activeTab,
-      notes: form.notes.trim(),
-    });
-    if (error) {
-      toast.error("Erro ao adicionar funcionário");
+    if (editingMember) {
+      const { error } = await supabase.from("staff_members").update({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        role: form.role.trim(),
+        notes: form.notes.trim(),
+      }).eq("id", editingMember.id);
+      if (error) {
+        toast.error("Erro ao atualizar funcionário");
+      } else {
+        toast.success("Funcionário atualizado!");
+        setDialogOpen(false);
+        fetchStaff();
+      }
     } else {
-      toast.success("Funcionário adicionado!");
-      setForm({ name: "", phone: "", role: "", notes: "" });
-      setDialogOpen(false);
-      fetchStaff();
+      const { error } = await supabase.from("staff_members").insert({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        role: form.role.trim(),
+        type: activeTab,
+        notes: form.notes.trim(),
+      });
+      if (error) {
+        toast.error("Erro ao adicionar funcionário");
+      } else {
+        toast.success("Funcionário adicionado!");
+        setDialogOpen(false);
+        fetchStaff();
+      }
     }
   };
 
