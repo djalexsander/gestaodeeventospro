@@ -25,6 +25,7 @@ export default function Funcionarios() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState<"equipe" | "freelancer">("equipe");
   const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "" });
 
