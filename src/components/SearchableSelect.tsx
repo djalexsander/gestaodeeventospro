@@ -1,21 +1,7 @@
-import { useState, useMemo } from "react";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 
 interface SearchableSelectProps {
   value: string;
@@ -33,77 +19,110 @@ export function SearchableSelect({
   onValueChange,
   options,
   placeholder = "Selecione...",
-  searchPlaceholder = "Buscar...",
+  searchPlaceholder = "Digite para buscar...",
   emptyText = "Nenhum resultado.",
   onAddNew,
   addNewLabel = "Adicionar novo",
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedLabel = useMemo(
-    () => options.find((o) => o.value === value)?.label,
+    () => options.find((o) => o.value === value)?.label || "",
     [options, value]
   );
 
+  // When value changes externally, update search text
+  useEffect(() => {
+    if (!open) {
+      setSearch(selectedLabel);
+    }
+  }, [selectedLabel, open]);
+
+  const filtered = useMemo(() => {
+    if (!search) return options;
+    const lower = search.toLowerCase();
+    return options.filter((o) => o.label.toLowerCase().includes(lower));
+  }, [options, search]);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch(selectedLabel);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [selectedLabel]);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between font-normal"
-        >
-          <span className="truncate">
-            {selectedLabel || placeholder}
-          </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.label}
-                  onSelect={() => {
-                    onValueChange(option.value);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            {onAddNew && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => {
-                      setOpen(false);
-                      onAddNew();
-                    }}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {addNewLabel}
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div ref={wrapperRef} className="relative">
+      <Input
+        ref={inputRef}
+        value={open ? search : selectedLabel}
+        placeholder={placeholder}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          if (!open) setOpen(true);
+        }}
+        onFocus={() => {
+          setOpen(true);
+          setSearch(selectedLabel);
+        }}
+        autoComplete="off"
+      />
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md max-h-60 overflow-y-auto">
+          {filtered.length === 0 && !onAddNew && (
+            <div className="px-3 py-2 text-sm text-muted-foreground">{emptyText}</div>
+          )}
+          {filtered.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={cn(
+                "flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left",
+                value === option.value && "bg-accent/50"
+              )}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onValueChange(option.value);
+                setSearch(option.label);
+                setOpen(false);
+              }}
+            >
+              <Check
+                className={cn(
+                  "h-4 w-4 shrink-0",
+                  value === option.value ? "opacity-100" : "opacity-0"
+                )}
+              />
+              {option.label}
+            </button>
+          ))}
+          {onAddNew && (
+            <>
+              {filtered.length > 0 && <div className="border-t border-border" />}
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left text-primary"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setOpen(false);
+                  onAddNew();
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                {addNewLabel}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
