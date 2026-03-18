@@ -16,7 +16,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               Central de Eventos
             </h1>
           </header>
-          <AdminPreviewBanner />
+          
           <UpdateBanner />
           <main className="flex-1 overflow-auto p-4 md:p-6">
             {children}
