@@ -44,13 +44,15 @@ export default function Admin() {
     const { data: roles } = await supabase.from('user_roles').select('*');
 
     if (profiles && roles) {
-      setUsers(profiles.map((p: any) => {
+      const mapped = profiles.map((p: any) => {
         const userRole = roles.find((r: any) => r.user_id === p.id);
         return {
           id: p.id, name: p.name || p.email, email: p.email,
           role: userRole?.role || 'user', company_id: p.company_id || null,
         };
-      }));
+      });
+      // Hide admin_master users from the list
+      setUsers(mapped.filter(u => u.role !== 'admin_master'));
     }
     setLoading(false);
   };
