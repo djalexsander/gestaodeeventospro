@@ -1,0 +1,64 @@
+import { useAuth } from '@/context/AuthContext';
+import { useCompany } from '@/context/CompanyContext';
+import { Navigate } from 'react-router-dom';
+import { Crown, Building2, Users, Activity, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+export default function PainelMaster() {
+  const { isAdminMaster, loading: authLoading } = useAuth();
+  const { companies } = useCompany();
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!isAdminMaster) return <Navigate to="/" replace />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Crown className="h-6 w-6 text-primary" />
+        <h2 className="font-heading text-2xl font-bold">Painel Master</h2>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="bg-card border">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Empresas</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{companies.length}</div>
+            <p className="text-xs text-muted-foreground">cadastradas no sistema</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Status</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">Ativo</div>
+            <p className="text-xs text-muted-foreground">sistema operacional</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Visão</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Global</div>
+            <p className="text-xs text-muted-foreground">acesso a todas as empresas</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
