@@ -76,7 +76,7 @@ export default function SetPassword() {
         <div className="bg-card rounded-xl border p-6 shadow-sm">
           {done ? (
             <div className="text-center space-y-4 py-4">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
+              <CheckCircle className="h-12 w-12 text-primary mx-auto" />
               <p className="text-foreground font-medium">Senha definida com sucesso!</p>
               <p className="text-sm text-muted-foreground">Redirecionando...</p>
             </div>
