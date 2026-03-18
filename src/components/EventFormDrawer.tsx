@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { EventItem, EventStatus } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
 import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
+import { Users } from "lucide-react";
+
+interface StaffMember {
+  id: string;
+  name: string;
+  role: string;
+  type: string;
+}
 
 interface EventFormDrawerProps {
   open: boolean;
@@ -23,6 +33,8 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
   const [showAddArtist, setShowAddArtist] = useState(false);
   const [showAddCity, setShowAddCity] = useState(false);
+  const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
+  const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
 
   const [form, setForm] = useState({
     date: "",
@@ -39,6 +51,28 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     staffNotes: "",
     status: "Pendente" as EventStatus,
   });
+
+  // Load all staff members
+  useEffect(() => {
+    const fetchStaff = async () => {
+      const { data } = await supabase.from("staff_members").select("id, name, role, type").order("name");
+      if (data) setAllStaff(data);
+    };
+    if (open) fetchStaff();
+  }, [open]);
+
+  // Load assigned staff when editing
+  useEffect(() => {
+    const fetchAssigned = async () => {
+      if (!event) { setSelectedStaffIds([]); return; }
+      const { data } = await supabase
+        .from("event_staff")
+        .select("staff_member_id")
+        .eq("event_id", event.id);
+      if (data) setSelectedStaffIds(data.map(d => d.staff_member_id));
+    };
+    if (open) fetchAssigned();
+  }, [event, open]);
 
   useEffect(() => {
     if (event) {
@@ -88,20 +122,43 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toggleStaff = (staffId: string) => {
+    setSelectedStaffIds(prev =>
+      prev.includes(staffId) ? prev.filter(id => id !== staffId) : [...prev, staffId]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
       ...form,
       riderId: form.riderId || null,
       departureDate: form.departureDate || null,
     };
+
+    let eventId: string | undefined;
     if (event) {
       updateEvent({ ...payload, id: event.id });
+      eventId = event.id;
     } else {
-      addEvent(payload);
+      eventId = await addEvent(payload);
     }
+
+    // Save staff assignments
+    if (eventId) {
+      await supabase.from("event_staff").delete().eq("event_id", eventId);
+      if (selectedStaffIds.length > 0) {
+        await supabase.from("event_staff").insert(
+          selectedStaffIds.map(sid => ({ event_id: eventId, staff_member_id: sid }))
+        );
+      }
+    }
+
     onOpenChange(false);
   };
+
+  const equipe = allStaff.filter(s => s.type === "equipe");
+  const freelancers = allStaff.filter(s => s.type === "freelancer");
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -201,6 +258,54 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
                 <Input type="time" value={form.departureTime} onChange={e => setForm(p => ({ ...p, departureTime: e.target.value }))} />
               </div>
             </div>
+          </div>
+
+          {/* Funcionários */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+            <h4 className="text-sm font-heading font-semibold text-foreground flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Funcionários
+            </h4>
+            {allStaff.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Nenhum funcionário cadastrado.</p>
+            ) : (
+              <div className="space-y-3">
+                {equipe.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Equipe</p>
+                    <div className="space-y-1.5">
+                      {equipe.map(s => (
+                        <label key={s.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                          <Checkbox
+                            checked={selectedStaffIds.includes(s.id)}
+                            onCheckedChange={() => toggleStaff(s.id)}
+                          />
+                          <span className="text-foreground">{s.name}</span>
+                          {s.role && <span className="text-xs text-muted-foreground">({s.role})</span>}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {freelancers.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Freelancer</p>
+                    <div className="space-y-1.5">
+                      {freelancers.map(s => (
+                        <label key={s.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                          <Checkbox
+                            checked={selectedStaffIds.includes(s.id)}
+                            onCheckedChange={() => toggleStaff(s.id)}
+                          />
+                          <span className="text-foreground">{s.name}</span>
+                          {s.role && <span className="text-xs text-muted-foreground">({s.role})</span>}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
