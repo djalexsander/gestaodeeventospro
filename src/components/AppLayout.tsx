@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UpdateBanner } from "@/components/UpdateBanner";
-import { AdminPreviewBanner } from "@/components/AdminPreviewBanner";
+
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
