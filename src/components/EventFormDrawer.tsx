@@ -220,7 +220,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
 
           <div className="space-y-2">
             <Label>Local</Label>
-            <Input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} required />
+            <Input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} />
           </div>
 
           <div className="space-y-2">
