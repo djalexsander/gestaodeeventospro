@@ -34,6 +34,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function MasterRedirect({ children }: { children: React.ReactNode }) {
+  const { isAdminMaster, loading } = useAuth();
+  if (loading) return null;
+  if (isAdminMaster) return <Navigate to="/master" replace />;
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
     <Routes>
