@@ -115,7 +115,11 @@ export default function Admin() {
     setDialogOpen(false);
   };
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const deleteUser = async (userId: string) => {
+    if (deletingId) return;
+    setDeletingId(userId);
     const res = await supabase.functions.invoke('delete-user', {
       body: { userId },
     });
@@ -126,6 +130,7 @@ export default function Admin() {
       toast.success('Usuário excluído');
       setUsers(prev => prev.filter(u => u.id !== userId));
     }
+    setDeletingId(null);
   };
 
   const getCompanyName = (companyId: string | null) => {
