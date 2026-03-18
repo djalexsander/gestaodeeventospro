@@ -35,7 +35,7 @@ export default function Admin() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user', company_id: '' });
+  const [form, setForm] = useState({ name: '', email: '', role: 'user', company_id: '' });
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -70,13 +70,13 @@ export default function Admin() {
 
   const openNew = () => {
     setEditingUser(null);
-    setForm({ name: '', email: '', password: '', role: 'user', company_id: '' });
+    setForm({ name: '', email: '', role: 'user', company_id: '' });
     setDialogOpen(true);
   };
 
   const openEdit = (u: UserRow) => {
     setEditingUser(u);
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, company_id: u.company_id || '' });
+    setForm({ name: u.name, email: u.email, role: u.role, company_id: u.company_id || '' });
     setDialogOpen(true);
   };
 
@@ -98,7 +98,7 @@ export default function Admin() {
     } else {
       const res = await supabase.functions.invoke('create-user', {
         body: {
-          email: form.email, password: form.password, name: form.name,
+          email: form.email, name: form.name,
           role: form.role, company_id: form.company_id || null,
         },
       });
@@ -106,7 +106,7 @@ export default function Admin() {
       if (res.error || res.data?.error) {
         toast.error(res.data?.error || 'Erro ao criar usuário');
       } else {
-        toast.success('Usuário criado com sucesso');
+        toast.success('Convite enviado! O usuário receberá um email para definir sua senha.');
         await fetchUsers();
       }
     }
@@ -225,16 +225,11 @@ export default function Admin() {
               <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" required />
             </div>
             {!editingUser && (
-              <>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Senha</Label>
-                  <Input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} placeholder="Mínimo 6 caracteres" required minLength={6} />
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" required />
+                <p className="text-xs text-muted-foreground">O usuário receberá um email para definir sua senha.</p>
+              </div>
             )}
             <div className="space-y-2">
               <Label>Papel</Label>

@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import Funcionarios from "./pages/Funcionarios";
 import Empresas from "./pages/Empresas";
 import Login from "./pages/Login";
+import SetPassword from "./pages/SetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/set-password" element={<SetPassword />} />
       <Route path="/" element={<ProtectedRoute><AppLayout><Index /></AppLayout></ProtectedRoute>} />
       <Route path="/artistas" element={<ProtectedRoute><AppLayout><Artistas /></AppLayout></ProtectedRoute>} />
       <Route path="/riders" element={<ProtectedRoute><AppLayout><Riders /></AppLayout></ProtectedRoute>} />
