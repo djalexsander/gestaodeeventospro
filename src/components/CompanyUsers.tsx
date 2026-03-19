@@ -239,33 +239,21 @@ export function CompanyUsers() {
             </div>
 
             {!editingUser && (
-              <>
-                <div className="space-y-2">
-                  <Label>
-                    Email <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="email@exemplo.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>
-                    Senha <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                    placeholder="Mínimo 6 caracteres"
-                    minLength={6}
-                    required
-                  />
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label>
+                  Email <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="email@exemplo.com"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  O usuário deverá fazer o primeiro acesso para definir sua senha.
+                </p>
+              </div>
             )}
 
             <div className="space-y-2">
