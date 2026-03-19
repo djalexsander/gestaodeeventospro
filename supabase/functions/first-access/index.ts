@@ -45,24 +45,56 @@ serve(async (req) => {
     const normalizedEmail = email.toLowerCase().trim();
     const targetUser = users.find((u) => u.email?.toLowerCase() === normalizedEmail);
 
-    if (!targetUser) {
+    if (targetUser) {
+      // User exists — just update password
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(targetUser.id, {
+        password,
+      });
+
+      if (updateError) {
+        return new Response(JSON.stringify({ error: updateError.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // User not found — check if email belongs to a company
+    const { data: company } = await supabaseAdmin
+      .from("companies")
+      .select("id, name")
+      .eq("email", normalizedEmail)
+      .limit(1)
+      .maybeSingle();
+
+    if (!company) {
       return new Response(JSON.stringify({ error: "Email não encontrado. Verifique com o administrador." }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Update password
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(targetUser.id, {
+    // Create new user as company_admin linked to this company
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: normalizedEmail,
       password,
+      email_confirm: true,
+      user_metadata: {
+        name: company.name,
+        role: "company_admin",
+        company_id: company.id,
+      },
     });
 
-    if (updateError) {
-      return new Response(JSON.stringify({ error: updateError.message }), {
+    if (createError) {
+      return new Response(JSON.stringify({ error: createError.message }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, created: true }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
