@@ -30,7 +30,7 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
   // Header
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Estação Mix Eventos', 14, 18);
+  doc.text('Gestão de Eventos Pro', 14, 18);
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
