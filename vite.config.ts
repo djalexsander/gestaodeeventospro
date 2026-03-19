@@ -4,81 +4,66 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: "./", // 🔥 ESSENCIAL PRO TAURI
+export default defineConfig(({ mode }) => {
+  const isTauri = process.env.TAURI_ENV === "true";
 
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
-    },
-  },
+  return {
+    base: "./",
 
-  plugins: [
-    react(),
-
-    mode === "development" && componentTagger(),
-
-    VitePWA({
-      registerType: "prompt",
-      includeAssets: ["favicon.ico", "pwa-192x192.png"],
-
-      manifest: {
-        name: "Gestão de Eventos Pro",
-        short_name: "Eventos Pro",
-        description: "Plataforma de gestão de eventos",
-        theme_color: "#6366f1",
-        background_color: "#0f172a",
-        display: "standalone",
-
-        // 🔥 IMPORTANTE (corrigido pro Tauri)
-        start_url: "./",
-
-        icons: [
-          {
-            src: "pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "pwa-192x192.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "pwa-192x192.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
+    server: {
+      host: "::",
+      port: 8080,
+      hmr: {
+        overlay: false,
       },
+    },
 
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+    plugins: [
+      react(),
 
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "supabase-api",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 300,
+      mode === "development" && componentTagger(),
+
+      // 🔥 PWA só roda no web, NÃO no Tauri
+      !isTauri &&
+        VitePWA({
+          registerType: "prompt",
+          includeAssets: ["favicon.ico", "pwa-192x192.png"],
+
+          manifest: {
+            name: "Gestão de Eventos Pro",
+            short_name: "Eventos Pro",
+            description: "Plataforma de gestão de eventos",
+            theme_color: "#6366f1",
+            background_color: "#0f172a",
+            display: "standalone",
+            start_url: "./",
+
+            icons: [
+              {
+                src: "pwa-192x192.png",
+                sizes: "192x192",
+                type: "image/png",
               },
-            },
+              {
+                src: "pwa-192x192.png",
+                sizes: "512x512",
+                type: "image/png",
+              },
+              {
+                src: "pwa-192x192.png",
+                sizes: "512x512",
+                type: "image/png",
+                purpose: "maskable",
+              },
+            ],
           },
-        ],
-      },
-    }),
-  ].filter(Boolean),
+        }),
+    ].filter(Boolean),
 
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-}));
+  };
+});
