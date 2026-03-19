@@ -210,11 +210,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
               value={form.cityId}
               onValueChange={v => setForm(p => ({ ...p, cityId: v }))}
               options={cities.map(c => ({ value: c.id, label: `${c.name} - ${c.state}` }))}
-              placeholder="Selecione uma cidade"
-              searchPlaceholder="Buscar cidade..."
-              emptyText="Nenhuma cidade encontrada."
-              onAddNew={() => setShowAddCity(true)}
-              addNewLabel="Adicionar nova cidade"
+              placeholder="Digite o nome da cidade"
+              onAddNew={(text) => { setPendingCityName(text); setShowAddCity(true); }}
+              addNewLabel="Cadastrar"
             />
           </div>
 
