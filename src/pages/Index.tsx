@@ -69,6 +69,22 @@ export default function Dashboard() {
     return groups;
   }, [filteredEvents]);
 
+  // Monthly agenda: all events for the calendar's displayed month
+  const monthlyEvents = useMemo(() => {
+    const monthStart = format(startOfMonth(selectedDate), "yyyy-MM-dd");
+    const monthEnd = format(endOfMonth(selectedDate), "yyyy-MM-dd");
+    let result = events.filter(e => e.date >= monthStart && e.date <= monthEnd);
+    if (filterCity !== "all") result = result.filter(e => e.cityId === filterCity);
+    if (filterArtist !== "all") result = result.filter(e => e.artistId === filterArtist);
+    result.sort((a, b) => a.date.localeCompare(b.date));
+    const groups: Record<string, EventItem[]> = {};
+    result.forEach(ev => {
+      if (!groups[ev.date]) groups[ev.date] = [];
+      groups[ev.date].push(ev);
+    });
+    return { groups, total: result.length };
+  }, [events, selectedDate, filterCity, filterArtist]);
+
   return (
     <div className="space-y-6">
       {/* Filter Bar */}
