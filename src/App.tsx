@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { CompanyProvider } from "@/context/CompanyContext";
 import { AppProvider } from "@/context/AppContext";
 import { AppLayout } from "@/components/AppLayout";
+import { PwaUpdateBanner } from "@/components/PwaUpdateBanner";
 import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
 import Artistas from "./pages/Artistas";
@@ -89,6 +90,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PwaUpdateBanner />
       <AuthProvider>
         <CompanyProvider>
           <AppProvider>
