@@ -101,7 +101,7 @@ interface ExportSingleEventParams {
   riderDetails?: { equipment: string; soundSystem: string; microphones: string; monitors: string } | null;
 }
 
-export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
+export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
   const doc = new jsPDF();
   const dateFormatted = format(new Date(event.date + 'T00:00:00'), 'dd/MM/yyyy');
 
