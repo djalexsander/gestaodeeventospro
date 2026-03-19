@@ -30,7 +30,7 @@ export function CompanyUsers() {
   const [editingUser, setEditingUser] = useState<CompanyUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [form, setForm] = useState({ name: "", email: "", role: "user" });
 
   const fetchUsers = async () => {
     if (!activeCompanyId) return;
@@ -66,13 +66,13 @@ export function CompanyUsers() {
 
   const openNew = () => {
     setEditingUser(null);
-    setForm({ name: "", email: "", password: "", role: "user" });
+    setForm({ name: "", email: "", role: "user" });
     setDialogOpen(true);
   };
 
   const openEdit = (u: CompanyUser) => {
     setEditingUser(u);
-    setForm({ name: u.name, email: u.email, password: "", role: u.role });
+    setForm({ name: u.name, email: u.email, role: u.role });
     setDialogOpen(true);
   };
 
@@ -99,17 +99,10 @@ export function CompanyUsers() {
         return;
       }
 
-      if (form.password.length < 6) {
-        toast.error("Senha deve ter no mínimo 6 caracteres");
-        setSubmitting(false);
-        return;
-      }
-
       const res = await supabase.functions.invoke("create-company-user", {
         body: {
           email: form.email,
           name: form.name,
-          password: form.password,
           role: form.role,
           company_id: activeCompanyId,
         },
@@ -246,33 +239,21 @@ export function CompanyUsers() {
             </div>
 
             {!editingUser && (
-              <>
-                <div className="space-y-2">
-                  <Label>
-                    Email <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="email@exemplo.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>
-                    Senha <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                    placeholder="Mínimo 6 caracteres"
-                    minLength={6}
-                    required
-                  />
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label>
+                  Email <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="email@exemplo.com"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  O usuário deverá fazer o primeiro acesso para definir sua senha.
+                </p>
+              </div>
             )}
 
             <div className="space-y-2">

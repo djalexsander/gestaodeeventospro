@@ -40,16 +40,10 @@ serve(async (req) => {
       });
     }
 
-    const { email, name, password, role, company_id } = await req.json();
+    const { email, name, role, company_id } = await req.json();
 
-    if (!email || !name || !password) {
-      return new Response(JSON.stringify({ error: "Email, nome e senha são obrigatórios" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "Senha deve ter no mínimo 6 caracteres" }), {
+    if (!email || !name) {
+      return new Response(JSON.stringify({ error: "Email e nome são obrigatórios" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -63,10 +57,13 @@ serve(async (req) => {
     const validRoles = ["company_admin", "user"];
     const finalRole = validRoles.includes(role) ? role : "user";
 
-    // Create user with password directly
+    // Generate a random temporary password - user must do first access to set their own
+    const tempPassword = crypto.randomUUID() + "Aa1!";
+
+    // Create user with temporary password
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password,
+      password: tempPassword,
       email_confirm: true,
       user_metadata: { name, role: finalRole, company_id },
     });
