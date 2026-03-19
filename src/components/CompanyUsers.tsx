@@ -99,17 +99,10 @@ export function CompanyUsers() {
         return;
       }
 
-      if (form.password.length < 6) {
-        toast.error("Senha deve ter no mínimo 6 caracteres");
-        setSubmitting(false);
-        return;
-      }
-
       const res = await supabase.functions.invoke("create-company-user", {
         body: {
           email: form.email,
           name: form.name,
-          password: form.password,
           role: form.role,
           company_id: activeCompanyId,
         },
