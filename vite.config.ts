@@ -5,11 +5,9 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  // 🔥 Detecta se é build para Tauri
-  const isTauri = process.env.TAURI_ENV === "true";
+  const isTauri = process.env.TAURI_PLATFORM === "true";
 
   return {
-    // 🔥 ESSENCIAL para Tauri
     base: "./",
 
     server: {
