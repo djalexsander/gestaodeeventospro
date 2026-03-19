@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, setMonth, setYear } from "date-fns";
+import { format, setMonth, setYear, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,6 +68,22 @@ export default function Dashboard() {
     });
     return groups;
   }, [filteredEvents]);
+
+  // Monthly agenda: all events for the calendar's displayed month
+  const monthlyEvents = useMemo(() => {
+    const monthStart = format(startOfMonth(selectedDate), "yyyy-MM-dd");
+    const monthEnd = format(endOfMonth(selectedDate), "yyyy-MM-dd");
+    let result = events.filter(e => e.date >= monthStart && e.date <= monthEnd);
+    if (filterCity !== "all") result = result.filter(e => e.cityId === filterCity);
+    if (filterArtist !== "all") result = result.filter(e => e.artistId === filterArtist);
+    result.sort((a, b) => a.date.localeCompare(b.date));
+    const groups: Record<string, EventItem[]> = {};
+    result.forEach(ev => {
+      if (!groups[ev.date]) groups[ev.date] = [];
+      groups[ev.date].push(ev);
+    });
+    return { groups, total: result.length };
+  }, [events, selectedDate, filterCity, filterArtist]);
 
   return (
     <div className="space-y-6">
@@ -278,7 +294,59 @@ export default function Dashboard() {
                       <div className="flex items-start justify-between mb-1">
                         <h4 className="text-sm font-semibold truncate">{ev.name}</h4>
                         <StatusBadge status={ev.status} />
-                      </div>
+      </div>
+
+      {/* Monthly Agenda */}
+      <div className="bg-card rounded-xl border p-4 md:p-6">
+        <h3 className="font-heading text-base font-bold mb-1 capitalize">
+          Agenda de {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          {monthlyEvents.total} evento{monthlyEvents.total !== 1 ? "s" : ""} neste mês
+        </p>
+
+        {monthlyEvents.total === 0 ? (
+          <p className="text-center text-muted-foreground py-8 text-sm">
+            Nenhum evento neste mês.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {Object.entries(monthlyEvents.groups).map(([date, evts]) => (
+              <div key={date}>
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    {format(new Date(date + "T12:00:00"), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {evts.map(ev => {
+                    const artist = getArtistById(ev.artistId);
+                    const city = getCityById(ev.cityId);
+                    return (
+                      <motion.div
+                        key={ev.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-3 rounded-lg border bg-background cursor-pointer hover:shadow-md hover:border-primary/30 transition-all"
+                        onClick={() => { setViewingEvent(ev); setDetailOpen(true); }}
+                      >
+                        <div className="flex items-start justify-between mb-1">
+                          <h4 className="text-sm font-semibold truncate">{ev.name}</h4>
+                          <StatusBadge status={ev.status} />
+                        </div>
+                        <p className="text-xs text-muted-foreground">{artist?.name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">{city?.name || "—"} • {ev.venue}</p>
+                        <p className="text-xs text-muted-foreground mt-1">🕐 {ev.showTime || "—"}</p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
                       <p className="text-xs text-muted-foreground">{artist?.name || "—"}</p>
                       <p className="text-xs text-muted-foreground">{city?.name || "—"} • {ev.venue}</p>
                       <p className="text-xs text-muted-foreground mt-1">🕐 {ev.showTime || "—"}</p>
