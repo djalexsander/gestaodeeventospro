@@ -66,7 +66,7 @@ export function CompanyUsers() {
 
   const openNew = () => {
     setEditingUser(null);
-    setForm({ name: "", email: "", password: "", role: "user" });
+    setForm({ name: "", email: "", role: "user" });
     setDialogOpen(true);
   };
 
