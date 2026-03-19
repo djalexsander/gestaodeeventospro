@@ -30,7 +30,7 @@ export function CompanyUsers() {
   const [editingUser, setEditingUser] = useState<CompanyUser | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user" });
+  const [form, setForm] = useState({ name: "", email: "", role: "user" });
 
   const fetchUsers = async () => {
     if (!activeCompanyId) return;
