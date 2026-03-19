@@ -6,6 +6,8 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "./teste/", // 🔥 ESSENCIAL PRO TAURI
+
   server: {
     host: "::",
     port: 8080,
@@ -13,12 +15,16 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+
   plugins: [
     react(),
+
     mode === "development" && componentTagger(),
+
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.ico", "pwa-192x192.png"],
+
       manifest: {
         name: "Gestão de Eventos Pro",
         short_name: "Eventos Pro",
@@ -26,7 +32,10 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#6366f1",
         background_color: "#0f172a",
         display: "standalone",
-        start_url: "/",
+
+        // 🔥 IMPORTANTE (corrigido pro Tauri)
+        start_url: "./",
+
         icons: [
           {
             src: "pwa-192x192.png",
@@ -46,21 +55,27 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
+
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-api",
-              expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 300,
+              },
             },
           },
         ],
       },
     }),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
