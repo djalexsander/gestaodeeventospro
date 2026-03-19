@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Shield, Loader2, Trash2, Plus, Pencil } from 'lucide-react';
+import { Globe, Loader2, Trash2, Pencil, ShieldCheck, Shield, Users as UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UserRow {
@@ -20,11 +20,27 @@ interface UserRow {
   company_id: string | null;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  admin_master: 'Admin Master',
-  company_admin: 'Admin Empresa',
-  admin: 'Admin',
-  user: 'Usuário',
+const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
+  admin_master: {
+    label: 'Master Admin',
+    icon: <ShieldCheck className="h-3 w-3 mr-1" />,
+    className: 'bg-destructive/10 text-destructive',
+  },
+  company_admin: {
+    label: 'Admin Empresa',
+    icon: <Shield className="h-3 w-3 mr-1" />,
+    className: 'bg-primary/10 text-primary',
+  },
+  admin: {
+    label: 'Admin',
+    icon: <Shield className="h-3 w-3 mr-1" />,
+    className: 'bg-primary/10 text-primary',
+  },
+  user: {
+    label: 'Usuário',
+    icon: <UsersIcon className="h-3 w-3 mr-1" />,
+    className: 'bg-muted text-muted-foreground',
+  },
 };
 
 export default function Admin() {
@@ -35,7 +51,7 @@ export default function Admin() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', role: 'user', company_id: '' });
+  const [form, setForm] = useState({ name: '', role: '', company_id: '' });
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
@@ -51,8 +67,7 @@ export default function Admin() {
           role: userRole?.role || 'user', company_id: p.company_id || null,
         };
       });
-      // Hide admin_master users from the list
-      setUsers(mapped.filter(u => u.role !== 'admin_master'));
+      setUsers(mapped);
     }
     setLoading(false);
   };
@@ -69,55 +84,30 @@ export default function Admin() {
     );
   }
 
-  if (!isAdmin) return <Navigate to="/" replace />;
-
-  const openNew = () => {
-    setEditingUser(null);
-    setForm({ name: '', email: '', role: 'user', company_id: '' });
-    setDialogOpen(true);
-  };
+  if (!isAdminMaster) return <Navigate to="/" replace />;
 
   const openEdit = (u: UserRow) => {
     setEditingUser(u);
-    setForm({ name: u.name, email: u.email, role: u.role, company_id: u.company_id || '' });
+    setForm({ name: u.name, role: u.role, company_id: u.company_id || '' });
     setDialogOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingUser) return;
     setSubmitting(true);
 
-    if (editingUser) {
-      await supabase.from('profiles').update({
-        name: form.name,
-        ...(form.company_id ? { company_id: form.company_id } : {}),
-      } as any).eq('id', editingUser.id);
-      await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
-      toast.success('Usuário atualizado');
-      setUsers(prev => prev.map(u => u.id === editingUser.id
-        ? { ...u, name: form.name, role: form.role, company_id: form.company_id || null }
-        : u
-      ));
-    } else {
-      const res = await supabase.functions.invoke('create-user', {
-        body: {
-          email: form.email, name: form.name,
-          role: form.role, company_id: form.company_id || null,
-        },
-      });
-
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Erro ao criar usuário');
-      } else {
-        toast.success('Convite enviado! O usuário receberá um email para definir sua senha.');
-        await fetchUsers();
-      }
-    }
+    await supabase.from('profiles').update({
+      name: form.name,
+      ...(form.company_id && form.company_id !== 'none' ? { company_id: form.company_id } : { company_id: null }),
+    } as any).eq('id', editingUser.id);
+    await supabase.from('user_roles').update({ role: form.role as any }).eq('user_id', editingUser.id);
+    toast.success('Usuário atualizado');
+    await fetchUsers();
 
     setSubmitting(false);
     setDialogOpen(false);
   };
-
 
   const deleteUser = async (userId: string) => {
     if (deletingId) return;
@@ -140,27 +130,16 @@ export default function Admin() {
     return companies.find(c => c.id === companyId)?.name || '—';
   };
 
-  const availableRoles = isAdminMaster
-    ? [
-        { value: 'admin_master', label: 'Admin Master' },
-        { value: 'company_admin', label: 'Admin Empresa' },
-        { value: 'user', label: 'Usuário' },
-      ]
-    : [
-        { value: 'admin', label: 'Admin' },
-        { value: 'user', label: 'Usuário' },
-      ];
+  const availableRoles = [
+    { value: 'admin_master', label: 'Master Admin' },
+    { value: 'company_admin', label: 'Admin Empresa' },
+    { value: 'user', label: 'Usuário' },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Shield className="h-6 w-6 text-primary" />
-          <h2 className="font-heading text-2xl font-bold">Gerenciamento de Usuários</h2>
-        </div>
-        <Button onClick={openNew}>
-          <Plus className="h-4 w-4 mr-2" /> Novo Usuário
-        </Button>
+      <div className="flex items-center gap-3">
+        <h2 className="font-heading text-2xl font-bold">Usuários Globais</h2>
       </div>
 
       <div className="bg-card rounded-xl border overflow-hidden">
@@ -168,53 +147,52 @@ export default function Admin() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Papel</TableHead>
               <TableHead>Empresa</TableHead>
-              <TableHead className="w-[100px]">Ações</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead className="w-[120px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={4} className="text-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   Nenhum usuário cadastrado
                 </TableCell>
               </TableRow>
-            ) : users.map(u => (
-              <TableRow key={u.id}>
-                <TableCell className="font-medium">{u.name || '—'}</TableCell>
-                <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    u.role === 'admin_master'
-                      ? 'bg-destructive/10 text-destructive'
-                      : u.role === 'admin' || u.role === 'company_admin'
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {ROLE_LABELS[u.role] || u.role}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{getCompanyName(u.company_id)}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(u)}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteUser(u.id)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            ) : users.map(u => {
+              const roleInfo = ROLE_LABELS[u.role] || ROLE_LABELS.user;
+              const isSelf = u.id === user?.id;
+              return (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium">{u.name || '—'}</TableCell>
+                  <TableCell className="text-muted-foreground">{getCompanyName(u.company_id)}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${roleInfo.className}`}>
+                      {roleInfo.icon}
+                      {roleInfo.label}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(u)} className="gap-1">
+                        <Pencil className="h-3 w-3" /> Editar
+                      </Button>
+                      {!isSelf && u.role !== 'admin_master' && (
+                        <Button variant="ghost" size="icon" disabled={deletingId === u.id} onClick={() => deleteUser(u.id)}>
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -222,24 +200,15 @@ export default function Admin() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-heading">
-              {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
-            </DialogTitle>
+            <DialogTitle className="font-heading">Editar Usuário</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label>Nome</Label>
-              <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Nome completo" required />
+              <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
             </div>
-            {!editingUser && (
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="email@exemplo.com" required />
-                <p className="text-xs text-muted-foreground">O usuário receberá um email para definir sua senha.</p>
-              </div>
-            )}
             <div className="space-y-2">
-              <Label>Papel</Label>
+              <Label>Tipo</Label>
               <Select value={form.role} onValueChange={v => setForm(p => ({ ...p, role: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -266,7 +235,7 @@ export default function Admin() {
             <div className="flex gap-3">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {editingUser ? 'Salvar' : 'Criar'}
+                Salvar
               </Button>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
             </div>
