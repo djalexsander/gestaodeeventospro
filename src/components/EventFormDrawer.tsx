@@ -198,11 +198,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
               value={form.artistId}
               onValueChange={handleArtistChange}
               options={artists.map(a => ({ value: a.id, label: a.name }))}
-              placeholder="Selecione um artista"
-              searchPlaceholder="Buscar artista..."
-              emptyText="Nenhum artista encontrado."
-              onAddNew={() => setShowAddArtist(true)}
-              addNewLabel="Adicionar novo artista"
+              placeholder="Digite o nome do artista"
+              onAddNew={(text) => { setPendingArtistName(text); setShowAddArtist(true); }}
+              addNewLabel="Cadastrar"
             />
           </div>
 
