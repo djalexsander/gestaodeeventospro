@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
 
-      // ✅ Apenas desenvolvimento
-      mode === "development" && componentTagger(),
+          mode === "development" && componentTagger(),
+      ].filter(Boolean),
 
       // ✅ PWA SOMENTE FORA DO TAURI
       !isTauri &&
