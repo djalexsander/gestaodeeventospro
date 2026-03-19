@@ -33,6 +33,8 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
   const [showAddArtist, setShowAddArtist] = useState(false);
   const [showAddCity, setShowAddCity] = useState(false);
+  const [pendingArtistName, setPendingArtistName] = useState("");
+  const [pendingCityName, setPendingCityName] = useState("");
   const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
 
@@ -196,11 +198,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
               value={form.artistId}
               onValueChange={handleArtistChange}
               options={artists.map(a => ({ value: a.id, label: a.name }))}
-              placeholder="Selecione um artista"
-              searchPlaceholder="Buscar artista..."
-              emptyText="Nenhum artista encontrado."
-              onAddNew={() => setShowAddArtist(true)}
-              addNewLabel="Adicionar novo artista"
+              placeholder="Digite o nome do artista"
+              onAddNew={(text) => { setPendingArtistName(text); setShowAddArtist(true); }}
+              addNewLabel="Cadastrar"
             />
           </div>
 
@@ -210,11 +210,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
               value={form.cityId}
               onValueChange={v => setForm(p => ({ ...p, cityId: v }))}
               options={cities.map(c => ({ value: c.id, label: `${c.name} - ${c.state}` }))}
-              placeholder="Selecione uma cidade"
-              searchPlaceholder="Buscar cidade..."
-              emptyText="Nenhuma cidade encontrada."
-              onAddNew={() => setShowAddCity(true)}
-              addNewLabel="Adicionar nova cidade"
+              placeholder="Digite o nome da cidade"
+              onAddNew={(text) => { setPendingCityName(text); setShowAddCity(true); }}
+              addNewLabel="Cadastrar"
             />
           </div>
 
@@ -335,11 +333,13 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         open={showAddArtist}
         onOpenChange={setShowAddArtist}
         onCreated={(id) => handleArtistChange(id)}
+        initialName={pendingArtistName}
       />
       <QuickAddCityDialog
         open={showAddCity}
         onOpenChange={setShowAddCity}
         onCreated={(id) => setForm(p => ({ ...p, cityId: id }))}
+        initialName={pendingCityName}
       />
     </Sheet>
   );

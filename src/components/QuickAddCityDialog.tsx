@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,13 +9,21 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated?: (id: string) => void;
+  initialName?: string;
 }
 
-export function QuickAddCityDialog({ open, onOpenChange, onCreated }: Props) {
+export function QuickAddCityDialog({ open, onOpenChange, onCreated, initialName = "" }: Props) {
   const { addCity } = useAppContext();
   const [name, setName] = useState("");
   const [state, setState] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setName(initialName);
+      setState("");
+    }
+  }, [open, initialName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
