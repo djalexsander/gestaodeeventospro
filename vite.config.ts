@@ -5,9 +5,11 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  const isTauri = process.env.TAURI_PLATFORM === "true";
+  // 🔥 DETECÇÃO CORRETA DO TAURI
+  const isTauri = !!process.env.TAURI_PLATFORM;
 
   return {
+    // ✅ ESSENCIAL PARA TAURI
     base: "./",
 
     server: {
@@ -18,13 +20,18 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    build: {
+      outDir: "dist",
+      assetsDir: "assets",
+    },
+
     plugins: [
       react(),
 
-      // Só no dev
+      // ✅ Apenas desenvolvimento
       mode === "development" && componentTagger(),
 
-      // 🔥 PWA NÃO roda no Tauri (corrige o bug dos /assets)
+      // ✅ PWA SOMENTE FORA DO TAURI
       !isTauri &&
         VitePWA({
           registerType: "prompt",
@@ -37,8 +44,6 @@ export default defineConfig(({ mode }) => {
             theme_color: "#6366f1",
             background_color: "#0f172a",
             display: "standalone",
-
-            // 🔥 IMPORTANTE
             start_url: "./",
 
             icons: [
@@ -48,12 +53,12 @@ export default defineConfig(({ mode }) => {
                 type: "image/png",
               },
               {
-                src: "pwa-192x192.png",
+                src: "pwa-512x512.png",
                 sizes: "512x512",
                 type: "image/png",
               },
               {
-                src: "pwa-192x192.png",
+                src: "pwa-512x512.png",
                 sizes: "512x512",
                 type: "image/png",
                 purpose: "maskable",
@@ -63,7 +68,6 @@ export default defineConfig(({ mode }) => {
 
           workbox: {
             globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-
             runtimeCaching: [
               {
                 urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
