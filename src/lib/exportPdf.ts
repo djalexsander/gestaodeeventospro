@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { EventItem, Artist, City } from '@/types';
+import { savePdf } from './savePdf';
 
 interface ExportParams {
   events: EventItem[];
