@@ -29,9 +29,9 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
     onOpenChange(false);
   };
 
-  const handleExportPdf = () => {
+  const handleExportPdf = async () => {
     const rider = event.riderId ? getRiderById(event.riderId) : null;
-    exportSingleEventPdf({
+    await exportSingleEventPdf({
       event,
       artistName: artist?.name || '—',
       cityLabel: city ? `${city.name} - ${city.state}` : '—',

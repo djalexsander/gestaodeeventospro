@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { EventItem, Artist, City } from '@/types';
+import { savePdf } from './savePdf';
 
 interface ExportParams {
   events: EventItem[];
@@ -11,7 +12,7 @@ interface ExportParams {
   getCityById: (id: string) => City | undefined;
 }
 
-export function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
+export async function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
   const year = month.getFullYear();
   const m = month.getMonth();
   
@@ -86,7 +87,11 @@ export function exportMonthlyPdf({ events, month, getArtistById, getCityById }: 
   doc.setFont('helvetica', 'bold');
   doc.text(`Total: ${monthEvents.length} evento(s)  |  ✅ Confirmados: ${confirmed}  |  ⏳ Pendentes: ${pending}  |  ❌ Cancelados: ${cancelled}`, 14, finalY + 10);
 
-  doc.save(`agenda-${format(month, 'yyyy-MM')}.pdf`);
+  await savePdf({
+    doc,
+    tipo: 'agenda',
+    data: format(month, 'yyyy-MM-dd'),
+  });
 }
 
 interface ExportSingleEventParams {
@@ -96,7 +101,7 @@ interface ExportSingleEventParams {
   riderDetails?: { equipment: string; soundSystem: string; microphones: string; monitors: string } | null;
 }
 
-export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
+export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
   const doc = new jsPDF();
   const dateFormatted = format(new Date(event.date + 'T00:00:00'), 'dd/MM/yyyy');
 
@@ -184,5 +189,11 @@ export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetail
     });
   }
 
-  doc.save(`evento-${event.name.replace(/\s+/g, '-').toLowerCase()}-${dateFormatted.replace(/\//g, '-')}.pdf`);
+  await savePdf({
+    doc,
+    tipo: 'evento',
+    evento: event.name,
+    cidade: cityLabel,
+    data: event.date,
+  });
 }
