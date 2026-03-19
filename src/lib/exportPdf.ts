@@ -75,7 +75,7 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
     });
 
     autoTable(doc, {
-      startY: 38,
+      startY: tableStartY,
       head: [['Data', 'Evento', 'Artista', 'Cidade', 'Local', 'Montagem', 'Show', 'Status']],
       body: tableData,
       styles: { fontSize: 9, cellPadding: 3 },
