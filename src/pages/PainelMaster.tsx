@@ -18,26 +18,6 @@ export default function PainelMaster() {
 
   if (!isAdminMaster) return <Navigate to="/" replace />;
 
-  const handleReset = async () => {
-    if (confirmText !== 'RESETAR') return;
-    setResetting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('reset-system', {
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      toast.success('Sistema resetado com sucesso!');
-      setShowConfirm(false);
-      setConfirmText('');
-      // Reload to refresh all contexts
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err: any) {
-      toast.error(err.message || 'Erro ao resetar sistema');
-    } finally {
-      setResetting(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
