@@ -13,7 +13,7 @@ interface ExportParams {
   companyName?: string;
 }
 
-export async function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
+export async function exportMonthlyPdf({ events, month, getArtistById, getCityById, companyName }: ExportParams) {
   const year = month.getFullYear();
   const m = month.getMonth();
   
@@ -32,15 +32,27 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text('Gestão de Eventos Pro', 14, 18);
+
+  let headerY = 18;
+  if (companyName) {
+    headerY += 7;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 140, 180);
+    doc.text(companyName, 14, headerY);
+    doc.setTextColor(0);
+  }
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Agenda — ${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}`, 14, 26);
+  doc.text(`Agenda — ${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}`, 14, headerY + 8);
 
   doc.setFontSize(8);
   doc.setTextColor(130);
-  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 32);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, headerY + 14);
   doc.setTextColor(0);
+
+  const tableStartY = headerY + 20;
 
   if (monthEvents.length === 0) {
     doc.setFontSize(12);
