@@ -20,6 +20,7 @@ import PainelMaster from "./pages/PainelMaster";
 import Configuracoes from "./pages/Configuracoes";
 import Login from "./pages/Login";
 import SetPassword from "./pages/SetPassword";
+import PrimeiroAcesso from "./pages/PrimeiroAcesso";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/set-password" element={<SetPassword />} />
+      <Route path="/primeiro-acesso" element={<PrimeiroAcesso />} />
       {/* Default route: redirect based on role */}
       <Route path="/" element={<ProtectedRoute><AppLayout><DefaultRedirect /></AppLayout></ProtectedRoute>} />
       {/* Company routes — blocked for admin_master */}
