@@ -87,7 +87,11 @@ export function exportMonthlyPdf({ events, month, getArtistById, getCityById }: 
   doc.setFont('helvetica', 'bold');
   doc.text(`Total: ${monthEvents.length} evento(s)  |  ✅ Confirmados: ${confirmed}  |  ⏳ Pendentes: ${pending}  |  ❌ Cancelados: ${cancelled}`, 14, finalY + 10);
 
-  doc.save(`agenda-${format(month, 'yyyy-MM')}.pdf`);
+  await savePdf({
+    doc,
+    tipo: 'agenda',
+    data: format(month, 'yyyy-MM-dd'),
+  });
 }
 
 interface ExportSingleEventParams {
