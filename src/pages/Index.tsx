@@ -137,9 +137,9 @@ export default function Dashboard() {
                 <Button
                   className="w-full"
                   size="sm"
-                  onClick={() => {
+                  onClick={async () => {
                     const exportDate = setYear(setMonth(new Date(), Number(exportMonth)), Number(exportYear));
-                    exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
+                    await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
                   }}
                 >
                   <FileDown className="h-4 w-4 mr-2" /> Gerar PDF
