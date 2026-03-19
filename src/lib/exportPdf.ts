@@ -155,7 +155,7 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   };
   const color = statusColors[event.status] || [99, 102, 241];
   doc.setTextColor(...color);
-  doc.text(event.status, 196, 40, { align: 'right' });
+  doc.text(event.status, 196, titleY, { align: 'right' });
   doc.setTextColor(0);
 
   // Details table
