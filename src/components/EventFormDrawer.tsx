@@ -33,6 +33,8 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
   const [showAddArtist, setShowAddArtist] = useState(false);
   const [showAddCity, setShowAddCity] = useState(false);
+  const [pendingArtistName, setPendingArtistName] = useState("");
+  const [pendingCityName, setPendingCityName] = useState("");
   const [allStaff, setAllStaff] = useState<StaffMember[]>([]);
   const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
 
