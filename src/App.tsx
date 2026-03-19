@@ -20,6 +20,7 @@ import PainelMaster from "./pages/PainelMaster";
 import Configuracoes from "./pages/Configuracoes";
 import Login from "./pages/Login";
 import SetPassword from "./pages/SetPassword";
+import PrimeiroAcesso from "./pages/PrimeiroAcesso";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
