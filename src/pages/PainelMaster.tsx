@@ -1,30 +1,12 @@
-import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCompany } from '@/context/CompanyContext';
 import { Navigate } from 'react-router-dom';
-import { Crown, Building2, Users, Activity, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { Crown, Building2, Users, Activity, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 export default function PainelMaster() {
-  const { isAdminMaster, loading: authLoading, session } = useAuth();
+  const { isAdminMaster, loading: authLoading } = useAuth();
   const { companies } = useCompany();
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmText, setConfirmText] = useState('');
-  const [resetting, setResetting] = useState(false);
 
   if (authLoading) {
     return (
