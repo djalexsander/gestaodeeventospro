@@ -42,11 +42,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [hasUpdates, setHasUpdates] = useState(false);
   const { activeCompanyId } = useCompany();
-  const { isAdminMaster } = useAuth();
+  const { user, isAdminMaster, loading: authLoading } = useAuth();
 
   const fetchAll = useCallback(async () => {
-    // Admin master always sees empty data (preview mode)
-    if (isAdminMaster) {
+    if (authLoading) return;
+
+    if (!user || isAdminMaster) {
       setCities([]);
       setArtists([]);
       setRiders([]);
@@ -94,11 +95,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       departureTime: (e as any).departure_time || '', notes: e.notes,
       staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
     })));
+
     setLoading(false);
     setHasUpdates(false);
-  }, [activeCompanyId, isAdminMaster]);
+  }, [activeCompanyId, authLoading, isAdminMaster, user]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => { void fetchAll(); }, [fetchAll]);
 
   useEffect(() => {
     const channel = supabase

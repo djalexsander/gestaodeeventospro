@@ -25,42 +25,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchRole = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
-    setRole((data?.role as AppRole) || 'user');
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+      setRole((data?.role as AppRole) || 'user');
+    } catch (error) {
+      console.error('Failed to fetch user role', error);
+      setRole('user');
+    }
   }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    // First, restore session from storage
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchRole(session.user.id);
-      }
+    const loadRole = async (userId: string) => {
+      await fetchRole(userId);
       if (mounted) setLoading(false);
-    });
+    };
 
-    // Then listen for subsequent auth changes (login/logout/token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // First, restore session from storage
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          await fetchRole(session.user.id);
-        }
+        void loadRole(session.user.id);
       } else {
         setRole(null);
+        setLoading(false);
       }
-      if (mounted) setLoading(false);
+    });
+
+    // Important: don't await other Supabase calls inside onAuthStateChange
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (!session?.user) {
+        setRole(null);
+        setLoading(false);
+        return;
+      }
+
+      if (event === 'SIGNED_IN') {
+        setLoading(true);
+      }
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        window.setTimeout(() => {
+          void loadRole(session.user.id);
+        }, 0);
+      }
     });
 
     return () => {
