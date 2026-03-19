@@ -72,7 +72,7 @@ export function CompanyUsers() {
 
   const openEdit = (u: CompanyUser) => {
     setEditingUser(u);
-    setForm({ name: u.name, email: u.email, password: "", role: u.role });
+    setForm({ name: u.name, email: u.email, role: u.role });
     setDialogOpen(true);
   };
 
