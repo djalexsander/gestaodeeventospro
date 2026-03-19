@@ -12,7 +12,7 @@ interface ExportParams {
   getCityById: (id: string) => City | undefined;
 }
 
-export function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
+export async function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
   const year = month.getFullYear();
   const m = month.getMonth();
   
