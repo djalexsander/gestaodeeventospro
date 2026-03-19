@@ -1,4 +1,5 @@
 import { useAppContext } from "@/context/AppContext";
+import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
