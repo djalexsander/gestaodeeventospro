@@ -108,7 +108,7 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   // Header
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Estação Mix Eventos', 14, 18);
+  doc.text('Gestão de Eventos Pro', 14, 18);
 
   doc.setFontSize(8);
   doc.setTextColor(130);
