@@ -182,7 +182,7 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   }
 
   autoTable(doc, {
-    startY: 48,
+    startY: titleY + 8,
     body: details,
     theme: 'grid',
     styles: { fontSize: 10, cellPadding: 4 },
