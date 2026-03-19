@@ -10,6 +10,7 @@ interface ExportParams {
   month: Date;
   getArtistById: (id: string) => Artist | undefined;
   getCityById: (id: string) => City | undefined;
+  companyName?: string;
 }
 
 export async function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
