@@ -73,7 +73,11 @@ export function AppSidebar() {
               <span className="font-heading text-sm font-bold text-sidebar-foreground truncate">
                 {platformName}
               </span>
-              <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
+              {!isAdminMaster && activeCompany ? (
+                <span className="text-xs text-sidebar-foreground/60 truncate">{activeCompany.name}</span>
+              ) : (
+                <span className="text-xs text-sidebar-foreground/60">Gestão de Eventos</span>
+              )}
             </div>
           )}
         </div>
