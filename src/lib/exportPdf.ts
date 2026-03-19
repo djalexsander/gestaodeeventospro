@@ -140,9 +140,10 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   doc.setTextColor(0);
 
   // Event title
+  const titleY = headerY + 22;
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text(event.name, 14, 40);
+  doc.text(event.name, 14, titleY);
 
   // Status on the right side
   doc.setFontSize(10);
