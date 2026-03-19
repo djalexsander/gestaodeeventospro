@@ -189,5 +189,11 @@ export function exportSingleEventPdf({ event, artistName, cityLabel, riderDetail
     });
   }
 
-  doc.save(`evento-${event.name.replace(/\s+/g, '-').toLowerCase()}-${dateFormatted.replace(/\//g, '-')}.pdf`);
+  await savePdf({
+    doc,
+    tipo: 'evento',
+    evento: event.name,
+    cidade: cityLabel,
+    data: event.date,
+  });
 }
