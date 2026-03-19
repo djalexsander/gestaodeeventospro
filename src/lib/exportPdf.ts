@@ -56,7 +56,7 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
 
   if (monthEvents.length === 0) {
     doc.setFontSize(12);
-    doc.text('Nenhum evento neste mês.', 14, 50);
+    doc.text('Nenhum evento neste mês.', 14, tableStartY + 12);
   } else {
     const tableData = monthEvents.map(ev => {
       const artist = getArtistById(ev.artistId);
