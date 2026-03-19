@@ -112,9 +112,10 @@ interface ExportSingleEventParams {
   artistName: string;
   cityLabel: string;
   riderDetails?: { equipment: string; soundSystem: string; microphones: string; monitors: string } | null;
+  companyName?: string;
 }
 
-export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
+export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails, companyName }: ExportSingleEventParams) {
   const doc = new jsPDF();
   const dateFormatted = format(new Date(event.date + 'T00:00:00'), 'dd/MM/yyyy');
 
@@ -123,9 +124,19 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   doc.setFont('helvetica', 'bold');
   doc.text('Gestão de Eventos Pro', 14, 18);
 
+  let headerY = 18;
+  if (companyName) {
+    headerY += 7;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 140, 180);
+    doc.text(companyName, 14, headerY);
+    doc.setTextColor(0);
+  }
+
   doc.setFontSize(8);
   doc.setTextColor(130);
-  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 25);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, headerY + 7);
   doc.setTextColor(0);
 
   // Event title
