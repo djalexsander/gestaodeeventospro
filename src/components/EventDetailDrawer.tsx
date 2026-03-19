@@ -43,6 +43,7 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
         microphones: rider.microphones || '',
         monitors: rider.monitors || '',
       } : null,
+      companyName: activeCompany?.name,
     });
   };
 
