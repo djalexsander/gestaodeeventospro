@@ -15,13 +15,13 @@ interface CompanyContextType {
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
-  const { user, isAdminMaster } = useAuth();
+  const { user, isAdminMaster, loading: authLoading } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchCompanies = useCallback(async () => {
-    if (!user) { setLoading(false); return; }
+    if (!user || authLoading) { setLoading(false); return; }
     setLoading(true);
 
     if (isAdminMaster) {
@@ -40,9 +40,13 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       }
     }
     setLoading(false);
-  }, [user, isAdminMaster]);
+  }, [user, isAdminMaster, authLoading]);
 
-  useEffect(() => { fetchCompanies(); }, [fetchCompanies]);
+  useEffect(() => {
+    if (!authLoading) {
+      fetchCompanies();
+    }
+  }, [fetchCompanies, authLoading]);
 
   const activeCompany = companies.find(c => c.id === activeCompanyId) || null;
 
