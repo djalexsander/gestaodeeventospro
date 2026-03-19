@@ -30,15 +30,20 @@ serve(async (req) => {
       });
     }
 
-    // Find user by email
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    // Find user by email using admin API
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
     if (listError) {
       return new Response(JSON.stringify({ error: listError.message }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const targetUser = users.find((u) => u.email === email.toLowerCase().trim());
+    const normalizedEmail = email.toLowerCase().trim();
+    const targetUser = users.find((u) => u.email?.toLowerCase() === normalizedEmail);
 
     if (!targetUser) {
       return new Response(JSON.stringify({ error: "Email não encontrado. Verifique com o administrador." }), {
