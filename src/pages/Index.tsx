@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, setMonth, setYear } from "date-fns";
+import { format, setMonth, setYear, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
