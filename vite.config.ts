@@ -5,9 +5,11 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
+  // 🔥 Detecta se é build para Tauri
   const isTauri = process.env.TAURI_ENV === "true";
 
   return {
+    // 🔥 ESSENCIAL para Tauri
     base: "./",
 
     server: {
@@ -21,9 +23,10 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
 
+      // Só no dev
       mode === "development" && componentTagger(),
 
-      // 🔥 PWA só roda no web, NÃO no Tauri
+      // 🔥 PWA NÃO roda no Tauri (corrige o bug dos /assets)
       !isTauri &&
         VitePWA({
           registerType: "prompt",
@@ -36,6 +39,8 @@ export default defineConfig(({ mode }) => {
             theme_color: "#6366f1",
             background_color: "#0f172a",
             display: "standalone",
+
+            // 🔥 IMPORTANTE
             start_url: "./",
 
             icons: [
@@ -54,6 +59,24 @@ export default defineConfig(({ mode }) => {
                 sizes: "512x512",
                 type: "image/png",
                 purpose: "maskable",
+              },
+            ],
+          },
+
+          workbox: {
+            globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+
+            runtimeCaching: [
+              {
+                urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+                handler: "NetworkFirst",
+                options: {
+                  cacheName: "supabase-api",
+                  expiration: {
+                    maxEntries: 50,
+                    maxAgeSeconds: 300,
+                  },
+                },
               },
             ],
           },
