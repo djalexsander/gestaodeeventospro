@@ -64,6 +64,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/set-password" element={<SetPassword />} />
+      <Route path="/primeiro-acesso" element={<PrimeiroAcesso />} />
       {/* Default route: redirect based on role */}
       <Route path="/" element={<ProtectedRoute><AppLayout><DefaultRedirect /></AppLayout></ProtectedRoute>} />
       {/* Company routes — blocked for admin_master */}
