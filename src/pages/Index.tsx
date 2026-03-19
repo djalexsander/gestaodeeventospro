@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { format, setMonth, setYear, startOfMonth, endOfMonth, isSameMonth } from "date-fns";
+import { format, setMonth, setYear, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export default function Dashboard() {
     return result.sort((a, b) => a.date.localeCompare(b.date));
   }, [events, filterCity, filterArtist]);
 
-  // Day events for the daily agenda (no filter, shows all for selected day)
+  // Day events for the daily agenda
   let dayEvents = events.filter(e => e.date === dateStr);
   if (filterCity !== "all") dayEvents = dayEvents.filter(e => e.cityId === filterCity);
   if (filterArtist !== "all") dayEvents = dayEvents.filter(e => e.artistId === filterArtist);
@@ -249,14 +249,12 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* Main Grid */}
+      {/* Main Grid: Calendar + Daily Agenda */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar */}
         <div className="lg:col-span-2">
           <EventCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
         </div>
 
-        {/* Daily Agenda */}
         <div className="bg-card rounded-xl border p-4 md:p-6">
           <h3 className="font-heading text-base font-bold mb-4 capitalize">
             {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
@@ -294,9 +292,20 @@ export default function Dashboard() {
                       <div className="flex items-start justify-between mb-1">
                         <h4 className="text-sm font-semibold truncate">{ev.name}</h4>
                         <StatusBadge status={ev.status} />
+                      </div>
+                      <p className="text-xs text-muted-foreground">{artist?.name || "—"}</p>
+                      <p className="text-xs text-muted-foreground">{city?.name || "—"} • {ev.venue}</p>
+                      <p className="text-xs text-muted-foreground mt-1">🕐 {ev.showTime || "—"}</p>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Monthly Agenda */}
+      {/* Monthly Agenda - below calendar */}
       <div className="bg-card rounded-xl border p-4 md:p-6">
         <h3 className="font-heading text-base font-bold mb-1 capitalize">
           Agenda de {format(selectedDate, "MMMM yyyy", { locale: ptBR })}
@@ -346,17 +355,6 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </div>
-                      <p className="text-xs text-muted-foreground">{artist?.name || "—"}</p>
-                      <p className="text-xs text-muted-foreground">{city?.name || "—"} • {ev.venue}</p>
-                      <p className="text-xs text-muted-foreground mt-1">🕐 {ev.showTime || "—"}</p>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
       </div>
 
       <EventFormDrawer
