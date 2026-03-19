@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppContext } from "@/context/AppContext";
+import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
 import { EventCalendar } from "@/components/EventCalendar";
@@ -18,6 +19,7 @@ import { exportMonthlyPdf } from "@/lib/exportPdf";
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
   const { isAdmin } = useAuth();
+  const { activeCompany } = useCompany();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -139,7 +141,7 @@ export default function Dashboard() {
                   size="sm"
                   onClick={async () => {
                     const exportDate = setYear(setMonth(new Date(), Number(exportMonth)), Number(exportYear));
-                    await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
+                    await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById, companyName: activeCompany?.name });
                   }}
                 >
                   <FileDown className="h-4 w-4 mr-2" /> Gerar PDF

@@ -1,4 +1,5 @@
 import { useAppContext } from "@/context/AppContext";
+import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
 import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -17,6 +18,7 @@ interface EventDetailDrawerProps {
 export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDetailDrawerProps) {
   const { getArtistById, getCityById, getRiderById, deleteEvent } = useAppContext();
   const { isAdmin } = useAuth();
+  const { activeCompany } = useCompany();
 
   if (!event) return null;
 
@@ -41,6 +43,7 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
         microphones: rider.microphones || '',
         monitors: rider.monitors || '',
       } : null,
+      companyName: activeCompany?.name,
     });
   };
 

@@ -10,9 +10,10 @@ interface ExportParams {
   month: Date;
   getArtistById: (id: string) => Artist | undefined;
   getCityById: (id: string) => City | undefined;
+  companyName?: string;
 }
 
-export async function exportMonthlyPdf({ events, month, getArtistById, getCityById }: ExportParams) {
+export async function exportMonthlyPdf({ events, month, getArtistById, getCityById, companyName }: ExportParams) {
   const year = month.getFullYear();
   const m = month.getMonth();
   
@@ -31,19 +32,31 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text('Gestão de Eventos Pro', 14, 18);
+
+  let headerY = 18;
+  if (companyName) {
+    headerY += 7;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 140, 180);
+    doc.text(companyName, 14, headerY);
+    doc.setTextColor(0);
+  }
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Agenda — ${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}`, 14, 26);
+  doc.text(`Agenda — ${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}`, 14, headerY + 8);
 
   doc.setFontSize(8);
   doc.setTextColor(130);
-  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 32);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, headerY + 14);
   doc.setTextColor(0);
+
+  const tableStartY = headerY + 20;
 
   if (monthEvents.length === 0) {
     doc.setFontSize(12);
-    doc.text('Nenhum evento neste mês.', 14, 50);
+    doc.text('Nenhum evento neste mês.', 14, tableStartY + 12);
   } else {
     const tableData = monthEvents.map(ev => {
       const artist = getArtistById(ev.artistId);
@@ -62,7 +75,7 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
     });
 
     autoTable(doc, {
-      startY: 38,
+      startY: tableStartY,
       head: [['Data', 'Evento', 'Artista', 'Cidade', 'Local', 'Montagem', 'Show', 'Status']],
       body: tableData,
       styles: { fontSize: 9, cellPadding: 3 },
@@ -99,9 +112,10 @@ interface ExportSingleEventParams {
   artistName: string;
   cityLabel: string;
   riderDetails?: { equipment: string; soundSystem: string; microphones: string; monitors: string } | null;
+  companyName?: string;
 }
 
-export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails }: ExportSingleEventParams) {
+export async function exportSingleEventPdf({ event, artistName, cityLabel, riderDetails, companyName }: ExportSingleEventParams) {
   const doc = new jsPDF();
   const dateFormatted = format(new Date(event.date + 'T00:00:00'), 'dd/MM/yyyy');
 
@@ -110,15 +124,26 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   doc.setFont('helvetica', 'bold');
   doc.text('Gestão de Eventos Pro', 14, 18);
 
+  let headerY = 18;
+  if (companyName) {
+    headerY += 7;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 140, 180);
+    doc.text(companyName, 14, headerY);
+    doc.setTextColor(0);
+  }
+
   doc.setFontSize(8);
   doc.setTextColor(130);
-  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 25);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, headerY + 7);
   doc.setTextColor(0);
 
   // Event title
+  const titleY = headerY + 22;
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text(event.name, 14, 40);
+  doc.text(event.name, 14, titleY);
 
   // Status on the right side
   doc.setFontSize(10);
@@ -130,7 +155,7 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   };
   const color = statusColors[event.status] || [99, 102, 241];
   doc.setTextColor(...color);
-  doc.text(event.status, 196, 40, { align: 'right' });
+  doc.text(event.status, 196, titleY, { align: 'right' });
   doc.setTextColor(0);
 
   // Details table
@@ -157,7 +182,7 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   }
 
   autoTable(doc, {
-    startY: 48,
+    startY: titleY + 8,
     body: details,
     theme: 'grid',
     styles: { fontSize: 10, cellPadding: 4 },
