@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,17 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated?: (id: string) => void;
+  initialName?: string;
 }
 
-export function QuickAddArtistDialog({ open, onOpenChange, onCreated }: Props) {
+export function QuickAddArtistDialog({ open, onOpenChange, onCreated, initialName = "" }: Props) {
   const { addArtist } = useAppContext();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) setName(initialName);
+  }, [open, initialName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

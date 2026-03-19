@@ -10,7 +10,7 @@ interface SearchableSelectProps {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyText?: string;
-  onAddNew?: () => void;
+  onAddNew?: (searchText: string) => void;
   addNewLabel?: string;
 }
 
@@ -18,11 +18,11 @@ export function SearchableSelect({
   value,
   onValueChange,
   options,
-  placeholder = "Selecione...",
+  placeholder = "Digite para buscar...",
   searchPlaceholder = "Digite para buscar...",
   emptyText = "Nenhum resultado.",
   onAddNew,
-  addNewLabel = "Adicionar novo",
+  addNewLabel = "Cadastrar",
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -34,7 +34,6 @@ export function SearchableSelect({
     [options, value]
   );
 
-  // When value changes externally, update search text
   useEffect(() => {
     if (!open) {
       setSearch(selectedLabel);
@@ -47,7 +46,12 @@ export function SearchableSelect({
     return options.filter((o) => o.label.toLowerCase().includes(lower));
   }, [options, search]);
 
-  // Close on outside click
+  const hasExactMatch = useMemo(() => {
+    if (!search.trim()) return true;
+    const lower = search.toLowerCase().trim();
+    return options.some((o) => o.label.toLowerCase() === lower);
+  }, [options, search]);
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -104,20 +108,20 @@ export function SearchableSelect({
               {option.label}
             </button>
           ))}
-          {onAddNew && (
+          {onAddNew && !hasExactMatch && search.trim() && (
             <>
               {filtered.length > 0 && <div className="border-t border-border" />}
               <button
                 type="button"
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left text-primary"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors text-left text-primary font-medium"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   setOpen(false);
-                  onAddNew();
+                  onAddNew(search.trim());
                 }}
               >
                 <Plus className="h-4 w-4" />
-                {addNewLabel}
+                {addNewLabel} "{search.trim()}"
               </button>
             </>
           )}
