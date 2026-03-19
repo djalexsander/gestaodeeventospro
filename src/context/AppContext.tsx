@@ -103,17 +103,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void fetchAll(); }, [fetchAll]);
 
   useEffect(() => {
+    const handleChange = () => { void fetchAll(); };
     const channel = supabase
       .channel('data-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cities' }, () => setHasUpdates(true))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'artists' }, () => setHasUpdates(true))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'technical_riders' }, () => setHasUpdates(true))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => setHasUpdates(true))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_members' }, () => setHasUpdates(true))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_staff' }, () => setHasUpdates(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cities' }, handleChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'artists' }, handleChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'technical_riders' }, handleChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, handleChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_members' }, handleChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_staff' }, handleChange)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchAll]);
 
   const refreshData = useCallback(async () => { await fetchAll(); }, [fetchAll]);
 
