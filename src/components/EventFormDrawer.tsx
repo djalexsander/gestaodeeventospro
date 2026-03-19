@@ -333,11 +333,13 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         open={showAddArtist}
         onOpenChange={setShowAddArtist}
         onCreated={(id) => handleArtistChange(id)}
+        initialName={pendingArtistName}
       />
       <QuickAddCityDialog
         open={showAddCity}
         onOpenChange={setShowAddCity}
         onCreated={(id) => setForm(p => ({ ...p, cityId: id }))}
+        initialName={pendingCityName}
       />
     </Sheet>
   );
