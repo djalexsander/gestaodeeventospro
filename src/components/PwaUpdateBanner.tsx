@@ -10,6 +10,7 @@ function PwaUpdateBannerInner() {
 
   useEffect(() => {
     let cancelled = false;
+    // @ts-ignore - virtual module provided by vite-plugin-pwa at runtime
     import("virtual:pwa-register").then(({ registerSW }) => {
       if (cancelled) return;
       const update = registerSW({
