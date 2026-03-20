@@ -1,11 +1,11 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  const isTauri = !!process.env.TAURI_PLATFORM;
+  const isTauri = process.env.TAURI_PLATFORM === "true";
 
   const plugins = [react(), mode === "development" && componentTagger()].filter(Boolean);
 
@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: isTauri ? "./" : "/",
+    base: isTauri ? "./" : "/", // 🔥 ESSENCIAL
 
     server: {
       host: "::",
