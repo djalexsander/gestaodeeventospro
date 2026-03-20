@@ -96,7 +96,7 @@ export default function Login() {
               onClick={async () => {
                 if (!email) { toast.error('Preencha o email primeiro'); return; }
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/set-password`,
+                  redirectTo: `${window.location.origin}/#/set-password`,
                 });
                 if (error) toast.error(error.message);
                 else toast.success('Email de recuperação enviado!');
