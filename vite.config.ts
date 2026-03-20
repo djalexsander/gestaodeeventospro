@@ -7,10 +7,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(({ mode }) => {
   const isTauri = !!process.env.TAURI_PLATFORM;
 
-  const plugins = [
-    react(),
-    mode === "development" && componentTagger(),
-  ].filter(Boolean);
+  const plugins = [react(), mode === "development" && componentTagger()].filter(Boolean);
 
   if (!isTauri) {
     plugins.push(
@@ -60,12 +57,13 @@ export default defineConfig(({ mode }) => {
             },
           ],
         },
-      })
+      }),
     );
   }
 
   return {
-    base: "./",
+    base: isTauri ? "./" : "/", // 🔥 CORREÇÃO PRINCIPAL
+
     server: {
       host: "::",
       port: 8080,
@@ -73,11 +71,14 @@ export default defineConfig(({ mode }) => {
         overlay: false,
       },
     },
+
     build: {
       outDir: "dist",
       assetsDir: "assets",
     },
+
     plugins,
+
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
