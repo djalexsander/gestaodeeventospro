@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  const isTauri = process.env.TAURI_PLATFORM === "true";
+  const isTauri = !!process.env.TAURI_PLATFORM;
 
   const plugins = [react(), mode === "development" && componentTagger()].filter(Boolean);
 
