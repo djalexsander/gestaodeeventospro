@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: isTauri ? "./" : "/", // 🔥 CORREÇÃO PRINCIPAL
+    base: isTauri ? "./" : "/", //
 
     server: {
       host: "::",
