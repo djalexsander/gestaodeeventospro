@@ -75,6 +75,17 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: "dist",
       assetsDir: "assets",
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ["react", "react-dom", "react-router-dom"],
+            supabase: ["@supabase/supabase-js"],
+            ui: ["@radix-ui/react-dialog", "@radix-ui/react-popover", "@radix-ui/react-select", "@radix-ui/react-tabs"],
+            charts: ["recharts", "d3-shape", "d3-scale", "d3-interpolate"],
+            motion: ["framer-motion"],
+          },
+        },
+      },
     },
 
     plugins,

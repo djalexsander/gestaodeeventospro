@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const { session, loading, signIn } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +86,7 @@ export default function Login() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                window.location.href = '/primeiro-acesso';
+                navigate('/primeiro-acesso');
               }}
             >
               Primeiro Acesso
@@ -95,7 +96,7 @@ export default function Login() {
               onClick={async () => {
                 if (!email) { toast.error('Preencha o email primeiro'); return; }
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/set-password`,
+                  redirectTo: `${window.location.origin}/#/set-password`,
                 });
                 if (error) toast.error(error.message);
                 else toast.success('Email de recuperação enviado!');
