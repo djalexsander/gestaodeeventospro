@@ -1,34 +1,36 @@
 import { isWeb } from "@/lib/platform";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 
-/**
- * Wrapper that only loads the PWA registration logic when running
- * as a web app (not inside Tauri).
- */
 function PwaUpdateBannerInner() {
   const [dismissed, setDismissed] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const [updateSW, setUpdateSW] = useState<((reloadPage?: boolean) => Promise<void>) | null>(null);
 
-  // Dynamically import the PWA register hook only at render time
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useRegisterSW } = require("virtual:pwa-register/react");
-
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegisteredSW(_swUrl: string, registration: ServiceWorkerRegistration | undefined) {
-      if (registration) {
-        setInterval(() => {
-          registration.update();
-        }, 60 * 1000);
-      }
-    },
-    onRegisterError(error: any) {
-      console.error("SW registration error:", error);
-    },
-  });
+  useEffect(() => {
+    let cancelled = false;
+    import("virtual:pwa-register").then(({ registerSW }) => {
+      if (cancelled) return;
+      const update = registerSW({
+        onNeedRefresh() {
+          setNeedRefresh(true);
+        },
+        onRegisteredSW(_swUrl: string, registration: ServiceWorkerRegistration | undefined) {
+          if (registration) {
+            setInterval(() => registration.update(), 60_000);
+          }
+        },
+        onRegisterError(error: any) {
+          console.error("SW registration error:", error);
+        },
+      });
+      setUpdateSW(() => update);
+    }).catch(() => {
+      // PWA plugin not available (e.g. Tauri build)
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   if (!needRefresh || dismissed) return null;
 
@@ -42,7 +44,7 @@ function PwaUpdateBannerInner() {
         <Button
           size="sm"
           variant="secondary"
-          onClick={() => updateServiceWorker(true)}
+          onClick={() => updateSW?.(true)}
           className="gap-2 font-semibold"
         >
           <RefreshCw className="h-3.5 w-3.5" />
@@ -62,8 +64,6 @@ function PwaUpdateBannerInner() {
 }
 
 export function PwaUpdateBanner() {
-  // Skip entirely when running inside Tauri
   if (!isWeb()) return null;
-
   return <PwaUpdateBannerInner />;
 }
