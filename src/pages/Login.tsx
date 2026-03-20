@@ -86,7 +86,7 @@ export default function Login() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                window.location.href = '/primeiro-acesso';
+                navigate('/primeiro-acesso');
               }}
             >
               Primeiro Acesso
