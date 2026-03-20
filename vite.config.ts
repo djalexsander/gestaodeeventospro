@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  const isTauri = !!process.env.TAURI_PLATFORM;
+  const isTauri = process.env.TAURI_ENV_PLATFORM === "windows" || process.env.TAURI_ENV_PLATFORM === "darwin";
 
   const plugins = [react(), mode === "development" && componentTagger()].filter(Boolean);
 
@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: isTauri ? "./" : "/", // 🔥 FORÇADO
+    base: "./", // 🔥 FORÇADO PARA TAURI
 
     server: {
       host: "::",
