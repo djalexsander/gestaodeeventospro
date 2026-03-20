@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const { session, loading, signIn } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
