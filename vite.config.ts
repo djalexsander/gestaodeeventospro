@@ -64,6 +64,10 @@ export default defineConfig(({ mode }) => {
   return {
     base: "./", // 🔥 FORÇADO PARA TAURI
 
+    define: {
+      __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "1.0.1"),
+    },
+
     server: {
       host: "::",
       port: 8080,
