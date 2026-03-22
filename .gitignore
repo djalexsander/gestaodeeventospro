@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Tauri / chaves / build
+~/.tauri/
+src-tauri/target/
+src-tauri/2
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
