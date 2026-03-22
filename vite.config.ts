@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { readFileSync } from "fs";
+
+const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 export default defineConfig(({ mode }) => {
   const isTauri = process.env.TAURI_ENV_PLATFORM === "windows" || process.env.TAURI_ENV_PLATFORM === "darwin";
@@ -65,7 +68,7 @@ export default defineConfig(({ mode }) => {
     base: "./", // 🔥 FORÇADO PARA TAURI
 
     define: {
-      __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "1.0.1"),
+      __APP_VERSION__: JSON.stringify(pkg.version),
     },
 
     server: {
