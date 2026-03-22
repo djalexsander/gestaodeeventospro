@@ -164,7 +164,6 @@ export function AppSidebar() {
         {!collapsed && user && (
           <div className="space-y-0.5">
             <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
-            <p className="text-[10px] text-sidebar-foreground/40">v{__APP_VERSION__}</p>
           </div>
         )}
         <Button
