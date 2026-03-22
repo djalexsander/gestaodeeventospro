@@ -110,6 +110,8 @@ export default function Login() {
             </p>
           </div>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground">v{__APP_VERSION__}</p>
       </div>
     </div>
   );
