@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => {
     base: "./", // 🔥 FORÇADO PARA TAURI
 
     define: {
-      __APP_VERSION__: JSON.stringify(require('./package.json').version),
+      __APP_VERSION__: JSON.stringify(pkg.version),
     },
 
     server: {
