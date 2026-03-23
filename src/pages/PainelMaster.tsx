@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCompany } from '@/context/CompanyContext';
 import { Navigate } from 'react-router-dom';
-import { Crown, Building2, Users, Activity, Loader2, X, Mail, Phone, Shield } from 'lucide-react';
+import { Crown, Building2, Users, Activity, Loader2, X, Mail, Phone, Shield, CreditCard } from 'lucide-react';
+import PlansManager from '@/components/PlansManager';
+import CompanySubscriptionManager from '@/components/CompanySubscriptionManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -223,6 +225,16 @@ export default function PainelMaster() {
             <p className="text-xs text-muted-foreground">acesso a todas as empresas</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Gestão de Planos */}
+      <div className="space-y-6 mt-8">
+        <div className="flex items-center gap-3">
+          <CreditCard className="h-5 w-5 text-primary" />
+          <h3 className="font-heading text-xl font-bold">Gestão de Planos</h3>
+        </div>
+        <PlansManager />
+        <CompanySubscriptionManager />
       </div>
 
       {/* Modal flutuante */}
