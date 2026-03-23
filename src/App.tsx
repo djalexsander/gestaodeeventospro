@@ -20,6 +20,8 @@ import Funcionarios from "./pages/Funcionarios";
 import Empresas from "./pages/Empresas";
 import Usuarios from "./pages/Usuarios";
 import PainelMaster from "./pages/PainelMaster";
+import Planos from "./pages/Planos";
+import Financeiro from "./pages/Financeiro";
 import Configuracoes from "./pages/Configuracoes";
 import Login from "./pages/Login";
 import SetPassword from "./pages/SetPassword";
