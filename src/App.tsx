@@ -166,7 +166,7 @@ function AppRoutes() {
         path="/usuarios"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <Usuarios />
               </AppLayout>
