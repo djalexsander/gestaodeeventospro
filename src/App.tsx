@@ -23,6 +23,7 @@ import PainelMaster from "./pages/PainelMaster";
 import Planos from "./pages/Planos";
 import Financeiro from "./pages/Financeiro";
 import Configuracoes from "./pages/Configuracoes";
+import PlanoAssinatura from "./pages/PlanoAssinatura";
 import Login from "./pages/Login";
 import SetPassword from "./pages/SetPassword";
 import PrimeiroAcesso from "./pages/PrimeiroAcesso";
@@ -163,6 +164,19 @@ function AppRoutes() {
             <CompanyRoute>
               <AppLayout>
                 <Usuarios />
+              </AppLayout>
+            </CompanyRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/plano-assinatura"
+        element={
+          <ProtectedRoute>
+            <CompanyRoute>
+              <AppLayout>
+                <PlanoAssinatura />
               </AppLayout>
             </CompanyRoute>
           </ProtectedRoute>

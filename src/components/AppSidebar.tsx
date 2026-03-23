@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown, CreditCard, DollarSign } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown, CreditCard, DollarSign, ClipboardList } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,7 @@ const empresaItems = [
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
   { title: "Funcionários", url: "/funcionarios", icon: Users },
+  { title: "Plano / Assinatura", url: "/plano-assinatura", icon: ClipboardList },
 ];
 
 const masterItems = [
