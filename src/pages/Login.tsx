@@ -29,6 +29,11 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    if (rememberMe) {
+      localStorage.setItem('saved_email', email);
+    } else {
+      localStorage.removeItem('saved_email');
+    }
     const { error } = await signIn(email, password);
     if (error) {
       toast.error('Email ou senha inválidos');
