@@ -173,6 +173,9 @@ export default function Financeiro() {
               </BarChart>
             </ResponsiveContainer>
           </Card>
+
+          {/* Approvals section */}
+          <AdminApprovals />
         </>
       )}
     </div>
