@@ -128,8 +128,8 @@ export default function Empresas() {
         // Assign plan if selected
         if (selectedPlanId !== "none" && newCompany) {
           const plan = plans.find(p => p.id === selectedPlanId);
-          let expiresAt: string | null = null;
-          if (plan && plan.duration_days) {
+          let expiresAt: string | null = expirationDate || null;
+          if (!expiresAt && plan && plan.duration_days) {
             const exp = new Date();
             exp.setDate(exp.getDate() + plan.duration_days);
             expiresAt = exp.toISOString();
@@ -139,7 +139,7 @@ export default function Empresas() {
             plan_id: selectedPlanId,
             starts_at: new Date().toISOString(),
             expires_at: expiresAt,
-            status: "active",
+            status: selectedStatus,
           });
         }
         toast.success("Empresa criada");
