@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCompany } from '@/context/CompanyContext';
 import { Navigate } from 'react-router-dom';
-import { Crown, Building2, Users, Activity, Loader2, X, Mail, Phone, Shield } from 'lucide-react';
+import { Crown, Building2, Users, Activity, Loader2, X, Mail, Phone, Shield, CreditCard } from 'lucide-react';
+import PlansManager from '@/components/PlansManager';
+import CompanySubscriptionManager from '@/components/CompanySubscriptionManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 
