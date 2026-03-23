@@ -131,7 +131,7 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {empresaItems.map((item) => (
+                {[...empresaBaseItems, ...(isAdmin ? empresaAdminItems : [])].map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title}>
                       <NavLink
