@@ -79,6 +79,9 @@ export default function Empresas() {
     setForm({ name: "", email: "", phone: "" });
     setLogoFile(null);
     setSelectedPlanId("none");
+    setSelectedRole("company_admin");
+    setSelectedStatus("active");
+    setExpirationDate("");
     setDialogOpen(true);
   };
 
