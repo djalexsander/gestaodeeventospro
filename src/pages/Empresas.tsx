@@ -21,7 +21,7 @@ interface CompanyRow {
   phone: string;
 }
 
-interface PlanOption { id: string; name: string; type: string; duration_days: number | null; }
+interface PlanOption { id: string; name: string; type: string; duration_days: number | null; price: number; }
 interface ActiveSub { company_id: string; plan_name: string; status: string; expires_at: string | null; }
 
 export default function Empresas() {
@@ -32,6 +32,9 @@ export default function Empresas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CompanyRow | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [selectedRole, setSelectedRole] = useState<string>("company_admin");
+  const [selectedStatus, setSelectedStatus] = useState<string>("active");
+  const [expirationDate, setExpirationDate] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +46,7 @@ export default function Empresas() {
     setLoading(true);
     const [compRes, plansRes, subsRes] = await Promise.all([
       supabase.from("companies").select("*").order("name"),
-      supabase.from("plans").select("id, name, type, duration_days").eq("is_active", true).order("price"),
+      supabase.from("plans").select("id, name, type, duration_days, price").eq("is_active", true).order("price"),
       supabase.from("company_subscriptions").select("company_id, status, expires_at, plans(name)").eq("status", "active"),
     ]);
     if (compRes.data) setCompanies(compRes.data as any);
@@ -76,6 +79,9 @@ export default function Empresas() {
     setForm({ name: "", email: "", phone: "" });
     setLogoFile(null);
     setSelectedPlanId("none");
+    setSelectedRole("company_admin");
+    setSelectedStatus("active");
+    setExpirationDate("");
     setDialogOpen(true);
   };
 
@@ -83,9 +89,11 @@ export default function Empresas() {
     setEditing(c);
     setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setLogoFile(null);
-    // Find active sub for this company
     const sub = activeSubs.find(s => s.company_id === c.id);
-    setSelectedPlanId("none"); // Don't preselect on edit to avoid accidental changes
+    setSelectedPlanId("none");
+    setSelectedRole("company_admin");
+    setSelectedStatus(sub?.status || "active");
+    setExpirationDate(sub?.expires_at ? new Date(sub.expires_at).toISOString().split("T")[0] : "");
     setDialogOpen(true);
   };
 
@@ -120,8 +128,8 @@ export default function Empresas() {
         // Assign plan if selected
         if (selectedPlanId !== "none" && newCompany) {
           const plan = plans.find(p => p.id === selectedPlanId);
-          let expiresAt: string | null = null;
-          if (plan && plan.duration_days) {
+          let expiresAt: string | null = expirationDate || null;
+          if (!expiresAt && plan && plan.duration_days) {
             const exp = new Date();
             exp.setDate(exp.getDate() + plan.duration_days);
             expiresAt = exp.toISOString();
@@ -131,7 +139,7 @@ export default function Empresas() {
             plan_id: selectedPlanId,
             starts_at: new Date().toISOString(),
             expires_at: expiresAt,
-            status: "active",
+            status: selectedStatus,
           });
         }
         toast.success("Empresa criada");
@@ -255,18 +263,59 @@ export default function Empresas() {
               <Label>Telefone</Label>
               <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
             </div>
-            {!editing && (
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Plano</Label>
-                <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                <Select value={selectedPlanId} onValueChange={v => {
+                  setSelectedPlanId(v);
+                  if (v !== "none") {
+                    const plan = plans.find(p => p.id === v);
+                    if (plan && plan.duration_days && !expirationDate) {
+                      const exp = new Date();
+                      exp.setDate(exp.getDate() + plan.duration_days);
+                      setExpirationDate(exp.toISOString().split("T")[0]);
+                    }
+                  }
+                }}>
                   <SelectTrigger><SelectValue placeholder="Sem plano" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sem plano</SelectItem>
-                    {plans.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    {plans.map(p => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} — R$ {Number(p.price).toFixed(2)}/mês
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
+              <div className="space-y-2">
+                <Label>Papel do Usuário</Label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="company_admin">Admin da Empresa</SelectItem>
+                    <SelectItem value="user">Usuário</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="expired">Expirado</SelectItem>
+                    <SelectItem value="cancelled">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Data de Vencimento</Label>
+                <Input type="date" value={expirationDate} onChange={e => setExpirationDate(e.target.value)} />
+              </div>
+            </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

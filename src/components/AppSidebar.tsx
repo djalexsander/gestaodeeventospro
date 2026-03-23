@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown } from "lucide-react";
+import { Calendar, Music, Mic2, MapPin, LayoutDashboard, Shield, LogOut, Users, Building2, Settings, Crown, CreditCard, DollarSign } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -33,6 +33,8 @@ const empresaItems = [
 const masterItems = [
   { title: "Painel Master", url: "/master", icon: Crown },
   { title: "Empresas", url: "/empresas", icon: Building2 },
+  { title: "Financeiro", url: "/financeiro", icon: DollarSign },
+  { title: "Planos", url: "/planos", icon: CreditCard },
   { title: "Usuários Globais", url: "/admin", icon: Shield },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
