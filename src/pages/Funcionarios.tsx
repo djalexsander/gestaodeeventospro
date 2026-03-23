@@ -32,9 +32,11 @@ export default function Funcionarios() {
   const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "" });
 
   const fetchStaff = async () => {
+    if (!activeCompanyId) { setLoading(false); return; }
     const { data, error } = await supabase
       .from("staff_members")
       .select("*")
+      .eq("company_id", activeCompanyId)
       .order("name");
     if (error) {
       toast.error("Erro ao carregar funcionários");
