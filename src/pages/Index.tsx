@@ -5,6 +5,9 @@ import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } fr
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
