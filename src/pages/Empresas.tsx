@@ -75,6 +75,7 @@ export default function Empresas() {
     setEditing(null);
     setForm({ name: "", email: "", phone: "" });
     setLogoFile(null);
+    setSelectedPlanId("none");
     setDialogOpen(true);
   };
 
