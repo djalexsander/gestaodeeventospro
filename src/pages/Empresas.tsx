@@ -32,6 +32,9 @@ export default function Empresas() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CompanyRow | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [selectedRole, setSelectedRole] = useState<string>("company_admin");
+  const [selectedStatus, setSelectedStatus] = useState<string>("active");
+  const [expirationDate, setExpirationDate] = useState<string>("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
