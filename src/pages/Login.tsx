@@ -81,6 +81,17 @@ export default function Login() {
               />
             </div>
 
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(!!checked)}
+              />
+              <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+                Lembrar meu email
+              </Label>
+            </div>
+
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Entrar
