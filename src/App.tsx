@@ -153,7 +153,7 @@ function AppRoutes() {
         path="/funcionarios"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <Funcionarios />
               </AppLayout>
