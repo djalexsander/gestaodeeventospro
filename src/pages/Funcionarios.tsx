@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useCompany } from "@/context/CompanyContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ interface StaffMember {
 
 export default function Funcionarios() {
   const { isAdmin, isAdminMaster } = useAuth();
+  const { activeCompanyId } = useCompany();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -30,9 +32,11 @@ export default function Funcionarios() {
   const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "" });
 
   const fetchStaff = async () => {
+    if (!activeCompanyId) { setLoading(false); return; }
     const { data, error } = await supabase
       .from("staff_members")
       .select("*")
+      .eq("company_id", activeCompanyId)
       .order("name");
     if (error) {
       toast.error("Erro ao carregar funcionários");
@@ -44,7 +48,7 @@ export default function Funcionarios() {
 
   useEffect(() => {
     fetchStaff();
-  }, []);
+  }, [activeCompanyId]);
 
   const openAdd = () => {
     setEditingMember(null);
@@ -84,6 +88,7 @@ export default function Funcionarios() {
         role: form.role.trim(),
         type: activeTab,
         notes: form.notes.trim(),
+        company_id: activeCompanyId,
       });
       if (error) {
         toast.error("Erro ao adicionar funcionário");
