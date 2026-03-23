@@ -88,6 +88,7 @@ export default function Funcionarios() {
         role: form.role.trim(),
         type: activeTab,
         notes: form.notes.trim(),
+        company_id: activeCompanyId,
       });
       if (error) {
         toast.error("Erro ao adicionar funcionário");
