@@ -112,7 +112,7 @@ export default function PlanoAssinatura() {
     return payload + crc16(payload);
   }, [pixData, subscription]);
 
-
+  const openHistory = () => {
     fetchHistory();
     setHistoryOpen(true);
   };
