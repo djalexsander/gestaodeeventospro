@@ -196,6 +196,32 @@ function AppRoutes() {
       />
 
       <Route
+        path="/planos"
+        element={
+          <ProtectedRoute>
+            <MasterRoute>
+              <AppLayout>
+                <Planos />
+              </AppLayout>
+            </MasterRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/financeiro"
+        element={
+          <ProtectedRoute>
+            <MasterRoute>
+              <AppLayout>
+                <Financeiro />
+              </AppLayout>
+            </MasterRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/admin"
         element={
           <ProtectedRoute>
