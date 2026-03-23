@@ -21,7 +21,7 @@ interface StaffMember {
 }
 
 export default function Funcionarios() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAdminMaster } = useAuth();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
