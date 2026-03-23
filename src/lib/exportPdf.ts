@@ -107,6 +107,73 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
   });
 }
 
+export async function exportPeriodPdf({ events, startDate, endDate, getArtistById, getCityById }: ExportPeriodParams) {
+  const periodEvents = events
+    .filter(e => e.date >= startDate && e.date <= endDate)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const startLabel = startDate.split('-').reverse().join('/');
+  const endLabel = endDate.split('-').reverse().join('/');
+
+  const doc = new jsPDF({ orientation: 'landscape' });
+
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Gestão de Eventos Pro', 14, 18);
+
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Agenda — ${startLabel} a ${endLabel}`, 14, 26);
+
+  doc.setFontSize(8);
+  doc.setTextColor(130);
+  doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, 14, 32);
+  doc.setTextColor(0);
+
+  const tableStartY = 38;
+
+  if (periodEvents.length === 0) {
+    doc.setFontSize(12);
+    doc.text('Nenhum evento neste período.', 14, tableStartY + 12);
+  } else {
+    const tableData = periodEvents.map(ev => {
+      const artist = getArtistById(ev.artistId);
+      const city = getCityById(ev.cityId);
+      const dateFormatted = format(new Date(ev.date + 'T00:00:00'), 'dd/MM/yyyy');
+      return [
+        dateFormatted, ev.name, artist?.name || '—',
+        city ? `${city.name}/${city.state}` : '—',
+        ev.venue || '—', ev.setupTime || '—', ev.showTime || '—', ev.status,
+      ];
+    });
+
+    autoTable(doc, {
+      startY: tableStartY,
+      head: [['Data', 'Evento', 'Artista', 'Cidade', 'Local', 'Montagem', 'Show', 'Status']],
+      body: tableData,
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: { 0: { cellWidth: 25 }, 5: { cellWidth: 22 }, 6: { cellWidth: 22 }, 7: { cellWidth: 25 } },
+    });
+  }
+
+  const confirmed = periodEvents.filter(e => e.status === 'Confirmado').length;
+  const pending = periodEvents.filter(e => e.status === 'Pendente').length;
+  const cancelled = periodEvents.filter(e => e.status === 'Cancelado').length;
+
+  const finalY = (doc as any).lastAutoTable?.finalY || 50;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Total: ${periodEvents.length} evento(s)  |  ✅ Confirmados: ${confirmed}  |  ⏳ Pendentes: ${pending}  |  ❌ Cancelados: ${cancelled}`, 14, finalY + 10);
+
+  await savePdf({
+    doc,
+    tipo: 'agenda-periodo',
+    data: `${startDate}_${endDate}`,
+  });
+}
+
 interface ExportSingleEventParams {
   event: EventItem;
   artistName: string;
