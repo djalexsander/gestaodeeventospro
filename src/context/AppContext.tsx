@@ -42,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [hasUpdates, setHasUpdates] = useState(false);
   const { activeCompanyId } = useCompany();
-  const { user, isAdminMaster, loading: authLoading } = useAuth();
+  const { user, isAdminMaster, role, loading: authLoading } = useAuth();
 
   const fetchAll = useCallback(async () => {
     if (authLoading) return;
