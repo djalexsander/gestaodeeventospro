@@ -46,7 +46,7 @@ export default function Empresas() {
     setLoading(true);
     const [compRes, plansRes, subsRes] = await Promise.all([
       supabase.from("companies").select("*").order("name"),
-      supabase.from("plans").select("id, name, type, duration_days").eq("is_active", true).order("price"),
+      supabase.from("plans").select("id, name, type, duration_days, price").eq("is_active", true).order("price"),
       supabase.from("company_subscriptions").select("company_id, status, expires_at, plans(name)").eq("status", "active"),
     ]);
     if (compRes.data) setCompanies(compRes.data as any);
