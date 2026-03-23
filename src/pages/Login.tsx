@@ -11,8 +11,9 @@ import { toast } from 'sonner';
 export default function Login() {
   const { session, loading, signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => localStorage.getItem('saved_email') || '');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('saved_email'));
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) {
