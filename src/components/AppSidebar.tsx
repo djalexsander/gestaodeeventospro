@@ -28,6 +28,7 @@ const empresaItems = [
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
   { title: "Funcionários", url: "/funcionarios", icon: Users },
+  { title: "Plano / Assinatura", url: "/plano-assinatura", icon: ClipboardList },
 ];
 
 const masterItems = [
