@@ -47,7 +47,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function CompanyRoute({ children }: { children: React.ReactNode }) {
+function CompanyRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { isAdmin, loading } = useAuth();
+
+  if (loading) return null;
+  if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
+
   return <>{children}</>;
 }
 
