@@ -216,30 +216,53 @@ export default function PlanoAssinatura() {
                   <p className="text-3xl font-bold text-primary">R$ {subscription.plan.price.toFixed(2)}</p>
                 </div>
               )}
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Tipo da Chave</span>
-                  <span className="font-medium capitalize">{pixData.key_type}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Chave PIX</span>
-                  <span className="font-medium">{pixData.pix_key}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Recebedor</span>
-                  <span className="font-medium">{pixData.receiver_name}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Banco</span>
-                  <span className="font-medium">{pixData.bank}</span>
-                </div>
-              </div>
-              <Button className="w-full" onClick={() => {
-                navigator.clipboard.writeText(pixData.pix_key);
-                toast.success("Chave PIX copiada!");
-              }}>
-                Copiar Chave PIX
-              </Button>
+              <Tabs defaultValue="qrcode" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="qrcode" className="gap-2"><QrCode className="h-3.5 w-3.5" /> QR Code</TabsTrigger>
+                  <TabsTrigger value="copiar" className="gap-2"><Copy className="h-3.5 w-3.5" /> Copiar Chave</TabsTrigger>
+                </TabsList>
+                <TabsContent value="qrcode" className="mt-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="rounded-xl border bg-white p-4">
+                      <QRCodeSVG
+                        value={pixPayload}
+                        size={200}
+                        level="M"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Escaneie o QR Code com o app do seu banco para pagar
+                    </p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="copiar" className="mt-4 space-y-3">
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Tipo da Chave</span>
+                      <span className="font-medium capitalize">{pixData.key_type}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Chave PIX</span>
+                      <span className="font-medium">{pixData.pix_key}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Recebedor</span>
+                      <span className="font-medium">{pixData.receiver_name}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Banco</span>
+                      <span className="font-medium">{pixData.bank}</span>
+                    </div>
+                  </div>
+                  <Button className="w-full" onClick={() => {
+                    navigator.clipboard.writeText(pixData.pix_key);
+                    toast.success("Chave PIX copiada!");
+                  }}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar Chave PIX
+                  </Button>
+                </TabsContent>
+              </Tabs>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground py-4 text-center">
