@@ -70,7 +70,49 @@ export default function PlanoAssinatura() {
     fetchPix();
   }, []);
 
-  const openHistory = () => {
+  // Generate PIX BR Code payload
+  const pixPayload = useMemo(() => {
+    if (!pixData?.pix_key) return "";
+    const amount = subscription?.plan?.price?.toFixed(2) || "0.00";
+    const name = (pixData.receiver_name || "").substring(0, 25).toUpperCase();
+    const city = (pixData.city || "").substring(0, 15).toUpperCase();
+    const key = pixData.pix_key;
+
+    const pad = (id: string, val: string) => id + String(val.length).padStart(2, "0") + val;
+    const merchantAccount = pad("00", "br.gov.bcb.pix") + pad("01", key);
+    
+    let payload = "";
+    payload += pad("00", "01"); // format indicator
+    payload += pad("26", merchantAccount); // merchant account
+    payload += pad("52", "0000"); // MCC
+    payload += pad("53", "986"); // currency BRL
+    if (parseFloat(amount) > 0) payload += pad("54", amount);
+    payload += pad("58", "BR"); // country
+    payload += pad("59", name); // merchant name
+    payload += pad("60", city); // merchant city
+    payload += pad("62", pad("05", "***")); // additional data
+
+    // CRC16 placeholder
+    payload += "6304";
+    
+    // Calculate CRC16-CCITT
+    const crc16 = (str: string) => {
+      let crc = 0xFFFF;
+      for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+          if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+          else crc <<= 1;
+          crc &= 0xFFFF;
+        }
+      }
+      return crc.toString(16).toUpperCase().padStart(4, "0");
+    };
+
+    return payload + crc16(payload);
+  }, [pixData, subscription]);
+
+
     fetchHistory();
     setHistoryOpen(true);
   };
