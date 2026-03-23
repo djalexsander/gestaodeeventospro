@@ -299,6 +299,36 @@ export type Database = {
           },
         ]
       }
+      pix_settings: {
+        Row: {
+          bank: string
+          city: string
+          id: string
+          key_type: string
+          pix_key: string
+          receiver_name: string
+          updated_at: string
+        }
+        Insert: {
+          bank?: string
+          city?: string
+          id?: string
+          key_type?: string
+          pix_key?: string
+          receiver_name?: string
+          updated_at?: string
+        }
+        Update: {
+          bank?: string
+          city?: string
+          id?: string
+          key_type?: string
+          pix_key?: string
+          receiver_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           created_at: string

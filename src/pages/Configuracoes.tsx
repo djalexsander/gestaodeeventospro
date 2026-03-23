@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Settings, Loader2, Globe, ImageIcon, Upload, Save } from 'lucide-react';
+import { Loader2, Globe, ImageIcon, Upload, Save, QrCode } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 export default function Configuracoes() {
@@ -18,17 +19,34 @@ export default function Configuracoes() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [pixKeyType, setPixKeyType] = useState('celular');
+  const [pixKey, setPixKey] = useState('');
+  const [pixReceiverName, setPixReceiverName] = useState('');
+  const [pixCity, setPixCity] = useState('');
+  const [pixBank, setPixBank] = useState('');
+
   useEffect(() => {
     if (!isAdminMaster) return;
-    const fetch = async () => {
-      const { data } = await supabase.from('system_settings' as any).select('*').limit(1).single();
-      if (data) {
-        setPlatformName((data as any).platform_name || '');
-        setPlatformLogoUrl((data as any).platform_logo_url || null);
+    const fetchAll = async () => {
+      const [settingsRes, pixRes] = await Promise.all([
+        supabase.from('system_settings' as any).select('*').limit(1).single(),
+        supabase.from('pix_settings' as any).select('*').limit(1).single(),
+      ]);
+      if (settingsRes.data) {
+        setPlatformName((settingsRes.data as any).platform_name || '');
+        setPlatformLogoUrl((settingsRes.data as any).platform_logo_url || null);
+      }
+      if (pixRes.data) {
+        const pix = pixRes.data as any;
+        setPixKeyType(pix.key_type || 'celular');
+        setPixKey(pix.pix_key || '');
+        setPixReceiverName(pix.receiver_name || '');
+        setPixCity(pix.city || '');
+        setPixBank(pix.bank || '');
       }
       setLoading(false);
     };
-    fetch();
+    fetchAll();
   }, [isAdminMaster]);
 
   useEffect(() => {
@@ -67,18 +85,30 @@ export default function Configuracoes() {
       logoUrl = urlData.publicUrl + '?t=' + Date.now();
     }
 
-    const { error } = await supabase
-      .from('system_settings' as any)
-      .update({ platform_name: platformName, platform_logo_url: logoUrl, updated_at: new Date().toISOString() } as any)
-      .not('id', 'is', null);
+    const [settingsRes, pixRes] = await Promise.all([
+      supabase
+        .from('system_settings' as any)
+        .update({ platform_name: platformName, platform_logo_url: logoUrl, updated_at: new Date().toISOString() } as any)
+        .not('id', 'is', null),
+      supabase
+        .from('pix_settings' as any)
+        .update({
+          key_type: pixKeyType,
+          pix_key: pixKey.trim(),
+          receiver_name: pixReceiverName.trim(),
+          city: pixCity.trim(),
+          bank: pixBank.trim(),
+          updated_at: new Date().toISOString(),
+        } as any)
+        .not('id', 'is', null),
+    ]);
 
-    if (error) {
+    if (settingsRes.error || pixRes.error) {
       toast.error('Erro ao salvar configurações');
     } else {
       setPlatformLogoUrl(logoUrl);
       setLogoFile(null);
       toast.success('Configurações salvas com sucesso!');
-      // Force reload to update sidebar
       window.location.reload();
     }
     setSubmitting(false);
@@ -97,7 +127,6 @@ export default function Configuracoes() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Identity */}
         <Card className="bg-card border">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -109,16 +138,11 @@ export default function Configuracoes() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Nome da Plataforma</Label>
-              <Input
-                value={platformName}
-                onChange={e => setPlatformName(e.target.value)}
-                placeholder="Gestão de Eventos Pro"
-              />
+              <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder="Gestão de Eventos Pro" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Logo */}
         <Card className="bg-card border">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -142,16 +166,52 @@ export default function Configuracoes() {
               <label className="flex items-center gap-2 px-4 py-2 rounded-md border cursor-pointer hover:bg-muted transition-colors text-sm">
                 <Upload className="h-4 w-4" />
                 Escolher arquivo
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/svg+xml"
-                  className="hidden"
-                  onChange={e => setLogoFile(e.target.files?.[0] || null)}
-                />
+                <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden" onChange={e => setLogoFile(e.target.files?.[0] || null)} />
               </label>
-              <span className="text-xs text-muted-foreground">
-                {logoFile ? logoFile.name : 'Nenhum escolhido'}
-              </span>
+              <span className="text-xs text-muted-foreground">{logoFile ? logoFile.name : 'Nenhum escolhido'}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border md:col-span-2">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <QrCode className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">Configuração PIX</CardTitle>
+            </div>
+            <CardDescription>Dados para geração de QR Code PIX nas cobranças.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Tipo da Chave</Label>
+                <Select value={pixKeyType} onValueChange={setPixKeyType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="celular">Celular</SelectItem>
+                    <SelectItem value="cpf">CPF</SelectItem>
+                    <SelectItem value="cnpj">CNPJ</SelectItem>
+                    <SelectItem value="email">E-mail</SelectItem>
+                    <SelectItem value="aleatoria">Chave Aleatória</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Chave PIX</Label>
+                <Input value={pixKey} onChange={e => setPixKey(e.target.value)} placeholder="+5500000000000" />
+              </div>
+              <div className="space-y-2">
+                <Label>Nome do Recebedor</Label>
+                <Input value={pixReceiverName} onChange={e => setPixReceiverName(e.target.value)} placeholder="NOME COMPLETO" />
+              </div>
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <Input value={pixCity} onChange={e => setPixCity(e.target.value)} placeholder="CIDADE" />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Banco</Label>
+                <Input value={pixBank} onChange={e => setPixBank(e.target.value)} placeholder="NOME DO BANCO" />
+              </div>
             </div>
           </CardContent>
         </Card>
