@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -12,6 +15,7 @@ jobs:
     env:
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repo
@@ -21,21 +25,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build frontend
-        run: npm run build
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Build Tauri app
-        run: npx tauri build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
         with:
-          name: app
-          path: src-tauri/target/release/
+          workspaces: ./src-tauri -> target
+
+      - name: Build and publish Tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Gestão de Eventos Pro ${{ github.ref_name }}"
+          releaseBody: "Nova versão publicada automaticamente pelo GitHub Actions."
+          releaseDraft: false
+          prerelease: false
