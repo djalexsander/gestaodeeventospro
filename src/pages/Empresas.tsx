@@ -192,6 +192,18 @@ export default function Empresas() {
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {(() => {
+                    const sub = activeSubs.find(s => s.company_id === c.id);
+                    return sub ? (
+                      <Badge variant="outline" className="gap-1">
+                        <CreditCard className="h-3 w-3" /> {sub.plan_name}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Sem plano</span>
+                    );
+                  })()}
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
