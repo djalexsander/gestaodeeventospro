@@ -179,7 +179,7 @@ function AppRoutes() {
         path="/plano-assinatura"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <PlanoAssinatura />
               </AppLayout>
