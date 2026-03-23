@@ -1,10 +1,14 @@
 import fs from "fs";
-import path from "path";
 import { spawn } from "child_process";
 
 const root = process.cwd();
-const keyPath = process.env.TAURI_KEY_PATH || "C:\\Users\\DjAlex\\Desktop\\gestaodeeventospro\\~\\.tauri\\myapp.key";
-const password = process.env.TAURI_KEY_PASSWORD;
+const keyPath = process.env.TAURI_SIGNING_PRIVATE_KEY;
+const password = process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD;
+
+if (!keyPath) {
+  console.error("Defina a variável TAURI_SIGNING_PRIVATE_KEY no CMD antes de rodar.");
+  process.exit(1);
+}
 
 if (!fs.existsSync(keyPath)) {
   console.error(`Chave privada não encontrada: ${keyPath}`);
@@ -12,7 +16,7 @@ if (!fs.existsSync(keyPath)) {
 }
 
 if (!password) {
-  console.error("Defina a variável TAURI_KEY_PASSWORD no CMD antes de rodar.");
+  console.error("Defina a variável TAURI_SIGNING_PRIVATE_KEY_PASSWORD no CMD antes de rodar.");
   process.exit(1);
 }
 
