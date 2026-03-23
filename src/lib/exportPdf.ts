@@ -13,6 +13,14 @@ interface ExportParams {
   companyName?: string;
 }
 
+interface ExportPeriodParams {
+  events: EventItem[];
+  startDate: string;
+  endDate: string;
+  getArtistById: (id: string) => Artist | undefined;
+  getCityById: (id: string) => City | undefined;
+}
+
 export async function exportMonthlyPdf({ events, month, getArtistById, getCityById, companyName }: ExportParams) {
   const year = month.getFullYear();
   const m = month.getMonth();
