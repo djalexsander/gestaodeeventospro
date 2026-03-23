@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 interface CompanyRow {
@@ -18,6 +20,9 @@ interface CompanyRow {
   email: string;
   phone: string;
 }
+
+interface PlanOption { id: string; name: string; type: string; duration_days: number | null; }
+interface ActiveSub { company_id: string; plan_name: string; status: string; expires_at: string | null; }
 
 export default function Empresas() {
   const { isAdminMaster, loading: authLoading } = useAuth();
@@ -30,11 +35,23 @@ export default function Empresas() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("none");
+  const [activeSubs, setActiveSubs] = useState<ActiveSub[]>([]);
 
   const fetchCompanies = async () => {
     setLoading(true);
-    const { data } = await supabase.from("companies").select("*").order("name");
-    if (data) setCompanies(data as any);
+    const [compRes, plansRes, subsRes] = await Promise.all([
+      supabase.from("companies").select("*").order("name"),
+      supabase.from("plans").select("id, name, type, duration_days").eq("is_active", true).order("price"),
+      supabase.from("company_subscriptions").select("company_id, status, expires_at, plans(name)").eq("status", "active"),
+    ]);
+    if (compRes.data) setCompanies(compRes.data as any);
+    if (plansRes.data) setPlans(plansRes.data as any);
+    if (subsRes.data) setActiveSubs(subsRes.data.map((s: any) => ({
+      company_id: s.company_id, plan_name: s.plans?.name || '—',
+      status: s.status, expires_at: s.expires_at,
+    })));
     setLoading(false);
   };
 
@@ -58,6 +75,7 @@ export default function Empresas() {
     setEditing(null);
     setForm({ name: "", email: "", phone: "" });
     setLogoFile(null);
+    setSelectedPlanId("none");
     setDialogOpen(true);
   };
 
@@ -65,6 +83,9 @@ export default function Empresas() {
     setEditing(c);
     setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setLogoFile(null);
+    // Find active sub for this company
+    const sub = activeSubs.find(s => s.company_id === c.id);
+    setSelectedPlanId("none"); // Don't preselect on edit to avoid accidental changes
     setDialogOpen(true);
   };
 
@@ -93,9 +114,30 @@ export default function Empresas() {
       if (error) toast.error("Erro ao atualizar empresa");
       else { toast.success("Empresa atualizada"); await fetchCompanies(); await refreshCompanies(); }
     } else {
-      const { error } = await supabase.from("companies").insert(payload);
+      const { data: newCompany, error } = await supabase.from("companies").insert(payload).select().single();
       if (error) toast.error("Erro ao criar empresa");
-      else { toast.success("Empresa criada"); await fetchCompanies(); await refreshCompanies(); }
+      else {
+        // Assign plan if selected
+        if (selectedPlanId !== "none" && newCompany) {
+          const plan = plans.find(p => p.id === selectedPlanId);
+          let expiresAt: string | null = null;
+          if (plan && plan.duration_days) {
+            const exp = new Date();
+            exp.setDate(exp.getDate() + plan.duration_days);
+            expiresAt = exp.toISOString();
+          }
+          await supabase.from("company_subscriptions").insert({
+            company_id: newCompany.id,
+            plan_id: selectedPlanId,
+            starts_at: new Date().toISOString(),
+            expires_at: expiresAt,
+            status: "active",
+          });
+        }
+        toast.success("Empresa criada");
+        await fetchCompanies();
+        await refreshCompanies();
+      }
     }
     setSubmitting(false);
     setDialogOpen(false);
@@ -127,14 +169,15 @@ export default function Empresas() {
               <TableHead>Nome</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="hidden md:table-cell">Telefone</TableHead>
+              <TableHead className="hidden md:table-cell">Plano</TableHead>
               <TableHead className="w-[100px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></TableCell></TableRow>
             ) : companies.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma empresa cadastrada</TableCell></TableRow>
             ) : companies.map(c => (
               <TableRow key={c.id}>
                 <TableCell>
@@ -149,6 +192,18 @@ export default function Empresas() {
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{c.email || "—"}</TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{c.phone || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {(() => {
+                    const sub = activeSubs.find(s => s.company_id === c.id);
+                    return sub ? (
+                      <Badge variant="outline" className="gap-1">
+                        <CreditCard className="h-3 w-3" /> {sub.plan_name}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Sem plano</span>
+                    );
+                  })()}
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
@@ -200,6 +255,18 @@ export default function Empresas() {
               <Label>Telefone</Label>
               <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="(00) 00000-0000" />
             </div>
+            {!editing && (
+              <div className="space-y-2">
+                <Label>Plano</Label>
+                <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                  <SelectTrigger><SelectValue placeholder="Sem plano" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem plano</SelectItem>
+                    {plans.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1" disabled={submitting}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
