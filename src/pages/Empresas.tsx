@@ -83,6 +83,9 @@ export default function Empresas() {
     setEditing(c);
     setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setLogoFile(null);
+    // Find active sub for this company
+    const sub = activeSubs.find(s => s.company_id === c.id);
+    setSelectedPlanId("none"); // Don't preselect on edit to avoid accidental changes
     setDialogOpen(true);
   };
 
