@@ -21,7 +21,7 @@ interface CompanyRow {
   phone: string;
 }
 
-interface PlanOption { id: string; name: string; type: string; duration_days: number | null; }
+interface PlanOption { id: string; name: string; type: string; duration_days: number | null; price: number; }
 interface ActiveSub { company_id: string; plan_name: string; status: string; expires_at: string | null; }
 
 export default function Empresas() {
