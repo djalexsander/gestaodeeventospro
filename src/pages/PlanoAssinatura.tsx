@@ -59,7 +59,7 @@ async function notifyMasters(title: string, message: string, type: string, refId
 export default function PlanoAssinatura() {
   const { activeCompanyId, activeCompany } = useCompany();
   const { subscription, plans, refreshSubscription } = useSubscription();
-  const { user } = useAuth();
+  const { user, isAdminMaster } = useAuth();
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
