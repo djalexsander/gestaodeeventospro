@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Loader2, DollarSign, Clock, TrendingUp, Building2, BarChart3, FileDown, CheckCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import AdminApprovals from "@/components/AdminApprovals";
 
 interface SubRow {
   id: string;
@@ -172,6 +173,9 @@ export default function Financeiro() {
               </BarChart>
             </ResponsiveContainer>
           </Card>
+
+          {/* Approvals section */}
+          <AdminApprovals />
         </>
       )}
     </div>
