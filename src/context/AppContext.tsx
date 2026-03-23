@@ -99,7 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setLoading(false);
     setHasUpdates(false);
-  }, [activeCompanyId, authLoading, isAdminMaster, user]);
+  }, [activeCompanyId, authLoading, isAdminMaster, user, role]);
 
   useEffect(() => { void fetchAll(); }, [fetchAll]);
 
