@@ -157,7 +157,7 @@ export default function Dashboard() {
                   size="sm"
                   onClick={async () => {
                     const exportDate = setYear(setMonth(new Date(), Number(exportMonth)), Number(exportYear));
-                    await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById, companyName: activeCompany?.name });
+                    await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
                   }}
                 >
                   <FileDown className="h-4 w-4 mr-2" /> Gerar PDF
