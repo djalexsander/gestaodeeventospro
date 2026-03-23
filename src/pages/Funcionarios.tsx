@@ -21,7 +21,7 @@ interface StaffMember {
 }
 
 export default function Funcionarios() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isAdminMaster } = useAuth();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -107,6 +107,18 @@ export default function Funcionarios() {
   };
 
   const filtered = staff.filter((s) => s.type === activeTab);
+
+  if (isAdminMaster) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-heading font-bold text-foreground">Funcionários</h1>
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
+          <Users className="h-10 w-10 opacity-40" />
+          <p className="text-sm">Admin Master não tem acesso aos dados de funcionários da empresa.</p>
+        </div>
+      </div>
+    );
+  }
 
   const StaffList = ({ items }: { items: StaffMember[] }) => (
     <div className="space-y-3">
