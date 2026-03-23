@@ -5,6 +5,9 @@ import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } fr
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +17,7 @@ import { EventFormDrawer } from "@/components/EventFormDrawer";
 import { EventDetailDrawer } from "@/components/EventDetailDrawer";
 import { StatusBadge } from "@/components/StatusBadge";
 import { motion, AnimatePresence } from "framer-motion";
-import { exportMonthlyPdf } from "@/lib/exportPdf";
+import { exportMonthlyPdf, exportPeriodPdf } from "@/lib/exportPdf";
 
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
@@ -29,6 +32,8 @@ export default function Dashboard() {
   const [filterArtist, setFilterArtist] = useState("all");
   const [exportMonth, setExportMonth] = useState(String(new Date().getMonth()));
   const [exportYear, setExportYear] = useState(String(new Date().getFullYear()));
+  const [periodStart, setPeriodStart] = useState<Date | undefined>(undefined);
+  const [periodEnd, setPeriodEnd] = useState<Date | undefined>(undefined);
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const hasActiveFilter = filterCity !== "all" || filterArtist !== "all";
@@ -121,48 +126,89 @@ export default function Dashboard() {
                 <FileDown className="h-4 w-4 mr-2" /> Exportar PDF
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 p-4" align="end">
-              <div className="space-y-3">
-                <h4 className="font-heading text-sm font-semibold">Exportar Agenda Mensal</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Mês</label>
-                    <Select value={exportMonth} onValueChange={setExportMonth}>
-                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {[
-                          "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-                          "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-                        ].map((m, i) => (
-                          <SelectItem key={i} value={String(i)}>{m}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            <PopoverContent className="w-80 p-4" align="end">
+              <Tabs defaultValue="monthly" className="w-full">
+                <TabsList className="w-full mb-3">
+                  <TabsTrigger value="monthly" className="flex-1 text-xs">Mensal</TabsTrigger>
+                  <TabsTrigger value="period" className="flex-1 text-xs">Por Período</TabsTrigger>
+                </TabsList>
+                <TabsContent value="monthly" className="space-y-3 mt-0">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Mês</label>
+                      <Select value={exportMonth} onValueChange={setExportMonth}>
+                        <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"].map((m, i) => (
+                            <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Ano</label>
+                      <Select value={exportYear} onValueChange={setExportYear}>
+                        <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 5 }, (_, i) => {
+                            const y = new Date().getFullYear() - 1 + i;
+                            return <SelectItem key={y} value={String(y)}>{y}</SelectItem>;
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">Ano</label>
-                    <Select value={exportYear} onValueChange={setExportYear}>
-                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 5 }, (_, i) => {
-                          const y = new Date().getFullYear() - 1 + i;
-                          return <SelectItem key={y} value={String(y)}>{y}</SelectItem>;
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Button
-                  className="w-full"
-                  size="sm"
-                  onClick={async () => {
+                  <Button className="w-full" size="sm" onClick={async () => {
                     const exportDate = setYear(setMonth(new Date(), Number(exportMonth)), Number(exportYear));
                     await exportMonthlyPdf({ events, month: exportDate, getArtistById, getCityById });
-                  }}
-                >
-                  <FileDown className="h-4 w-4 mr-2" /> Gerar PDF
-                </Button>
-              </div>
+                  }}>
+                    <FileDown className="h-4 w-4 mr-2" /> Gerar PDF Mensal
+                  </Button>
+                </TabsContent>
+                <TabsContent value="period" className="space-y-3 mt-0">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Data Início</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full h-9 justify-start text-left text-xs font-normal", !periodStart && "text-muted-foreground")}>
+                            <CalendarIcon className="h-3 w-3 mr-1" />
+                            {periodStart ? format(periodStart, "dd/MM/yyyy") : "Selecionar"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={periodStart} onSelect={setPeriodStart} initialFocus className="p-3 pointer-events-auto" />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Data Fim</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full h-9 justify-start text-left text-xs font-normal", !periodEnd && "text-muted-foreground")}>
+                            <CalendarIcon className="h-3 w-3 mr-1" />
+                            {periodEnd ? format(periodEnd, "dd/MM/yyyy") : "Selecionar"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={periodEnd} onSelect={setPeriodEnd} initialFocus className="p-3 pointer-events-auto" />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                  <Button className="w-full" size="sm" disabled={!periodStart || !periodEnd} onClick={async () => {
+                    if (!periodStart || !periodEnd) return;
+                    await exportPeriodPdf({
+                      events,
+                      startDate: format(periodStart, "yyyy-MM-dd"),
+                      endDate: format(periodEnd, "yyyy-MM-dd"),
+                      getArtistById, getCityById,
+                    });
+                  }}>
+                    <FileDown className="h-4 w-4 mr-2" /> Gerar PDF por Período
+                  </Button>
+                </TabsContent>
+              </Tabs>
             </PopoverContent>
           </Popover>
           {isAdmin && (
