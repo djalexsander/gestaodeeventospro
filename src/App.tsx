@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { CompanyProvider } from "@/context/CompanyContext";
 import { AppProvider } from "@/context/AppContext";
+import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { AppLayout } from "@/components/AppLayout";
 import { PwaUpdateBanner } from "@/components/PwaUpdateBanner";
 import { Loader2 } from "lucide-react";
