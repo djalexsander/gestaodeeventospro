@@ -48,7 +48,7 @@ export default function Funcionarios() {
 
   useEffect(() => {
     fetchStaff();
-  }, []);
+  }, [activeCompanyId]);
 
   const openAdd = () => {
     setEditingMember(null);
