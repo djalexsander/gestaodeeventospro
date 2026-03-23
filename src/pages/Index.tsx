@@ -32,6 +32,8 @@ export default function Dashboard() {
   const [filterArtist, setFilterArtist] = useState("all");
   const [exportMonth, setExportMonth] = useState(String(new Date().getMonth()));
   const [exportYear, setExportYear] = useState(String(new Date().getFullYear()));
+  const [periodStart, setPeriodStart] = useState<Date | undefined>(undefined);
+  const [periodEnd, setPeriodEnd] = useState<Date | undefined>(undefined);
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
   const hasActiveFilter = filterCity !== "all" || filterArtist !== "all";
