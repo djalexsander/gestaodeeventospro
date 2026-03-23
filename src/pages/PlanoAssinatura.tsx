@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompany } from "@/context/CompanyContext";
 import { useSubscription } from "@/context/SubscriptionContext";
@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, CreditCard, QrCode, ArrowUpCircle, History, Package, CalendarDays, Infinity } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, CreditCard, QrCode, ArrowUpCircle, History, Package, CalendarDays, Infinity, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 
 interface HistoryRow {
   id: string;
@@ -67,6 +69,48 @@ export default function PlanoAssinatura() {
   useEffect(() => {
     fetchPix();
   }, []);
+
+  // Generate PIX BR Code payload
+  const pixPayload = useMemo(() => {
+    if (!pixData?.pix_key) return "";
+    const amount = subscription?.plan?.price?.toFixed(2) || "0.00";
+    const name = (pixData.receiver_name || "").substring(0, 25).toUpperCase();
+    const city = (pixData.city || "").substring(0, 15).toUpperCase();
+    const key = pixData.pix_key;
+
+    const pad = (id: string, val: string) => id + String(val.length).padStart(2, "0") + val;
+    const merchantAccount = pad("00", "br.gov.bcb.pix") + pad("01", key);
+    
+    let payload = "";
+    payload += pad("00", "01"); // format indicator
+    payload += pad("26", merchantAccount); // merchant account
+    payload += pad("52", "0000"); // MCC
+    payload += pad("53", "986"); // currency BRL
+    if (parseFloat(amount) > 0) payload += pad("54", amount);
+    payload += pad("58", "BR"); // country
+    payload += pad("59", name); // merchant name
+    payload += pad("60", city); // merchant city
+    payload += pad("62", pad("05", "***")); // additional data
+
+    // CRC16 placeholder
+    payload += "6304";
+    
+    // Calculate CRC16-CCITT
+    const crc16 = (str: string) => {
+      let crc = 0xFFFF;
+      for (let i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+          if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+          else crc <<= 1;
+          crc &= 0xFFFF;
+        }
+      }
+      return crc.toString(16).toUpperCase().padStart(4, "0");
+    };
+
+    return payload + crc16(payload);
+  }, [pixData, subscription]);
 
   const openHistory = () => {
     fetchHistory();
@@ -214,30 +258,53 @@ export default function PlanoAssinatura() {
                   <p className="text-3xl font-bold text-primary">R$ {subscription.plan.price.toFixed(2)}</p>
                 </div>
               )}
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Tipo da Chave</span>
-                  <span className="font-medium capitalize">{pixData.key_type}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Chave PIX</span>
-                  <span className="font-medium">{pixData.pix_key}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Recebedor</span>
-                  <span className="font-medium">{pixData.receiver_name}</span>
-                </div>
-                <div className="flex justify-between rounded-lg border p-3">
-                  <span className="text-muted-foreground">Banco</span>
-                  <span className="font-medium">{pixData.bank}</span>
-                </div>
-              </div>
-              <Button className="w-full" onClick={() => {
-                navigator.clipboard.writeText(pixData.pix_key);
-                toast.success("Chave PIX copiada!");
-              }}>
-                Copiar Chave PIX
-              </Button>
+              <Tabs defaultValue="qrcode" className="w-full">
+                <TabsList className="w-full grid grid-cols-2">
+                  <TabsTrigger value="qrcode" className="gap-2"><QrCode className="h-3.5 w-3.5" /> QR Code</TabsTrigger>
+                  <TabsTrigger value="copiar" className="gap-2"><Copy className="h-3.5 w-3.5" /> Copiar Chave</TabsTrigger>
+                </TabsList>
+                <TabsContent value="qrcode" className="mt-4">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="rounded-xl border bg-white p-4">
+                      <QRCodeSVG
+                        value={pixPayload}
+                        size={200}
+                        level="M"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Escaneie o QR Code com o app do seu banco para pagar
+                    </p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="copiar" className="mt-4 space-y-3">
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Tipo da Chave</span>
+                      <span className="font-medium capitalize">{pixData.key_type}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Chave PIX</span>
+                      <span className="font-medium">{pixData.pix_key}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Recebedor</span>
+                      <span className="font-medium">{pixData.receiver_name}</span>
+                    </div>
+                    <div className="flex justify-between rounded-lg border p-3">
+                      <span className="text-muted-foreground">Banco</span>
+                      <span className="font-medium">{pixData.bank}</span>
+                    </div>
+                  </div>
+                  <Button className="w-full" onClick={() => {
+                    navigator.clipboard.writeText(pixData.pix_key);
+                    toast.success("Chave PIX copiada!");
+                  }}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar Chave PIX
+                  </Button>
+                </TabsContent>
+              </Tabs>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground py-4 text-center">
