@@ -85,13 +85,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       soundSystem: r.sound_system, microphones: r.microphones, monitors: r.monitors, notes: r.notes,
       riderFileName: r.rider_file_name, riderFileUrl: r.rider_file_url,
     })));
-    if (eventsRes.data) setEvents(eventsRes.data.map(e => ({
-      id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
-      artistId: e.artist_id, riderId: e.rider_id, setupTime: e.setup_time,
-      showTime: e.show_time, departureDate: (e as any).departure_date || null,
-      departureTime: (e as any).departure_time || '', notes: e.notes,
-      staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
-    })));
+    if (eventsRes.data) {
+      const mapped = eventsRes.data.map(e => ({
+        id: e.id, date: e.date, name: e.name, cityId: e.city_id, venue: e.venue,
+        artistId: e.artist_id, riderId: e.rider_id, setupTime: e.setup_time,
+        showTime: e.show_time, departureDate: (e as any).departure_date || null,
+        departureTime: (e as any).departure_time || '', notes: e.notes,
+        staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
+      }));
+      // Usuários comuns só veem eventos confirmados
+      setEvents(role === 'user' ? mapped.filter(e => e.status === 'Confirmado') : mapped);
+    }
 
     setLoading(false);
     setHasUpdates(false);
