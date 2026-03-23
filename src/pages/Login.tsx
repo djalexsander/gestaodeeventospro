@@ -6,13 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 export default function Login() {
   const { session, loading, signIn } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => localStorage.getItem('saved_email') || '');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('saved_email'));
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) {
@@ -28,6 +30,11 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    if (rememberMe) {
+      localStorage.setItem('saved_email', email);
+    } else {
+      localStorage.removeItem('saved_email');
+    }
     const { error } = await signIn(email, password);
     if (error) {
       toast.error('Email ou senha inválidos');
@@ -72,6 +79,17 @@ export default function Login() {
                 required
                 minLength={6}
               />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(!!checked)}
+              />
+              <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+                Lembrar meu email
+              </Label>
             </div>
 
             <Button type="submit" className="w-full" disabled={submitting}>
