@@ -47,7 +47,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function CompanyRoute({ children }: { children: React.ReactNode }) {
+function CompanyRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { isAdmin, loading } = useAuth();
+
+  if (loading) return null;
+  if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
+
   return <>{children}</>;
 }
 
@@ -148,7 +153,7 @@ function AppRoutes() {
         path="/funcionarios"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <Funcionarios />
               </AppLayout>
@@ -161,7 +166,7 @@ function AppRoutes() {
         path="/usuarios"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <Usuarios />
               </AppLayout>
@@ -174,7 +179,7 @@ function AppRoutes() {
         path="/plano-assinatura"
         element={
           <ProtectedRoute>
-            <CompanyRoute>
+            <CompanyRoute adminOnly>
               <AppLayout>
                 <PlanoAssinatura />
               </AppLayout>

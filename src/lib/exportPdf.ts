@@ -34,14 +34,6 @@ export async function exportMonthlyPdf({ events, month, getArtistById, getCityBy
   doc.text('Gestão de Eventos Pro', 14, 18);
 
   let headerY = 18;
-  if (companyName) {
-    headerY += 7;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 140, 180);
-    doc.text(companyName, 14, headerY);
-    doc.setTextColor(0);
-  }
   
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
@@ -125,14 +117,6 @@ export async function exportSingleEventPdf({ event, artistName, cityLabel, rider
   doc.text('Gestão de Eventos Pro', 14, 18);
 
   let headerY = 18;
-  if (companyName) {
-    headerY += 7;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 140, 180);
-    doc.text(companyName, 14, headerY);
-    doc.setTextColor(0);
-  }
 
   doc.setFontSize(8);
   doc.setTextColor(130);

@@ -22,11 +22,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-const empresaItems = [
+const empresaBaseItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Artistas", url: "/artistas", icon: Music },
   { title: "Riders Técnicos", url: "/riders", icon: Mic2 },
   { title: "Cidades", url: "/cidades", icon: MapPin },
+];
+
+const empresaAdminItems = [
   { title: "Funcionários", url: "/funcionarios", icon: Users },
   { title: "Plano / Assinatura", url: "/plano-assinatura", icon: ClipboardList },
 ];
@@ -128,7 +131,7 @@ export function AppSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {empresaItems.map((item) => (
+                {[...empresaBaseItems, ...(isAdmin ? empresaAdminItems : [])].map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.title}>
                       <NavLink
