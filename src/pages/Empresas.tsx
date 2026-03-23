@@ -114,9 +114,30 @@ export default function Empresas() {
       if (error) toast.error("Erro ao atualizar empresa");
       else { toast.success("Empresa atualizada"); await fetchCompanies(); await refreshCompanies(); }
     } else {
-      const { error } = await supabase.from("companies").insert(payload);
+      const { data: newCompany, error } = await supabase.from("companies").insert(payload).select().single();
       if (error) toast.error("Erro ao criar empresa");
-      else { toast.success("Empresa criada"); await fetchCompanies(); await refreshCompanies(); }
+      else {
+        // Assign plan if selected
+        if (selectedPlanId !== "none" && newCompany) {
+          const plan = plans.find(p => p.id === selectedPlanId);
+          let expiresAt: string | null = null;
+          if (plan && plan.duration_days) {
+            const exp = new Date();
+            exp.setDate(exp.getDate() + plan.duration_days);
+            expiresAt = exp.toISOString();
+          }
+          await supabase.from("company_subscriptions").insert({
+            company_id: newCompany.id,
+            plan_id: selectedPlanId,
+            starts_at: new Date().toISOString(),
+            expires_at: expiresAt,
+            status: "active",
+          });
+        }
+        toast.success("Empresa criada");
+        await fetchCompanies();
+        await refreshCompanies();
+      }
     }
     setSubmitting(false);
     setDialogOpen(false);
