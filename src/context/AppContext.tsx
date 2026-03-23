@@ -58,20 +58,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true);
-    const companyFilter = activeCompanyId
-      ? `company_id.eq.${activeCompanyId},company_id.is.null`
-      : undefined;
 
     let citiesQ = supabase.from('cities').select('*').order('name');
     let artistsQ = supabase.from('artists').select('*').order('name');
     let ridersQ = supabase.from('technical_riders').select('*').order('name');
     let eventsQ = supabase.from('events').select('*').order('date');
 
-    if (companyFilter) {
-      citiesQ = citiesQ.or(companyFilter);
-      artistsQ = artistsQ.or(companyFilter);
-      ridersQ = ridersQ.or(companyFilter);
-      eventsQ = eventsQ.or(companyFilter);
+    if (activeCompanyId) {
+      citiesQ = citiesQ.eq('company_id', activeCompanyId);
+      artistsQ = artistsQ.eq('company_id', activeCompanyId);
+      ridersQ = ridersQ.eq('company_id', activeCompanyId);
+      eventsQ = eventsQ.eq('company_id', activeCompanyId);
     }
 
     const [citiesRes, artistsRes, ridersRes, eventsRes] = await Promise.all([
