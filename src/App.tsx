@@ -171,6 +171,19 @@ function AppRoutes() {
       />
 
       <Route
+        path="/plano-assinatura"
+        element={
+          <ProtectedRoute>
+            <CompanyRoute>
+              <AppLayout>
+                <PlanoAssinatura />
+              </AppLayout>
+            </CompanyRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/master"
         element={
           <ProtectedRoute>
