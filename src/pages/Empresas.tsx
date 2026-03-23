@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
 interface CompanyRow {
@@ -18,6 +20,9 @@ interface CompanyRow {
   email: string;
   phone: string;
 }
+
+interface PlanOption { id: string; name: string; type: string; duration_days: number | null; }
+interface ActiveSub { company_id: string; plan_name: string; status: string; expires_at: string | null; }
 
 export default function Empresas() {
   const { isAdminMaster, loading: authLoading } = useAuth();
@@ -30,6 +35,9 @@ export default function Empresas() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [plans, setPlans] = useState<PlanOption[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("none");
+  const [activeSubs, setActiveSubs] = useState<ActiveSub[]>([]);
 
   const fetchCompanies = async () => {
     setLoading(true);
