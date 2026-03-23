@@ -227,6 +227,16 @@ export default function PainelMaster() {
         </Card>
       </div>
 
+      {/* Gestão de Planos */}
+      <div className="space-y-6 mt-8">
+        <div className="flex items-center gap-3">
+          <CreditCard className="h-5 w-5 text-primary" />
+          <h3 className="font-heading text-xl font-bold">Gestão de Planos</h3>
+        </div>
+        <PlansManager />
+        <CompanySubscriptionManager />
+      </div>
+
       {/* Modal flutuante */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">

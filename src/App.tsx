@@ -233,12 +233,13 @@ const App = () => (
 
       <AuthProvider>
         <CompanyProvider>
-          <AppProvider>
-            {/* 🔥 CORREÇÃO AQUI */}
-            <HashRouter>
-              <AppRoutes />
-            </HashRouter>
-          </AppProvider>
+          <SubscriptionProvider>
+            <AppProvider>
+              <HashRouter>
+                <AppRoutes />
+              </HashRouter>
+            </AppProvider>
+          </SubscriptionProvider>
         </CompanyProvider>
       </AuthProvider>
     </TooltipProvider>
