@@ -280,11 +280,14 @@ export default function Empresas() {
                   <SelectTrigger><SelectValue placeholder="Sem plano" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sem plano</SelectItem>
-                    {plans.map(p => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name} — R$ {Number(p.duration_days ? p.duration_days : 0) > 0 ? `${(plans.find(pp => pp.id === p.id) as any)?.price || '0'}/mês` : '0'}
-                      </SelectItem>
-                    ))}
+                    {plans.map(p => {
+                      const price = typeof p === 'object' ? (p as any).price || 0 : 0;
+                      return (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name} — R$ {Number(price).toFixed(2)}/mês
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
