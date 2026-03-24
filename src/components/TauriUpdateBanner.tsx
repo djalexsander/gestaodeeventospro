@@ -51,8 +51,8 @@ export function TauriUpdateBanner() {
     setUpdating(true);
     try {
       await updateObj.downloadAndInstall();
-      const { relaunch } = await import("@tauri-apps/plugin-process");
-      await relaunch();
+      const process = await import("@tauri-apps/api/process");
+      await process.relaunch();
     } catch {
       setUpdating(false);
     }
