@@ -14,6 +14,12 @@ export function PwaUpdateBanner() {
         const update = registerSW({
           onNeedRefresh() {
             setNeedRefresh(true);
+            // Play notification sound
+            try {
+              const audio = new Audio('/notification.wav');
+              audio.volume = 0.5;
+              audio.play().catch(() => {});
+            } catch {}
           },
           onOfflineReady() {
             // silent
