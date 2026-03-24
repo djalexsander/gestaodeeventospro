@@ -278,6 +278,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <PwaUpdateBanner />
+      <TauriUpdateBanner />
 
       <AuthProvider>
         <CompanyProvider>
