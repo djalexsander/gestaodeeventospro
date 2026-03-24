@@ -8,7 +8,6 @@ import { CompanyProvider } from "@/context/CompanyContext";
 import { AppProvider } from "@/context/AppContext";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { AppLayout } from "@/components/AppLayout";
-import { PwaUpdateBanner } from "@/components/PwaUpdateBanner";
 import { TauriUpdateBanner } from "@/components/TauriUpdateBanner";
 import { Loader2 } from "lucide-react";
 
@@ -277,7 +276,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PwaUpdateBanner />
       <TauriUpdateBanner />
 
       <AuthProvider>
