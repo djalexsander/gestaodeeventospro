@@ -9,6 +9,7 @@ import { AppProvider } from "@/context/AppContext";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { AppLayout } from "@/components/AppLayout";
 import { PwaUpdateBanner } from "@/components/PwaUpdateBanner";
+import { TauriUpdateBanner } from "@/components/TauriUpdateBanner";
 import { Loader2 } from "lucide-react";
 
 import Index from "./pages/Index";
