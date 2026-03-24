@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download } from "lucide-react";
 import { exportSingleEventPdf } from "@/lib/exportPdf";
+import { downloadRiderPdf } from "@/lib/downloadPdf";
 
 interface EventDetailDrawerProps {
   open: boolean;
