@@ -61,6 +61,20 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
           <DetailRow icon={MapPin} label="Cidade" value={city ? `${city.name} - ${city.state}` : "—"} />
           <DetailRow icon={MapPin} label="Local" value={event.venue || "—"} />
           <DetailRow icon={Mic2} label="Rider Técnico" value={rider?.name || "—"} />
+          {rider && (rider.riderFileUrl || (artist?.riderFileUrl)) && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-7"
+              onClick={() => {
+                const url = rider.riderFileUrl || artist?.riderFileUrl;
+                const name = rider.riderFileName || artist?.riderFileName || 'rider.pdf';
+                if (url) downloadRiderPdf(url, name);
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" /> Baixar Rider PDF
+            </Button>
+          )}
           <DetailRow icon={Wrench} label="Montagem" value={event.setupTime || "—"} />
           <DetailRow icon={Clock} label="Show" value={event.showTime || "—"} />
 
