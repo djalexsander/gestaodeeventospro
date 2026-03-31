@@ -314,55 +314,77 @@ export default function AdminApprovals() {
               {planChanges.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhuma solicitação.</p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Plano Atual</TableHead>
-                      <TableHead>Plano Solicitado</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-[150px]">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Desktop table */}
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Empresa</TableHead>
+                          <TableHead>Plano Atual</TableHead>
+                          <TableHead>Plano Solicitado</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="w-[150px]">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {planChanges.map(r => (
+                          <TableRow key={r.id}>
+                            <TableCell className="font-medium">{r.companies?.name || "—"}</TableCell>
+                            <TableCell>{r.current_plan?.name || "—"}</TableCell>
+                            <TableCell className="font-semibold text-primary">{r.requested_plan?.name || "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{formatDate(r.created_at)}</TableCell>
+                            <TableCell><Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge></TableCell>
+                            <TableCell>
+                              {r.status === "pending" && (
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
+                                    {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                    Aprovar
+                                  </Button>
+                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
+                                    <XCircle className="h-3 w-3" />
+                                    Rejeitar
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile cards */}
+                  <div className="md:hidden space-y-3">
                     {planChanges.map(r => (
-                      <TableRow key={r.id}>
-                        <TableCell className="font-medium">{r.companies?.name || "—"}</TableCell>
-                        <TableCell>{r.current_plan?.name || "—"}</TableCell>
-                        <TableCell className="font-semibold text-primary">{r.requested_plan?.name || "—"}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{formatDate(r.created_at)}</TableCell>
-                        <TableCell><Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge></TableCell>
-                        <TableCell>
-                          {r.status === "pending" && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="gap-1 text-xs h-7"
-                                disabled={processing === r.id}
-                                onClick={() => handlePlanChangeAction(r.id, "approved", r)}
-                              >
-                                {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                                Aprovar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="gap-1 text-xs h-7"
-                                disabled={processing === r.id}
-                                onClick={() => handlePlanChangeAction(r.id, "rejected", r)}
-                              >
-                                <XCircle className="h-3 w-3" />
-                                Rejeitar
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
+                      <div key={r.id} className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{r.companies?.name || "—"}</span>
+                          <Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge>
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <p className="text-muted-foreground">Atual: {r.current_plan?.name || "—"}</p>
+                          <p className="font-semibold text-primary">Solicitado: {r.requested_plan?.name || "—"}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{formatDate(r.created_at)}</p>
+                        {r.status === "pending" && (
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="default" className="gap-1 text-xs" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
+                              {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                              Aprovar
+                            </Button>
+                            <Button size="sm" variant="destructive" className="gap-1 text-xs" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
+                              <XCircle className="h-3 w-3" />
+                              Rejeitar
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
