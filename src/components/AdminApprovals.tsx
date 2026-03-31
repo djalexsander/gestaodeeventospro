@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CheckCircle, XCircle, FileText, Eye, ArrowUpCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, FileText, Eye, ArrowUpCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface PaymentRow {
@@ -172,6 +173,22 @@ export default function AdminApprovals() {
     fetchAll();
   };
 
+  const handleDeletePayment = async (id: string) => {
+    setProcessing(id);
+    const { error } = await supabase.from("payment_submissions").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir"); } else { toast.success("Comprovante excluído."); }
+    setProcessing(null);
+    fetchAll();
+  };
+
+  const handleDeletePlanChange = async (id: string) => {
+    setProcessing(id);
+    const { error } = await supabase.from("plan_change_requests").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir"); } else { toast.success("Solicitação excluída."); }
+    setProcessing(null);
+    fetchAll();
+  };
+
   const statusLabel = (s: string) => {
     if (s === "pending") return "Pendente";
     if (s === "approved") return "Aprovado";
@@ -245,18 +262,37 @@ export default function AdminApprovals() {
                               )}
                             </TableCell>
                             <TableCell>
-                              {p.status === "pending" && (
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
-                                    {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                                    Aprovar
-                                  </Button>
-                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
-                                    <XCircle className="h-3 w-3" />
-                                    Rejeitar
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="flex gap-1">
+                                {p.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
+                                      {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                      Aprovar
+                                    </Button>
+                                    <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
+                                      <XCircle className="h-3 w-3" />
+                                      Rejeitar
+                                    </Button>
+                                  </>
+                                )}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="gap-1 text-xs h-7 text-destructive hover:text-destructive" disabled={processing === p.id}>
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir comprovante?</AlertDialogTitle>
+                                      <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeletePayment(p.id)}>Excluir</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -292,6 +328,23 @@ export default function AdminApprovals() {
                               </Button>
                             </>
                           )}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost" className="gap-1 text-xs text-destructive hover:text-destructive" disabled={processing === p.id}>
+                                <Trash2 className="h-3 w-3" /> Excluir
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir comprovante?</AlertDialogTitle>
+                                <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeletePayment(p.id)}>Excluir</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     ))}
@@ -337,18 +390,37 @@ export default function AdminApprovals() {
                             <TableCell className="text-sm text-muted-foreground">{formatDate(r.created_at)}</TableCell>
                             <TableCell><Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge></TableCell>
                             <TableCell>
-                              {r.status === "pending" && (
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
-                                    {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                                    Aprovar
-                                  </Button>
-                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
-                                    <XCircle className="h-3 w-3" />
-                                    Rejeitar
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="flex gap-1">
+                                {r.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
+                                      {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                      Aprovar
+                                    </Button>
+                                    <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
+                                      <XCircle className="h-3 w-3" />
+                                      Rejeitar
+                                    </Button>
+                                  </>
+                                )}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="gap-1 text-xs h-7 text-destructive hover:text-destructive" disabled={processing === r.id}>
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir solicitação?</AlertDialogTitle>
+                                      <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeletePlanChange(r.id)}>Excluir</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -381,6 +453,23 @@ export default function AdminApprovals() {
                             </Button>
                           </div>
                         )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost" className="gap-1 text-xs text-destructive hover:text-destructive" disabled={processing === r.id}>
+                              <Trash2 className="h-3 w-3" /> Excluir
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir solicitação?</AlertDialogTitle>
+                              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeletePlanChange(r.id)}>Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     ))}
                   </div>
