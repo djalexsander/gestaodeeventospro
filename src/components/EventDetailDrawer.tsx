@@ -121,7 +121,7 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
             <Button variant="outline" onClick={handleExportPdf} className="flex-1">
               <Download className="h-4 w-4 mr-2" /> Exportar PDF
             </Button>
-            {isAdmin && (
+            {isAdmin && !isReadOnly && (
               <>
                 <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
                   <Pencil className="h-4 w-4 mr-2" /> Editar
