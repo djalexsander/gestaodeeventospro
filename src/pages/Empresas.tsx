@@ -10,7 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, CreditCard } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, Loader2, Upload, ImageIcon, CreditCard, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 interface CompanyRow {
@@ -356,7 +360,23 @@ export default function Empresas() {
               </div>
               <div className="space-y-2">
                 <Label>Data de Vencimento</Label>
-                <Input type="date" value={expirationDate} onChange={e => setExpirationDate(e.target.value)} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !expirationDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {expirationDate ? format(new Date(expirationDate + "T12:00:00"), "dd/MM/yyyy") : "Selecionar"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={expirationDate ? new Date(expirationDate + "T12:00:00") : undefined}
+                      onSelect={(d) => setExpirationDate(d ? format(d, "yyyy-MM-dd") : "")}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <div className="flex gap-3 pt-2">
