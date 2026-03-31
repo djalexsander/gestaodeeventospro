@@ -102,7 +102,7 @@ export default function Riders() {
                     ) : "—"}
                   </TableCell>
                   <TableCell>
-                    {isAdmin && (
+                    {isAdmin && !isReadOnly && (
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-3 w-3" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteRider(r.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>

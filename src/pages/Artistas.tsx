@@ -106,7 +106,7 @@ export default function Artistas() {
                   ) : "—"}
                 </TableCell>
                 <TableCell>
-                  {isAdmin && (
+                  {isAdmin && !isReadOnly && (
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(a)}><Pencil className="h-3 w-3" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => deleteArtist(a.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>

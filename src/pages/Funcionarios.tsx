@@ -189,7 +189,7 @@ export default function Funcionarios() {
           <h1 className="text-2xl font-heading font-bold text-foreground">Funcionários</h1>
           <p className="text-muted-foreground text-sm">Gerencie sua equipe e freelancers</p>
         </div>
-        {isAdmin && (
+        {isAdmin && !isReadOnly && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={openAdd}>
