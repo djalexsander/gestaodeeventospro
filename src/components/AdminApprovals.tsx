@@ -390,18 +390,37 @@ export default function AdminApprovals() {
                             <TableCell className="text-sm text-muted-foreground">{formatDate(r.created_at)}</TableCell>
                             <TableCell><Badge variant={statusVariant(r.status)}>{statusLabel(r.status)}</Badge></TableCell>
                             <TableCell>
-                              {r.status === "pending" && (
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
-                                    {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                                    Aprovar
-                                  </Button>
-                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
-                                    <XCircle className="h-3 w-3" />
-                                    Rejeitar
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="flex gap-1">
+                                {r.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "approved", r)}>
+                                      {processing === r.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                      Aprovar
+                                    </Button>
+                                    <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === r.id} onClick={() => handlePlanChangeAction(r.id, "rejected", r)}>
+                                      <XCircle className="h-3 w-3" />
+                                      Rejeitar
+                                    </Button>
+                                  </>
+                                )}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="gap-1 text-xs h-7 text-destructive hover:text-destructive" disabled={processing === r.id}>
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir solicitação?</AlertDialogTitle>
+                                      <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeletePlanChange(r.id)}>Excluir</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
