@@ -68,9 +68,6 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     await supabase.from('notifications').insert(rows);
   }, [notifiedExpiration]);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [subscription, setSubscription] = useState<CompanySubscription | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const fetchPlans = useCallback(async () => {
     const { data } = await supabase.from('plans').select('*').eq('is_active', true).order('price');
