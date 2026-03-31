@@ -217,60 +217,86 @@ export default function AdminApprovals() {
               {payments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhum comprovante enviado.</p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Comprovante</TableHead>
-                      <TableHead className="w-[150px]">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Desktop table */}
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Empresa</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Comprovante</TableHead>
+                          <TableHead className="w-[150px]">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payments.map(p => (
+                          <TableRow key={p.id}>
+                            <TableCell className="font-medium">{p.companies?.name || "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{formatDate(p.created_at)}</TableCell>
+                            <TableCell><Badge variant={statusVariant(p.status)}>{statusLabel(p.status)}</Badge></TableCell>
+                            <TableCell>
+                              {p.receipt_url && (
+                                <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setPreviewUrl(p.receipt_url)}>
+                                  <Eye className="h-3 w-3" />
+                                  Ver
+                                </Button>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {p.status === "pending" && (
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
+                                    {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                    Aprovar
+                                  </Button>
+                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
+                                    <XCircle className="h-3 w-3" />
+                                    Rejeitar
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile cards */}
+                  <div className="md:hidden space-y-3">
                     {payments.map(p => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.companies?.name || "—"}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{formatDate(p.created_at)}</TableCell>
-                        <TableCell><Badge variant={statusVariant(p.status)}>{statusLabel(p.status)}</Badge></TableCell>
-                        <TableCell>
+                      <div key={p.id} className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{p.companies?.name || "—"}</span>
+                          <Badge variant={statusVariant(p.status)}>{statusLabel(p.status)}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{formatDate(p.created_at)}</p>
+                        <div className="flex flex-wrap gap-2">
                           {p.receipt_url && (
-                            <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setPreviewUrl(p.receipt_url)}>
+                            <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={() => setPreviewUrl(p.receipt_url)}>
                               <Eye className="h-3 w-3" />
-                              Ver
+                              Ver Comprovante
                             </Button>
                           )}
-                        </TableCell>
-                        <TableCell>
                           {p.status === "pending" && (
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="gap-1 text-xs h-7"
-                                disabled={processing === p.id}
-                                onClick={() => handlePaymentAction(p.id, "approved", p)}
-                              >
+                            <>
+                              <Button size="sm" variant="default" className="gap-1 text-xs" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
                                 {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
                                 Aprovar
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="gap-1 text-xs h-7"
-                                disabled={processing === p.id}
-                                onClick={() => handlePaymentAction(p.id, "rejected", p)}
-                              >
+                              <Button size="sm" variant="destructive" className="gap-1 text-xs" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
                                 <XCircle className="h-3 w-3" />
                                 Rejeitar
                               </Button>
-                            </div>
+                            </>
                           )}
-                        </TableCell>
-                      </TableRow>
+                        </div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
