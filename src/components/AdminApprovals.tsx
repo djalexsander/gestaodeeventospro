@@ -262,18 +262,37 @@ export default function AdminApprovals() {
                               )}
                             </TableCell>
                             <TableCell>
-                              {p.status === "pending" && (
-                                <div className="flex gap-1">
-                                  <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
-                                    {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
-                                    Aprovar
-                                  </Button>
-                                  <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
-                                    <XCircle className="h-3 w-3" />
-                                    Rejeitar
-                                  </Button>
-                                </div>
-                              )}
+                              <div className="flex gap-1">
+                                {p.status === "pending" && (
+                                  <>
+                                    <Button size="sm" variant="default" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "approved", p)}>
+                                      {processing === p.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />}
+                                      Aprovar
+                                    </Button>
+                                    <Button size="sm" variant="destructive" className="gap-1 text-xs h-7" disabled={processing === p.id} onClick={() => handlePaymentAction(p.id, "rejected", p)}>
+                                      <XCircle className="h-3 w-3" />
+                                      Rejeitar
+                                    </Button>
+                                  </>
+                                )}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost" className="gap-1 text-xs h-7 text-destructive hover:text-destructive" disabled={processing === p.id}>
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Excluir comprovante?</AlertDialogTitle>
+                                      <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeletePayment(p.id)}>Excluir</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
