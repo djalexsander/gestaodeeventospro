@@ -157,7 +157,7 @@ export default function Funcionarios() {
                 <p className="text-xs text-muted-foreground mt-1 truncate">{member.notes}</p>
               )}
             </div>
-            {isAdmin && (
+            {isAdmin && !isReadOnly && (
               <div className="flex items-center gap-1 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
