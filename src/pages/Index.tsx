@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { EventItem } from "@/types";
 import { EventCalendar } from "@/components/EventCalendar";
 import { EventFormDrawer } from "@/components/EventFormDrawer";
