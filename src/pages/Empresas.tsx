@@ -119,8 +119,35 @@ export default function Empresas() {
 
     if (editing) {
       const { error } = await supabase.from("companies").update(payload).eq("id", editing.id);
-      if (error) toast.error("Erro ao atualizar empresa");
-      else { toast.success("Empresa atualizada"); await fetchCompanies(); await refreshCompanies(); }
+      if (error) { toast.error("Erro ao atualizar empresa"); }
+      else {
+        // Update or create subscription
+        if (selectedPlanId !== "none") {
+          const plan = plans.find(p => p.id === selectedPlanId);
+          let expiresAt: string | null = expirationDate || null;
+          if (!expiresAt && plan && plan.duration_days) {
+            const exp = new Date();
+            exp.setDate(exp.getDate() + plan.duration_days);
+            expiresAt = exp.toISOString();
+          }
+          // Deactivate old subscriptions
+          await supabase.from("company_subscriptions").update({ status: "cancelled" }).eq("company_id", editing.id).eq("status", "active");
+          // Create new subscription
+          await supabase.from("company_subscriptions").insert({
+            company_id: editing.id,
+            plan_id: selectedPlanId,
+            starts_at: new Date().toISOString(),
+            expires_at: expiresAt,
+            status: selectedStatus,
+          });
+        } else {
+          // Remove active subscriptions if "Sem plano"
+          await supabase.from("company_subscriptions").update({ status: "cancelled" }).eq("company_id", editing.id).eq("status", "active");
+        }
+        toast.success("Empresa atualizada");
+        await fetchCompanies();
+        await refreshCompanies();
+      }
     } else {
       const { data: newCompany, error } = await supabase.from("companies").insert(payload).select().single();
       if (error) toast.error("Erro ao criar empresa");
