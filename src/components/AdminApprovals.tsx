@@ -453,6 +453,23 @@ export default function AdminApprovals() {
                             </Button>
                           </div>
                         )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost" className="gap-1 text-xs text-destructive hover:text-destructive" disabled={processing === r.id}>
+                              <Trash2 className="h-3 w-3" /> Excluir
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir solicitação?</AlertDialogTitle>
+                              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeletePlanChange(r.id)}>Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     ))}
                   </div>
