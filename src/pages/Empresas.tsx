@@ -85,15 +85,23 @@ export default function Empresas() {
     setDialogOpen(true);
   };
 
-  const openEdit = (c: CompanyRow) => {
+  const openEdit = async (c: CompanyRow) => {
     setEditing(c);
     setForm({ name: c.name, email: c.email || "", phone: c.phone || "" });
     setLogoFile(null);
-    const sub = activeSubs.find(s => s.company_id === c.id);
-    setSelectedPlanId("none");
+    // Fetch current active subscription with plan_id
+    const { data: subData } = await supabase
+      .from("company_subscriptions")
+      .select("*, plans(name)")
+      .eq("company_id", c.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setSelectedPlanId(subData?.plan_id || "none");
     setSelectedRole("company_admin");
-    setSelectedStatus(sub?.status || "active");
-    setExpirationDate(sub?.expires_at ? new Date(sub.expires_at).toISOString().split("T")[0] : "");
+    setSelectedStatus(subData?.status || "active");
+    setExpirationDate(subData?.expires_at ? new Date(subData.expires_at).toISOString().split("T")[0] : "");
     setDialogOpen(true);
   };
 
