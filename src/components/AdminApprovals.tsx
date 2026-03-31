@@ -173,6 +173,22 @@ export default function AdminApprovals() {
     fetchAll();
   };
 
+  const handleDeletePayment = async (id: string) => {
+    setProcessing(id);
+    const { error } = await supabase.from("payment_submissions").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir"); } else { toast.success("Comprovante excluído."); }
+    setProcessing(null);
+    fetchAll();
+  };
+
+  const handleDeletePlanChange = async (id: string) => {
+    setProcessing(id);
+    const { error } = await supabase.from("plan_change_requests").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir"); } else { toast.success("Solicitação excluída."); }
+    setProcessing(null);
+    fetchAll();
+  };
+
   const statusLabel = (s: string) => {
     if (s === "pending") return "Pendente";
     if (s === "approved") return "Aprovado";
