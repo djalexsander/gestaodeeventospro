@@ -238,12 +238,20 @@ export default function Empresas() {
                 <TableCell className="hidden md:table-cell">
                   {(() => {
                     const sub = activeSubs.find(s => s.company_id === c.id);
-                    return sub ? (
-                      <Badge variant="outline" className="gap-1">
-                        <CreditCard className="h-3 w-3" /> {sub.plan_name}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">Sem plano</span>
+                    if (!sub) return <span className="text-muted-foreground text-sm">Sem plano</span>;
+                    const daysLeft = sub.expires_at
+                      ? Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                      : null;
+                    const isExpired = daysLeft !== null && daysLeft <= 0;
+                    return (
+                      <div className="flex flex-col gap-0.5">
+                        <Badge variant={isExpired ? "destructive" : "outline"} className="gap-1 w-fit">
+                          <CreditCard className="h-3 w-3" /> {sub.plan_name}
+                        </Badge>
+                        <span className={`text-[11px] ${isExpired ? 'text-destructive' : daysLeft !== null && daysLeft <= 7 ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                          {daysLeft === null ? '∞ Vitalício' : isExpired ? 'Expirado' : `${daysLeft} dia${daysLeft !== 1 ? 's' : ''} restante${daysLeft !== 1 ? 's' : ''}`}
+                        </span>
+                      </div>
                     );
                   })()}
                 </TableCell>
