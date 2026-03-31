@@ -23,6 +23,7 @@ import { exportMonthlyPdf, exportPeriodPdf } from "@/lib/exportPdf";
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
   const { isAdmin } = useAuth();
+  const { isReadOnly } = useSubscription();
   const { activeCompany } = useCompany();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
