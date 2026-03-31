@@ -89,6 +89,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         sub.status = 'expired';
         // Update in DB
         await supabase.from('company_subscriptions').update({ status: 'expired' }).eq('id', sub.id);
+        // Notify all company users about expiration
+        await notifyCompanyUsersOfExpiration(activeCompanyId, sub.id);
       }
 
       setSubscription(sub);
