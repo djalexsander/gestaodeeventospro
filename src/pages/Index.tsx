@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { EventItem } from "@/types";
 import { EventCalendar } from "@/components/EventCalendar";
 import { EventFormDrawer } from "@/components/EventFormDrawer";
@@ -22,6 +23,7 @@ import { exportMonthlyPdf, exportPeriodPdf } from "@/lib/exportPdf";
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
   const { isAdmin } = useAuth();
+  const { isReadOnly } = useSubscription();
   const { activeCompany } = useCompany();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
@@ -211,7 +213,7 @@ export default function Dashboard() {
               </Tabs>
             </PopoverContent>
           </Popover>
-          {isAdmin && (
+          {isAdmin && !isReadOnly && (
             <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Novo Evento
             </Button>

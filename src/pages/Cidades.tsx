@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { City } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ const STATES = [
 export default function Cidades() {
   const { cities, addCity, updateCity, deleteCity } = useAppContext();
   const { isAdmin } = useAuth();
+  const { isReadOnly } = useSubscription();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<City | null>(null);
   const [form, setForm] = useState({ name: "", state: "" });
@@ -38,7 +40,7 @@ export default function Cidades() {
           <MapPin className="h-6 w-6 text-primary" />
           <h2 className="font-heading text-2xl font-bold">Cidades</h2>
         </div>
-        {isAdmin && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Cidade</Button>}
+        {isAdmin && !isReadOnly && <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Nova Cidade</Button>}
       </div>
 
       <div className="bg-card rounded-xl border overflow-hidden">
@@ -58,7 +60,7 @@ export default function Cidades() {
                 <TableCell className="font-medium">{c.name}</TableCell>
                 <TableCell className="text-muted-foreground">{c.state}</TableCell>
                 <TableCell>
-                  {isAdmin && (
+                  {isAdmin && !isReadOnly && (
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-3 w-3" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => deleteCity(c.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>

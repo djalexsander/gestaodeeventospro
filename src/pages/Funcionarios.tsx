@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { useCompany } from "@/context/CompanyContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface StaffMember {
 
 export default function Funcionarios() {
   const { isAdmin, isAdminMaster } = useAuth();
+  const { isReadOnly } = useSubscription();
   const { activeCompanyId } = useCompany();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,7 +157,7 @@ export default function Funcionarios() {
                 <p className="text-xs text-muted-foreground mt-1 truncate">{member.notes}</p>
               )}
             </div>
-            {isAdmin && (
+            {isAdmin && !isReadOnly && (
               <div className="flex items-center gap-1 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
@@ -187,7 +189,7 @@ export default function Funcionarios() {
           <h1 className="text-2xl font-heading font-bold text-foreground">Funcionários</h1>
           <p className="text-muted-foreground text-sm">Gerencie sua equipe e freelancers</p>
         </div>
-        {isAdmin && (
+        {isAdmin && !isReadOnly && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={openAdd}>

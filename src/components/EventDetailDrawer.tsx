@@ -1,5 +1,6 @@
 import { useAppContext } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface EventDetailDrawerProps {
 export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDetailDrawerProps) {
   const { getArtistById, getCityById, getRiderById, deleteEvent } = useAppContext();
   const { isAdmin } = useAuth();
+  const { isReadOnly } = useSubscription();
   
 
   if (!event) return null;
@@ -119,7 +121,7 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
             <Button variant="outline" onClick={handleExportPdf} className="flex-1">
               <Download className="h-4 w-4 mr-2" /> Exportar PDF
             </Button>
-            {isAdmin && (
+            {isAdmin && !isReadOnly && (
               <>
                 <Button onClick={() => { onOpenChange(false); onEdit(event); }} className="flex-1">
                   <Pencil className="h-4 w-4 mr-2" /> Editar

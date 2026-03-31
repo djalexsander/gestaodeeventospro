@@ -43,6 +43,31 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscription, setSubscription] = useState<CompanySubscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notifiedExpiration, setNotifiedExpiration] = useState<string | null>(null);
+
+  const notifyCompanyUsersOfExpiration = useCallback(async (companyId: string, subId: string) => {
+    // Only notify once per subscription
+    if (notifiedExpiration === subId) return;
+    setNotifiedExpiration(subId);
+
+    // Get all users from this company
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('company_id', companyId);
+
+    if (!profiles || profiles.length === 0) return;
+
+    const rows = profiles.map((p: any) => ({
+      user_id: p.id,
+      company_id: companyId,
+      type: 'warning',
+      title: 'Plano Expirado',
+      message: 'O plano da sua empresa expirou. O sistema está em modo somente leitura. Acesse Plano & Assinatura para renovar.',
+    }));
+
+    await supabase.from('notifications').insert(rows);
+  }, [notifiedExpiration]);
 
   const fetchPlans = useCallback(async () => {
     const { data } = await supabase.from('plans').select('*').eq('is_active', true).order('price');
@@ -89,6 +114,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         sub.status = 'expired';
         // Update in DB
         await supabase.from('company_subscriptions').update({ status: 'expired' }).eq('id', sub.id);
+        // Notify all company users about expiration
+        await notifyCompanyUsersOfExpiration(activeCompanyId, sub.id);
       }
 
       setSubscription(sub);
