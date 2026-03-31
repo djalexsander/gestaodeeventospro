@@ -213,7 +213,7 @@ export default function Dashboard() {
               </Tabs>
             </PopoverContent>
           </Popover>
-          {isAdmin && (
+          {isAdmin && !isReadOnly && (
             <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Novo Evento
             </Button>

@@ -24,6 +24,7 @@ interface StaffMember {
 
 export default function Funcionarios() {
   const { isAdmin, isAdminMaster } = useAuth();
+  const { isReadOnly } = useSubscription();
   const { activeCompanyId } = useCompany();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
