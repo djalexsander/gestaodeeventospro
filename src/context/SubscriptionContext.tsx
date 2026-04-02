@@ -39,7 +39,7 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { activeCompanyId } = useCompany();
-  const { user, isAdminMaster, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscription, setSubscription] = useState<CompanySubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,14 +134,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, [authLoading, user, fetchPlans, fetchSubscription]);
 
-  const isExpired = !isAdminMaster && (
+  const isExpired = (
     !subscription ||
     subscription.status === 'expired' ||
     subscription.status === 'cancelled' ||
     (subscription.expiresAt && new Date(subscription.expiresAt) < new Date())
   );
 
-  const isReadOnly = !isAdminMaster && !!user && !authLoading && isExpired;
+  const isReadOnly = !!user && !authLoading && isExpired;
 
   const daysRemaining = subscription?.expiresAt
     ? Math.max(0, Math.ceil((new Date(subscription.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
