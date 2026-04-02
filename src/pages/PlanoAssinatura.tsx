@@ -59,7 +59,7 @@ async function notifyMasters(title: string, message: string, type: string, refId
 export default function PlanoAssinatura() {
   const { activeCompanyId, activeCompany } = useCompany();
   const { subscription, plans, refreshSubscription } = useSubscription();
-  const { user, isAdminMaster } = useAuth();
+  const { user } = useAuth();
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -262,20 +262,6 @@ export default function PlanoAssinatura() {
     return new Date(d).toLocaleDateString("pt-BR");
   };
 
-  if (isAdminMaster) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <CreditCard className="h-6 w-6 text-primary" />
-          <h2 className="font-heading text-2xl font-bold">Plano & Assinatura</h2>
-        </div>
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-          <CreditCard className="h-10 w-10 opacity-40" />
-          <p className="text-sm">Admin Master não tem acesso aos dados de assinatura da empresa.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
