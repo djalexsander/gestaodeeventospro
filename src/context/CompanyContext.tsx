@@ -15,7 +15,7 @@ interface CompanyContextType {
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
-  const { user, isAdminMaster, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,23 +24,16 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (!user || authLoading) { setLoading(false); return; }
     setLoading(true);
 
-    if (isAdminMaster) {
-      const { data } = await supabase.from('companies').select('*').order('name');
-      if (data) {
-        const mapped = data.map((c: any) => ({ id: c.id, name: c.name, logoUrl: c.logo_url }));
-        setCompanies(mapped);
-        if (!activeCompanyId && mapped.length > 0) setActiveCompanyId(mapped[0].id);
-      }
-    } else {
-      const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single();
-      if (profile?.company_id) {
-        setActiveCompanyId(profile.company_id);
-        const { data } = await supabase.from('companies').select('*').eq('id', profile.company_id).single();
-        if (data) setCompanies([{ id: (data as any).id, name: (data as any).name, logoUrl: (data as any).logo_url }]);
-      }
+    // All users (including admin_master) load their own company from profiles
+    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single();
+    if (profile?.company_id) {
+      setActiveCompanyId(profile.company_id);
+      const { data } = await supabase.from('companies').select('*').eq('id', profile.company_id).single();
+      if (data) setCompanies([{ id: (data as any).id, name: (data as any).name, logoUrl: (data as any).logo_url }]);
     }
+
     setLoading(false);
-  }, [user, isAdminMaster, authLoading]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     if (!authLoading) {
