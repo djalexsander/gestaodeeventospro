@@ -135,13 +135,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [authLoading, user, fetchPlans, fetchSubscription]);
 
   const isExpired = (
-    !subscription ||
-    subscription.status === 'expired' ||
-    subscription.status === 'cancelled' ||
-    (subscription.expiresAt && new Date(subscription.expiresAt) < new Date())
+    !loading && !subscription
+  ) || (
+    subscription?.status === 'expired' ||
+    subscription?.status === 'cancelled' ||
+    (!!subscription?.expiresAt && new Date(subscription.expiresAt) < new Date())
   );
 
-  const isReadOnly = !!user && !authLoading && isExpired;
+  const isReadOnly = !!user && !authLoading && !loading && !!isExpired;
 
   const daysRemaining = subscription?.expiresAt
     ? Math.max(0, Math.ceil((new Date(subscription.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))

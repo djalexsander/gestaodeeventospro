@@ -2,7 +2,9 @@ import { AlertTriangle } from 'lucide-react';
 import { useSubscription } from '@/context/SubscriptionContext';
 
 export function SubscriptionBanner() {
-  const { isReadOnly, isExpired, daysRemaining, subscription } = useSubscription();
+  const { isReadOnly, isExpired, daysRemaining, subscription, loading } = useSubscription();
+
+  if (loading) return null;
 
   if (!isExpired) {
     // Show warning when < 5 days remaining
