@@ -42,12 +42,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [hasUpdates, setHasUpdates] = useState(false);
   const { activeCompanyId } = useCompany();
-  const { user, isAdminMaster, role, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
 
   const fetchAll = useCallback(async () => {
     if (authLoading) return;
 
-    if (!user || isAdminMaster) {
+    if (!user || !activeCompanyId) {
       setCities([]);
       setArtists([]);
       setRiders([]);
@@ -64,12 +64,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let ridersQ = supabase.from('technical_riders').select('*').order('name');
     let eventsQ = supabase.from('events').select('*').order('date');
 
-    if (activeCompanyId) {
-      citiesQ = citiesQ.eq('company_id', activeCompanyId);
-      artistsQ = artistsQ.eq('company_id', activeCompanyId);
-      ridersQ = ridersQ.eq('company_id', activeCompanyId);
-      eventsQ = eventsQ.eq('company_id', activeCompanyId);
-    }
+    citiesQ = citiesQ.eq('company_id', activeCompanyId);
+    artistsQ = artistsQ.eq('company_id', activeCompanyId);
+    ridersQ = ridersQ.eq('company_id', activeCompanyId);
+    eventsQ = eventsQ.eq('company_id', activeCompanyId);
 
     const [citiesRes, artistsRes, ridersRes, eventsRes] = await Promise.all([
       citiesQ, artistsQ, ridersQ, eventsQ,
@@ -99,7 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setLoading(false);
     setHasUpdates(false);
-  }, [activeCompanyId, authLoading, isAdminMaster, user, role]);
+  }, [activeCompanyId, authLoading, user, role]);
 
   useEffect(() => { void fetchAll(); }, [fetchAll]);
 

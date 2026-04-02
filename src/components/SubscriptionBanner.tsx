@@ -1,13 +1,8 @@
 import { AlertTriangle } from 'lucide-react';
 import { useSubscription } from '@/context/SubscriptionContext';
-import { useAuth } from '@/context/AuthContext';
 
 export function SubscriptionBanner() {
   const { isReadOnly, isExpired, daysRemaining, subscription } = useSubscription();
-  const { isAdminMaster } = useAuth();
-
-  // Admin Master never sees subscription banners
-  if (isAdminMaster) return null;
 
   if (!isExpired) {
     // Show warning when < 5 days remaining
