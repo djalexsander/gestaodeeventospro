@@ -115,22 +115,31 @@ jobs:
           SIGNATURE="$(cat "$SIG_FILE")"
           SETUP_NAME="$(basename "$SETUP_FILE")"
           PUB_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          NOTES="$(jq -r '.notes // "Nova versão"' latest.json 2>/dev/null || echo "Nova versão $TAG")"
-          URL="https://github.com/${REPO}/releases/download/${TAG}/${SETUP_NAME}"
+          NOTES="$(jq -r '.notes // empty' latest.json 2>/dev/null || true)"
+          if [[ -z "$NOTES" ]]; then
+            NOTES="Nova versão ${TAG}"
+          fi
+          # URL-encode the setup filename (handles spaces and unicode)
+          ENCODED_NAME="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$SETUP_NAME")"
+          URL="https://github.com/${REPO}/releases/download/${TAG}/${ENCODED_NAME}"
 
-          cat > latest.json <<EOF
-          {
-            "version": "${VERSION}",
-            "notes": ${NOTES@Q},
-            "pub_date": "${PUB_DATE}",
-            "platforms": {
-              "windows-x86_64": {
-                "signature": "${SIGNATURE}",
-                "url": "${URL}"
+          jq -n \
+            --arg version "$VERSION" \
+            --arg notes "$NOTES" \
+            --arg pub_date "$PUB_DATE" \
+            --arg signature "$SIGNATURE" \
+            --arg url "$URL" \
+            '{
+              version: $version,
+              notes: $notes,
+              pub_date: $pub_date,
+              platforms: {
+                "windows-x86_64": {
+                  signature: $signature,
+                  url: $url
+                }
               }
-            }
-          }
-          EOF
+            }' > latest.json
 
           echo "== latest.json =="
           cat latest.json
