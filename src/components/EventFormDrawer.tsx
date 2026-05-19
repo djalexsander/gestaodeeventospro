@@ -52,6 +52,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     notes: "",
     staffNotes: "",
     status: "Pendente" as EventStatus,
+    realizadoCom: "",
   });
 
   // Load all staff members
@@ -92,6 +93,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         notes: event.notes,
         staffNotes: event.staffNotes || "",
         status: event.status,
+        realizadoCom: event.realizadoCom || "",
       });
     } else {
       setForm({
@@ -108,6 +110,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         notes: "",
         staffNotes: "",
         status: "Pendente",
+        realizadoCom: "",
       });
     }
   }, [event, defaultDate, open]);
@@ -136,6 +139,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
       ...form,
       riderId: form.riderId || null,
       departureDate: form.departureDate || null,
+      realizadoCom: form.realizadoCom.trim() || null,
     };
 
     let eventId: string | undefined;
@@ -219,6 +223,15 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           <div className="space-y-2">
             <Label>Local</Label>
             <Input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Com quem será realizado</Label>
+            <Input
+              value={form.realizadoCom}
+              onChange={e => setForm(p => ({ ...p, realizadoCom: e.target.value }))}
+              placeholder="Ex: Contratante, empresa de som, produtora, artista, cliente..."
+            />
           </div>
 
           <div className="space-y-2">

@@ -5,7 +5,7 @@ import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download } from "lucide-react";
+import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download, Handshake } from "lucide-react";
 import { exportSingleEventPdf } from "@/lib/exportPdf";
 import { downloadRiderPdf } from "@/lib/downloadPdf";
 
@@ -62,6 +62,9 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
           <DetailRow icon={Music} label="Artista" value={artist?.name || "—"} />
           <DetailRow icon={MapPin} label="Cidade" value={city ? `${city.name} - ${city.state}` : "—"} />
           <DetailRow icon={MapPin} label="Local" value={event.venue || "—"} />
+          {event.realizadoCom && event.realizadoCom.trim() && (
+            <DetailRow icon={Handshake} label="Com quem será realizado" value={event.realizadoCom} />
+          )}
           <DetailRow icon={Mic2} label="Rider Técnico" value={rider?.name || "—"} />
           {rider && (rider.riderFileUrl || (artist?.riderFileUrl)) && (
             <Button
