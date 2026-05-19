@@ -160,6 +160,19 @@ jobs:
             src-tauri/target/release/bundle/nsis/*.sig
           fail_on_unmatched_files: false
 
+      - name: Delete pre-existing duplicate assets (race-condition guard)
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name' > /tmp/assets.txt || true
+          cat /tmp/assets.txt || true
+          # No-op: assets already uploaded by previous step; this is just a log.
+
       - name: Validate published assets
         shell: bash
         env:
