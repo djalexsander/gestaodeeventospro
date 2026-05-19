@@ -5,7 +5,7 @@ import { EventItem } from "@/types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download, Handshake } from "lucide-react";
+import { Clock, MapPin, Music, Mic2, Wrench, FileText, Trash2, Pencil, LogOut, Users, Download, Handshake, Phone, User } from "lucide-react";
 import { exportSingleEventPdf } from "@/lib/exportPdf";
 import { downloadRiderPdf } from "@/lib/downloadPdf";
 
@@ -62,8 +62,21 @@ export function EventDetailDrawer({ open, onOpenChange, event, onEdit }: EventDe
           <DetailRow icon={Music} label="Artista" value={artist?.name || "—"} />
           <DetailRow icon={MapPin} label="Cidade" value={city ? `${city.name} - ${city.state}` : "—"} />
           <DetailRow icon={MapPin} label="Local" value={event.venue || "—"} />
-          {event.realizadoCom && event.realizadoCom.trim() && (
-            <DetailRow icon={Handshake} label="Com quem será realizado" value={event.realizadoCom} />
+          {(event.contratanteNome || event.contratanteCidade || event.contratanteTelefone) && (
+            <div className="bg-muted rounded-lg p-4 space-y-2">
+              <h4 className="font-heading text-sm font-semibold flex items-center gap-2">
+                <Handshake className="h-4 w-4" /> Contratante
+              </h4>
+              {event.contratanteNome && (
+                <p className="text-xs text-muted-foreground flex items-center gap-2"><User className="h-3 w-3" /><strong>Nome:</strong> {event.contratanteNome}</p>
+              )}
+              {event.contratanteCidade && (
+                <p className="text-xs text-muted-foreground flex items-center gap-2"><MapPin className="h-3 w-3" /><strong>Cidade:</strong> {event.contratanteCidade}</p>
+              )}
+              {event.contratanteTelefone && (
+                <p className="text-xs text-muted-foreground flex items-center gap-2"><Phone className="h-3 w-3" /><strong>Telefone:</strong> {event.contratanteTelefone}</p>
+              )}
+            </div>
           )}
           <DetailRow icon={Mic2} label="Rider Técnico" value={rider?.name || "—"} />
           {rider && (rider.riderFileUrl || (artist?.riderFileUrl)) && (

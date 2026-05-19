@@ -52,7 +52,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     notes: "",
     staffNotes: "",
     status: "Pendente" as EventStatus,
-    realizadoCom: "",
+    contratanteNome: "",
+    contratanteCidade: "",
+    contratanteTelefone: "",
   });
 
   // Load all staff members
@@ -93,7 +95,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         notes: event.notes,
         staffNotes: event.staffNotes || "",
         status: event.status,
-        realizadoCom: event.realizadoCom || "",
+        contratanteNome: event.contratanteNome || "",
+        contratanteCidade: event.contratanteCidade || "",
+        contratanteTelefone: event.contratanteTelefone || "",
       });
     } else {
       setForm({
@@ -110,7 +114,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         notes: "",
         staffNotes: "",
         status: "Pendente",
-        realizadoCom: "",
+        contratanteNome: "",
+        contratanteCidade: "",
+        contratanteTelefone: "",
       });
     }
   }, [event, defaultDate, open]);
@@ -139,7 +145,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
       ...form,
       riderId: form.riderId || null,
       departureDate: form.departureDate || null,
-      realizadoCom: form.realizadoCom.trim() || null,
+      contratanteNome: form.contratanteNome.trim() || null,
+      contratanteCidade: form.contratanteCidade.trim() || null,
+      contratanteTelefone: form.contratanteTelefone.trim() || null,
     };
 
     let eventId: string | undefined;
@@ -225,13 +233,33 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
             <Input value={form.venue} onChange={e => setForm(p => ({ ...p, venue: e.target.value }))} />
           </div>
 
-          <div className="space-y-2">
-            <Label>Com quem será realizado</Label>
-            <Input
-              value={form.realizadoCom}
-              onChange={e => setForm(p => ({ ...p, realizadoCom: e.target.value }))}
-              placeholder="Ex: Contratante, empresa de som, produtora, artista, cliente..."
-            />
+          <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+            <h4 className="text-sm font-heading font-semibold text-foreground">Contratante</h4>
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input
+                value={form.contratanteNome}
+                onChange={e => setForm(p => ({ ...p, contratanteNome: e.target.value }))}
+                placeholder="Ex: Produtora, empresa, cliente..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Cidade</Label>
+                <Input
+                  value={form.contratanteCidade}
+                  onChange={e => setForm(p => ({ ...p, contratanteCidade: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Telefone</Label>
+                <Input
+                  value={form.contratanteTelefone}
+                  onChange={e => setForm(p => ({ ...p, contratanteTelefone: e.target.value }))}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -45,7 +45,9 @@ export interface EventItem {
   notes: string;
   staffNotes: string;
   status: EventStatus;
-  realizadoCom?: string | null;
+  contratanteNome?: string | null;
+  contratanteCidade?: string | null;
+  contratanteTelefone?: string | null;
 }
 
 export interface Company {

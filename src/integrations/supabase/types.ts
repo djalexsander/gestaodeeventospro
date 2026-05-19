@@ -215,6 +215,9 @@ export type Database = {
           artist_id: string
           city_id: string
           company_id: string | null
+          contratante_cidade: string | null
+          contratante_nome: string | null
+          contratante_telefone: string | null
           created_at: string
           date: string
           departure_date: string | null
@@ -222,7 +225,6 @@ export type Database = {
           id: string
           name: string
           notes: string
-          realizado_com: string | null
           rider_id: string | null
           setup_time: string
           show_time: string
@@ -235,6 +237,9 @@ export type Database = {
           artist_id: string
           city_id: string
           company_id?: string | null
+          contratante_cidade?: string | null
+          contratante_nome?: string | null
+          contratante_telefone?: string | null
           created_at?: string
           date: string
           departure_date?: string | null
@@ -242,7 +247,6 @@ export type Database = {
           id?: string
           name: string
           notes?: string
-          realizado_com?: string | null
           rider_id?: string | null
           setup_time?: string
           show_time?: string
@@ -255,6 +259,9 @@ export type Database = {
           artist_id?: string
           city_id?: string
           company_id?: string | null
+          contratante_cidade?: string | null
+          contratante_nome?: string | null
+          contratante_telefone?: string | null
           created_at?: string
           date?: string
           departure_date?: string | null
@@ -262,7 +269,6 @@ export type Database = {
           id?: string
           name?: string
           notes?: string
-          realizado_com?: string | null
           rider_id?: string | null
           setup_time?: string
           show_time?: string
