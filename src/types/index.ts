@@ -45,6 +45,7 @@ export interface EventItem {
   notes: string;
   staffNotes: string;
   status: EventStatus;
+  realizadoCom?: string | null;
 }
 
 export interface Company {
