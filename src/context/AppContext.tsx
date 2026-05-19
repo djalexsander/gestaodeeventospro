@@ -90,7 +90,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         showTime: e.show_time, departureDate: (e as any).departure_date || null,
         departureTime: (e as any).departure_time || '', notes: e.notes,
         staffNotes: (e as any).staff_notes || '', status: e.status as EventStatus,
-        realizadoCom: (e as any).realizado_com || null,
+        contratanteNome: (e as any).contratante_nome || null,
+        contratanteCidade: (e as any).contratante_cidade || null,
+        contratanteTelefone: (e as any).contratante_telefone || null,
       }));
       // Usuários comuns só veem eventos confirmados
       setEvents(role === 'user' ? mapped.filter(e => e.status === 'Confirmado') : mapped);
@@ -221,7 +223,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       show_time: event.showTime, notes: event.notes, status: event.status,
       departure_date: event.departureDate, departure_time: event.departureTime,
       staff_notes: event.staffNotes,
-      realizado_com: event.realizadoCom?.trim() ? event.realizadoCom.trim() : null,
+      contratante_nome: event.contratanteNome?.trim() ? event.contratanteNome.trim() : null,
+      contratante_cidade: event.contratanteCidade?.trim() ? event.contratanteCidade.trim() : null,
+      contratante_telefone: event.contratanteTelefone?.trim() ? event.contratanteTelefone.trim() : null,
     };
     if (activeCompanyId) insertData.company_id = activeCompanyId;
     const { data, error } = await supabase.from('events').insert(insertData).select().single();
@@ -232,7 +236,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       showTime: data.show_time, departureDate: (data as any).departure_date || null,
       departureTime: (data as any).departure_time || '', notes: data.notes,
       staffNotes: (data as any).staff_notes || '', status: data.status as EventStatus,
-      realizadoCom: (data as any).realizado_com || null,
+      contratanteNome: (data as any).contratante_nome || null,
+      contratanteCidade: (data as any).contratante_cidade || null,
+      contratanteTelefone: (data as any).contratante_telefone || null,
     }]);
     return data.id;
   }, [activeCompanyId]);
@@ -244,7 +250,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       show_time: event.showTime, notes: event.notes, status: event.status,
       departure_date: event.departureDate, departure_time: event.departureTime,
       staff_notes: event.staffNotes,
-      realizado_com: event.realizadoCom?.trim() ? event.realizadoCom.trim() : null,
+      contratante_nome: event.contratanteNome?.trim() ? event.contratanteNome.trim() : null,
+      contratante_cidade: event.contratanteCidade?.trim() ? event.contratanteCidade.trim() : null,
+      contratante_telefone: event.contratanteTelefone?.trim() ? event.contratanteTelefone.trim() : null,
     } as any).eq('id', event.id);
     if (error) { toast.error('Erro ao atualizar evento'); return; }
     setEvents(prev => prev.map(e => e.id === event.id ? event : e));
