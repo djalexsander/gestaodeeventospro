@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UpdateBanner } from "@/components/UpdateBanner";
+import { TauriUpdateBanner } from "@/components/TauriUpdateBanner";
 import { SubscriptionBanner } from "@/components/SubscriptionBanner";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -20,6 +21,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <NotificationBell />
           </header>
           
+          <TauriUpdateBanner />
           <UpdateBanner />
           <SubscriptionBanner />
           <main className="flex-1 overflow-auto p-4 md:p-6">
