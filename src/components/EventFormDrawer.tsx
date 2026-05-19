@@ -52,7 +52,9 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     notes: "",
     staffNotes: "",
     status: "Pendente" as EventStatus,
-    realizadoCom: "",
+    contratanteNome: "",
+    contratanteCidade: "",
+    contratanteTelefone: "",
   });
 
   // Load all staff members
