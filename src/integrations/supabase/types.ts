@@ -222,6 +222,7 @@ export type Database = {
           id: string
           name: string
           notes: string
+          realizado_com: string | null
           rider_id: string | null
           setup_time: string
           show_time: string
@@ -241,6 +242,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string
+          realizado_com?: string | null
           rider_id?: string | null
           setup_time?: string
           show_time?: string
@@ -260,6 +262,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string
+          realizado_com?: string | null
           rider_id?: string | null
           setup_time?: string
           show_time?: string
