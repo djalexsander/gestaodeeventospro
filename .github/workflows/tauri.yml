@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,6 +22,39 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Resolve version/tag
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+          else
+            TAG="v$(node -p "require('./package.json').version")"
+          fi
+          VERSION="${TAG#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG  Version: $VERSION  package.json: $PKG_VERSION"
+          if [[ "$VERSION" != "$PKG_VERSION" ]]; then
+            echo "::error::Tag version ($VERSION) does not match package.json ($PKG_VERSION)."
+            exit 1
+          fi
+
+      - name: Validate updater signing secrets
+        shell: bash
+        run: |
+          if [[ -z "${TAURI_SIGNING_PRIVATE_KEY}" ]]; then
+            echo "::error::Missing secret TAURI_SIGNING_PRIVATE_KEY"; exit 1
+          fi
+          if [[ -z "${TAURI_SIGNING_PRIVATE_KEY_PASSWORD}" ]]; then
+            echo "::error::Missing secret TAURI_SIGNING_PRIVATE_KEY_PASSWORD"; exit 1
+          fi
+          if ! grep -q '"pubkey"' src-tauri/tauri.conf.json; then
+            echo "::error::pubkey missing from src-tauri/tauri.conf.json"; exit 1
+          fi
+          echo "Signing secrets and pubkey present."
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -32,10 +66,7 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Install Rust
+      - name: Install Rust (stable)
         uses: dtolnay/rust-toolchain@stable
 
       - name: Rust cache
@@ -43,11 +74,100 @@ jobs:
         with:
           workspaces: ./src-tauri -> target
 
-      - name: Build and publish Tauri app
+      - name: Install dependencies (Bun)
+        run: bun install
+
+      - name: Sync version across manifests
+        run: bun run sync-version
+
+      - name: Build and publish Tauri app (signed)
+        id: tauri
         uses: tauri-apps/tauri-action@v0
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Gestão de Eventos Pro ${{ github.ref_name }}"
+          tagName: ${{ steps.version.outputs.tag }}
+          releaseName: "Gestão de Eventos Pro ${{ steps.version.outputs.tag }}"
           releaseBody: "Nova versão publicada automaticamente pelo GitHub Actions."
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
+
+      - name: List build artifacts
+        shell: bash
+        run: |
+          echo "== bundle dir =="
+          ls -R src-tauri/target/release/bundle || true
+
+      - name: Generate / validate latest.json
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          BUNDLE_DIR="src-tauri/target/release/bundle"
+          SIG_FILE="$(find "$BUNDLE_DIR" -type f -name '*.sig' | head -n1 || true)"
+          SETUP_FILE="$(find "$BUNDLE_DIR" -type f -name '*-setup.exe' | head -n1 || true)"
+          if [[ -z "$SIG_FILE" || -z "$SETUP_FILE" ]]; then
+            echo "::error::Missing .sig or -setup.exe artifact (sig=$SIG_FILE setup=$SETUP_FILE)"
+            exit 1
+          fi
+          SIGNATURE="$(cat "$SIG_FILE")"
+          SETUP_NAME="$(basename "$SETUP_FILE")"
+          PUB_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          NOTES="$(jq -r '.notes // "Nova versão"' latest.json 2>/dev/null || echo "Nova versão $TAG")"
+          URL="https://github.com/${REPO}/releases/download/${TAG}/${SETUP_NAME}"
+
+          cat > latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "notes": ${NOTES@Q},
+            "pub_date": "${PUB_DATE}",
+            "platforms": {
+              "windows-x86_64": {
+                "signature": "${SIGNATURE}",
+                "url": "${URL}"
+              }
+            }
+          }
+          EOF
+
+          echo "== latest.json =="
+          cat latest.json
+
+          for field in version notes pub_date platforms; do
+            jq -e ".${field}" latest.json > /dev/null || { echo "::error::latest.json missing $field"; exit 1; }
+          done
+          jq -e '.platforms."windows-x86_64".url' latest.json > /dev/null || { echo "::error::missing url"; exit 1; }
+          jq -e '.platforms."windows-x86_64".signature' latest.json > /dev/null || { echo "::error::missing signature"; exit 1; }
+
+      - name: Upload latest.json and installer to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: |
+            latest.json
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/bundle/nsis/*.sig
+          fail_on_unmatched_files: false
+
+      - name: Validate published assets
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          URL="https://github.com/${REPO}/releases/download/${TAG}/latest.json"
+          echo "Checking $URL"
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -L -o /tmp/latest.json -w "%{http_code}" "$URL" || echo 000)
+            if [[ "$code" == "200" ]]; then
+              echo "latest.json published OK"
+              cat /tmp/latest.json
+              exit 0
+            fi
+            echo "attempt $i: HTTP $code, retrying..."
+            sleep 5
+          done
+          echo "::error::Could not fetch latest.json from release"
+          exit 1
