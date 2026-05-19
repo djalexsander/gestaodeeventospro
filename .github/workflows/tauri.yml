@@ -156,8 +156,6 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           files: |
             latest.json
-            src-tauri/target/release/bundle/nsis/*-setup.exe
-            src-tauri/target/release/bundle/nsis/*.sig
           fail_on_unmatched_files: false
 
       - name: Validate published assets
