@@ -38,7 +38,7 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const { activeCompanyId } = useCompany();
+  const { activeCompanyId, loading: companyLoading } = useCompany();
   const { user, loading: authLoading } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subscription, setSubscription] = useState<CompanySubscription | null>(null);
@@ -81,7 +81,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchSubscription = useCallback(async () => {
-    if (!activeCompanyId) { setSubscription(null); setLoading(false); return; }
+    if (!activeCompanyId) {
+      setSubscription(null);
+      // Don't flip loading off yet — company may still be loading
+      if (!companyLoading) setLoading(false);
+      return;
+    }
+
+    setLoading(true);
 
     const { data } = await supabase
       .from('company_subscriptions')
@@ -123,26 +130,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       setSubscription(null);
     }
     setLoading(false);
-  }, [activeCompanyId]);
+  }, [activeCompanyId, companyLoading]);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      fetchPlans();
-      fetchSubscription();
-    } else {
-      setLoading(false);
-    }
+    if (authLoading) return;
+    if (!user) { setLoading(false); return; }
+    fetchPlans();
+    fetchSubscription();
   }, [authLoading, user, fetchPlans, fetchSubscription]);
 
   const isExpired = (
-    !loading && !subscription
+    !loading && !companyLoading && !!activeCompanyId && !subscription
   ) || (
     subscription?.status === 'expired' ||
     subscription?.status === 'cancelled' ||
     (!!subscription?.expiresAt && new Date(subscription.expiresAt) < new Date())
   );
 
-  const isReadOnly = !!user && !authLoading && !loading && !!isExpired;
+  const isReadOnly = !!user && !authLoading && !companyLoading && !loading && !!isExpired;
 
   const daysRemaining = subscription?.expiresAt
     ? Math.max(0, Math.ceil((new Date(subscription.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
