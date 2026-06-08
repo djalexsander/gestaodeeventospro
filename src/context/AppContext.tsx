@@ -217,6 +217,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Events CRUD
   const addEvent = useCallback(async (event: Omit<EventItem, 'id'>): Promise<string | undefined> => {
+    // Pré-validação: contexto do usuário/empresa
+    if (!user) {
+      console.error('[addEvent] Usuário não autenticado');
+      toast.error('Você precisa estar logado para criar eventos.');
+      return undefined;
+    }
+    if (!activeCompanyId) {
+      console.error('[addEvent] activeCompanyId ausente', { userId: user.id, role });
+      toast.error('Sua conta não está vinculada a uma empresa ativa. Entre em contato com o administrador.');
+      return undefined;
+    }
+    // Validação de campos obrigatórios
+    const missing: string[] = [];
+    if (!event.name?.trim()) missing.push('nome do evento');
+    if (!event.date) missing.push('data');
+    if (!event.cityId) missing.push('cidade');
+    if (!event.artistId) missing.push('artista');
+    if (missing.length > 0) {
+      console.error('[addEvent] Campos obrigatórios faltando:', missing);
+      toast.error(`Preencha os campos obrigatórios: ${missing.join(', ')}.`);
+      return undefined;
+    }
+
     const insertData: any = {
       date: event.date, name: event.name, city_id: event.cityId, venue: event.venue,
       artist_id: event.artistId, rider_id: event.riderId, setup_time: event.setupTime,
@@ -226,10 +249,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       contratante_nome: event.contratanteNome?.trim() ? event.contratanteNome.trim() : null,
       contratante_cidade: event.contratanteCidade?.trim() ? event.contratanteCidade.trim() : null,
       contratante_telefone: event.contratanteTelefone?.trim() ? event.contratanteTelefone.trim() : null,
+      company_id: activeCompanyId,
     };
-    if (activeCompanyId) insertData.company_id = activeCompanyId;
+
+    console.log('[addEvent] Diagnóstico:', {
+      userId: user.id,
+      role,
+      activeCompanyId,
+      companyIdInPayload: insertData.company_id,
+      payload: insertData,
+    });
+
     const { data, error } = await supabase.from('events').insert(insertData).select().single();
-    if (error) { toast.error('Erro ao criar evento'); return undefined; }
+    if (error) {
+      console.error('[addEvent] Erro Supabase:', error);
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('row-level security') || msg.includes('permission') || error.code === '42501') {
+        toast.error('Sem permissão para criar evento nesta empresa. Verifique seu vínculo com o administrador.');
+      } else if (msg.includes('foreign key') || error.code === '23503') {
+        toast.error('Cidade, artista ou empresa selecionada não existe mais. Recarregue a página.');
+      } else if (msg.includes('null value') || error.code === '23502') {
+        toast.error(`Campo obrigatório vazio: ${error.message}`);
+      } else {
+        toast.error(`Erro ao criar evento: ${error.message}`);
+      }
+      return undefined;
+    }
     setEvents(prev => [...prev, {
       id: data.id, date: data.date, name: data.name, cityId: data.city_id, venue: data.venue,
       artistId: data.artist_id, riderId: data.rider_id, setupTime: data.setup_time,
@@ -240,8 +285,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       contratanteCidade: (data as any).contratante_cidade || null,
       contratanteTelefone: (data as any).contratante_telefone || null,
     }]);
+    toast.success('Evento criado com sucesso!');
     return data.id;
-  }, [activeCompanyId]);
+  }, [activeCompanyId, user, role]);
 
   const updateEvent = useCallback(async (event: EventItem) => {
     const { error } = await supabase.from('events').update({
