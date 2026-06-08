@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
+import { useCompany } from "@/context/CompanyContext";
 import { EventItem, EventStatus } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -32,6 +33,7 @@ interface EventFormDrawerProps {
 
 export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: EventFormDrawerProps) {
   const { artists, cities, riders, addEvent, updateEvent, getRiderByArtistId, getArtistById } = useAppContext();
+  const { activeCompanyId } = useCompany();
   const [showAddArtist, setShowAddArtist] = useState(false);
   const [showAddCity, setShowAddCity] = useState(false);
   const [pendingArtistName, setPendingArtistName] = useState("");
@@ -61,11 +63,16 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
   // Load all staff members
   useEffect(() => {
     const fetchStaff = async () => {
-      const { data } = await supabase.from("staff_members").select("id, name, role, type").order("name");
+      if (!activeCompanyId) { setAllStaff([]); return; }
+      const { data } = await supabase
+        .from("staff_members")
+        .select("id, name, role, type")
+        .eq("company_id", activeCompanyId)
+        .order("name");
       if (data) setAllStaff(data);
     };
     if (open) fetchStaff();
-  }, [open]);
+  }, [open, activeCompanyId]);
 
   // Load assigned staff when editing
   useEffect(() => {
