@@ -8,6 +8,7 @@ import { CompanyProvider } from "@/context/CompanyContext";
 import { AppProvider } from "@/context/AppContext";
 import { SubscriptionProvider } from "@/context/SubscriptionContext";
 import { AppLayout } from "@/components/AppLayout";
+import { TauriUpdateBanner } from "@/components/TauriUpdateBanner";
 import { Loader2 } from "lucide-react";
 
 import Index from "./pages/Index";
@@ -275,6 +276,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <TauriUpdateBanner />
 
       <AuthProvider>
         <CompanyProvider>
