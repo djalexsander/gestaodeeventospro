@@ -14,6 +14,7 @@ import { SearchableSelect } from "@/components/SearchableSelect";
 import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
 import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
 import { Users } from "lucide-react";
+import { toast } from "sonner";
 
 interface StaffMember {
   id: string;
@@ -141,6 +142,17 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validação client-side antes de tentar salvar
+    const missing: string[] = [];
+    if (!form.name.trim()) missing.push('nome do evento');
+    if (!form.date) missing.push('data');
+    if (!form.cityId) missing.push('cidade');
+    if (!form.artistId) missing.push('artista');
+    if (missing.length > 0) {
+      toast.error(`Preencha: ${missing.join(', ')}.`);
+      return;
+    }
+
     const payload = {
       ...form,
       riderId: form.riderId || null,
@@ -152,19 +164,28 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
 
     let eventId: string | undefined;
     if (event) {
-      updateEvent({ ...payload, id: event.id });
+      await updateEvent({ ...payload, id: event.id });
       eventId = event.id;
     } else {
       eventId = await addEvent(payload);
+      if (!eventId) {
+        // addEvent já mostrou o toast com a causa real
+        return;
+      }
     }
 
     // Save staff assignments
     if (eventId) {
-      await supabase.from("event_staff").delete().eq("event_id", eventId);
+      const { error: delErr } = await supabase.from("event_staff").delete().eq("event_id", eventId);
+      if (delErr) console.error('[event_staff] erro ao remover antigos:', delErr);
       if (selectedStaffIds.length > 0) {
-        await supabase.from("event_staff").insert(
+        const { error: insErr } = await supabase.from("event_staff").insert(
           selectedStaffIds.map(sid => ({ event_id: eventId, staff_member_id: sid }))
         );
+        if (insErr) {
+          console.error('[event_staff] erro ao vincular equipe:', insErr);
+          toast.warning(`Evento salvo, mas houve falha ao vincular a equipe: ${insErr.message}`);
+        }
       }
     }
 
