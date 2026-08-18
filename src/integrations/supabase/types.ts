@@ -308,13 +308,120 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          device_id: string | null
+          error: string
+          id: string
+          notification_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          device_id?: string | null
+          error?: string
+          id?: string
+          notification_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          device_id?: string | null
+          error?: string
+          id?: string
+          notification_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "user_push_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          event_assignment_added: boolean
+          event_assignment_removed: boolean
+          event_cancelled: boolean
+          event_created: boolean
+          event_date_changed: boolean
+          event_location_changed: boolean
+          event_time_changed: boolean
+          event_updated: boolean
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          event_assignment_added?: boolean
+          event_assignment_removed?: boolean
+          event_cancelled?: boolean
+          event_created?: boolean
+          event_date_changed?: boolean
+          event_location_changed?: boolean
+          event_time_changed?: boolean
+          event_updated?: boolean
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          event_assignment_added?: boolean
+          event_assignment_removed?: boolean
+          event_cancelled?: boolean
+          event_created?: boolean
+          event_date_changed?: boolean
+          event_location_changed?: boolean
+          event_time_changed?: boolean
+          event_updated?: boolean
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           company_id: string | null
           created_at: string
+          dedupe_key: string | null
+          event_id: string | null
           id: string
           is_read: boolean
           message: string
+          read_at: string | null
           reference_id: string | null
           reference_type: string | null
           title: string
@@ -324,9 +431,12 @@ export type Database = {
         Insert: {
           company_id?: string | null
           created_at?: string
+          dedupe_key?: string | null
+          event_id?: string | null
           id?: string
           is_read?: boolean
           message?: string
+          read_at?: string | null
           reference_id?: string | null
           reference_type?: string | null
           title: string
@@ -336,9 +446,12 @@ export type Database = {
         Update: {
           company_id?: string | null
           created_at?: string
+          dedupe_key?: string | null
+          event_id?: string | null
           id?: string
           is_read?: boolean
           message?: string
+          read_at?: string | null
           reference_id?: string | null
           reference_type?: string | null
           title?: string
@@ -351,6 +464,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
@@ -588,6 +708,7 @@ export type Database = {
           role: string
           type: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           company_id?: string | null
@@ -599,6 +720,7 @@ export type Database = {
           role?: string
           type: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           company_id?: string | null
@@ -610,6 +732,7 @@ export type Database = {
           role?: string
           type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -617,6 +740,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -698,6 +828,59 @@ export type Database = {
           },
           {
             foreignKeyName: "technical_riders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_push_devices: {
+        Row: {
+          auth: string
+          company_id: string | null
+          created_at: string
+          device_name: string
+          enabled: boolean
+          endpoint: string
+          id: string
+          last_seen_at: string
+          p256dh: string
+          platform: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          company_id?: string | null
+          created_at?: string
+          device_name?: string
+          enabled?: boolean
+          endpoint: string
+          id?: string
+          last_seen_at?: string
+          p256dh: string
+          platform?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          company_id?: string | null
+          created_at?: string
+          device_name?: string
+          enabled?: boolean
+          endpoint?: string
+          id?: string
+          last_seen_at?: string
+          p256dh?: string
+          platform?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_push_devices_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"

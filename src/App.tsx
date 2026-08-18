@@ -12,6 +12,7 @@ import { TauriUpdateBanner } from "@/components/TauriUpdateBanner";
 import { Loader2 } from "lucide-react";
 
 import Index from "./pages/Index";
+import EventoDetalhe from "./pages/EventoDetalhe";
 import Artistas from "./pages/Artistas";
 import Riders from "./pages/Riders";
 import Cidades from "./pages/Cidades";
@@ -42,7 +43,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!session) return <Navigate to="/login" replace />;
+  if (!session) {
+    try {
+      const target = `${window.location.hash.replace(/^#/, "")}`;
+      if (target && target !== "/login") sessionStorage.setItem("pendingRoute", target);
+    } catch { /* noop */ }
+    return <Navigate to="/login" replace />;
+  }
 
   return <>{children}</>;
 }
@@ -104,6 +111,19 @@ function AppRoutes() {
             <CompanyRoute>
               <AppLayout>
                 <Index />
+              </AppLayout>
+            </CompanyRoute>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/eventos/:id"
+        element={
+          <ProtectedRoute>
+            <CompanyRoute>
+              <AppLayout>
+                <EventoDetalhe />
               </AppLayout>
             </CompanyRoute>
           </ProtectedRoute>
