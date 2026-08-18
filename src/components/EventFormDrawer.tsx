@@ -16,12 +16,14 @@ import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
 import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
+import { notifyEvent, type NotifyType } from "@/lib/push";
 
 interface StaffMember {
   id: string;
   name: string;
   role: string;
   type: string;
+  user_id?: string | null;
 }
 
 interface EventFormDrawerProps {
@@ -66,7 +68,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
       if (!activeCompanyId) { setAllStaff([]); return; }
       const { data } = await supabase
         .from("staff_members")
-        .select("id, name, role, type")
+        .select("id, name, role, type, user_id")
         .eq("company_id", activeCompanyId)
         .order("name");
       if (data) setAllStaff(data);
@@ -170,7 +172,12 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     };
 
     let eventId: string | undefined;
+    const previousStaffIds = event ? [...selectedStaffIds] : [];
+    let assignedBefore: string[] = [];
     if (event) {
+      const { data: before } = await supabase
+        .from("event_staff").select("staff_member_id").eq("event_id", event.id);
+      assignedBefore = (before ?? []).map(b => b.staff_member_id);
       await updateEvent({ ...payload, id: event.id });
       eventId = event.id;
     } else {
@@ -180,6 +187,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         return;
       }
     }
+    void previousStaffIds;
 
     // Save staff assignments
     if (eventId) {
@@ -193,6 +201,37 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           console.error('[event_staff] erro ao vincular equipe:', insErr);
           toast.warning(`Evento salvo, mas houve falha ao vincular a equipe: ${insErr.message}`);
         }
+      }
+    }
+
+    // Notificações (não bloqueiam o salvamento)
+    if (eventId) {
+      const userIdOf = (staffIds: string[]) =>
+        allStaff.filter(s => staffIds.includes(s.id) && s.user_id).map(s => s.user_id as string);
+
+      if (!event) {
+        notifyEvent({ eventId, type: "event_created", audience: "company" });
+        const added = userIdOf(selectedStaffIds);
+        if (added.length > 0) {
+          notifyEvent({ eventId, type: "event_assignment_added", staffUserIds: added });
+        }
+      } else {
+        const changes: NotifyType[] = [];
+        if (form.status === "Cancelado" && event.status !== "Cancelado") changes.push("event_cancelled");
+        if (form.date !== event.date) changes.push("event_date_changed");
+        if (form.showTime !== event.showTime || form.setupTime !== event.setupTime) changes.push("event_time_changed");
+        if (form.venue !== event.venue || form.cityId !== event.cityId) changes.push("event_location_changed");
+        if (changes.length === 0 && JSON.stringify(payload) !== JSON.stringify({
+          ...event, id: undefined,
+        })) {
+          changes.push("event_updated");
+        }
+        changes.slice(0, 2).forEach(type => notifyEvent({ eventId: eventId!, type, audience: "company" }));
+
+        const added = userIdOf(selectedStaffIds.filter(id => !assignedBefore.includes(id)));
+        const removed = userIdOf(assignedBefore.filter(id => !selectedStaffIds.includes(id)));
+        if (added.length > 0) notifyEvent({ eventId, type: "event_assignment_added", staffUserIds: added });
+        if (removed.length > 0) notifyEvent({ eventId, type: "event_assignment_removed", staffUserIds: removed });
       }
     }
 
