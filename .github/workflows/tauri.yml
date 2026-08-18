@@ -106,8 +106,10 @@ jobs:
         run: |
           set -e
           BUNDLE_DIR="src-tauri/target/release/bundle"
-          SIG_FILE="$(find "$BUNDLE_DIR" -type f -name '*.sig' | head -n1 || true)"
+          # IMPORTANT: the updater consumes the NSIS installer, so the signature
+          # MUST be the one generated for *-setup.exe (never the .msi signature).
           SETUP_FILE="$(find "$BUNDLE_DIR" -type f -name '*-setup.exe' | head -n1 || true)"
+          SIG_FILE="$(find "$BUNDLE_DIR" -type f -name '*-setup.exe.sig' | head -n1 || true)"
           if [[ -z "$SIG_FILE" || -z "$SETUP_FILE" ]]; then
             echo "::error::Missing .sig or -setup.exe artifact (sig=$SIG_FILE setup=$SETUP_FILE)"
             exit 1
@@ -119,9 +121,18 @@ jobs:
           if [[ -z "$NOTES" ]]; then
             NOTES="Nova versão ${TAG}"
           fi
-          # URL-encode the setup filename (handles spaces and unicode)
-          ENCODED_NAME="$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$SETUP_NAME")"
-          URL="https://github.com/${REPO}/releases/download/${TAG}/${ENCODED_NAME}"
+          # GitHub sanitizes asset names on upload (spaces/accents -> dots), so the
+          # download URL must use the *published asset name*, not the local filename.
+          ASSET_NAME="$(curl -sf -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/${REPO}/releases/tags/${TAG}" \
+            | jq -r '.assets[].name | select(endswith("-setup.exe"))' | head -n1)"
+          if [[ -z "$ASSET_NAME" || "$ASSET_NAME" == "null" ]]; then
+            echo "::warning::Could not read published asset name, falling back to local name"
+            ASSET_NAME="$(python3 -c "import re,sys; print(re.sub(r'[^A-Za-z0-9._-]+','.',sys.argv[1]))" "$SETUP_NAME")"
+          fi
+          URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET_NAME}"
+          echo "Updater artifact: $SETUP_NAME -> $ASSET_NAME"
+          echo "Signature file: $SIG_FILE"
 
           jq -n \
             --arg version "$VERSION" \
@@ -149,6 +160,13 @@ jobs:
           done
           jq -e '.platforms."windows-x86_64".url' latest.json > /dev/null || { echo "::error::missing url"; exit 1; }
           jq -e '.platforms."windows-x86_64".signature' latest.json > /dev/null || { echo "::error::missing signature"; exit 1; }
+
+          # Fail fast if the URL is not actually downloadable
+          CODE="$(curl -s -o /dev/null -L -w '%{http_code}' "$URL" || echo 000)"
+          if [[ "$CODE" != "200" ]]; then
+            echo "::error::Updater URL not reachable (HTTP $CODE): $URL"; exit 1
+          fi
+          echo "Updater URL reachable: $URL"
 
       - name: Upload latest.json and installer to release
         uses: softprops/action-gh-release@v2
