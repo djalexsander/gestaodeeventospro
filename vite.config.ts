@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
         filename: "sw.ts",
         injectManifest: {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          // index.html NUNCA vai para o precache: navegações precisam passar
+          // pela rota NetworkFirst, senão o Android continua servindo o HTML
+          // antigo (cache-first) mesmo com um SW novo já ativo.
+          globIgnores: ["**/index.html"],
         },
         includeAssets: ["favicon.ico", "pwa-192x192.png"],
         manifest: {
