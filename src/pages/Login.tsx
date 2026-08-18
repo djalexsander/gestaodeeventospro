@@ -25,7 +25,17 @@ export default function Login() {
     );
   }
 
-  if (session) return <Navigate to="/" replace />;
+  if (session) {
+    let target = "/";
+    try {
+      const pending = sessionStorage.getItem("pendingRoute");
+      if (pending) {
+        target = pending;
+        sessionStorage.removeItem("pendingRoute");
+      }
+    } catch { /* noop */ }
+    return <Navigate to={target} replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
