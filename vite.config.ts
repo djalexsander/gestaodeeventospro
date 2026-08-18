@@ -16,6 +16,12 @@ export default defineConfig(({ mode }) => {
     plugins.push(
       VitePWA({
         registerType: "prompt",
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.ts",
+        injectManifest: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        },
         includeAssets: ["favicon.ico", "pwa-192x192.png"],
         manifest: {
           name: "Gestão de Eventos Pro",
@@ -41,22 +47,6 @@ export default defineConfig(({ mode }) => {
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable",
-            },
-          ],
-        },
-        workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "supabase-api",
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 300,
-                },
-              },
             },
           ],
         },
