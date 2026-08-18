@@ -207,6 +207,10 @@ serve(async (req) => {
       return json({ error: `Falha ao registrar notificações: ${insertError.message}` }, 500);
     }
 
+    console.info(
+      `[notify-event] notification persisted type=${type} event=${event.id} rows=${inserted?.length ?? 0} recipients=${recipientIds.length}`,
+    );
+
     let notifByUser = new Map((inserted ?? []).map((n) => [n.user_id, n.id]));
 
     // Linhas ignoradas por duplicidade: recupera os ids existentes para que o
@@ -223,12 +227,19 @@ serve(async (req) => {
       ]);
     }
 
+    console.info(`[notify-event] notification_ids resolvidos=${notifByUser.size}`);
+
     // Push
     const { data: devices } = await admin
       .from("user_push_devices")
       .select("id, user_id, endpoint, p256dh, auth")
       .in("user_id", recipientIds)
       .eq("enabled", true);
+
+    console.info(`[notify-event] push devices found=${devices?.length ?? 0}`);
+    if ((devices ?? []).length === 0) {
+      console.warn(`[notify-event] nenhum dispositivo habilitado para recipients=${recipientIds.join(",")}`);
+    }
 
     const payloadFor = (uid: string) => ({
       title,
@@ -241,7 +252,15 @@ serve(async (req) => {
 
     const results = await Promise.all(
       (devices ?? []).map(async (d) => {
+        console.info(`[notify-event] sending push device=${d.id} user=${d.user_id}`);
         const res = await sendPush(d as PushDevice, payloadFor(d.user_id));
+        if (res.status === "sent") {
+          console.info(`[notify-event] push success device=${d.id}`);
+        } else {
+          console.error(
+            `[notify-event] PUSH ERROR\nstatus: ${res.status}\nbody: ${res.error}\nsubscription/device: ${d.id} (user ${d.user_id})`,
+          );
+        }
         return { ...res, userId: d.user_id };
       }),
     );
