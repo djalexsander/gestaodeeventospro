@@ -16,7 +16,7 @@ import { QuickAddArtistDialog } from "@/components/QuickAddArtistDialog";
 import { QuickAddCityDialog } from "@/components/QuickAddCityDialog";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
-import { notifyEvent, type NotifyType } from "@/lib/push";
+import { notifyEvent, type NotifyType, type EventChange } from "@/lib/push";
 
 interface StaffMember {
   id: string;
