@@ -148,7 +148,7 @@ serve(async (req) => {
     const prefMap = new Map((prefs ?? []).map((p) => [p.user_id, p as Record<string, boolean>]));
     recipientIds = recipientIds.filter((id) => {
       const p = prefMap.get(id);
-      return !p || p[type] !== false;
+      return !p || p[PREF_COLUMN[type]] !== false;
     });
     if (recipientIds.length === 0) return json({ success: true, recipients: 0 });
 
