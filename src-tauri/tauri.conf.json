@@ -41,7 +41,9 @@
       "endpoints": [
         "https://github.com/djalexsander/gestaodeeventospro/releases/latest/download/latest.json"
       ],
-      "dialog": true
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }
