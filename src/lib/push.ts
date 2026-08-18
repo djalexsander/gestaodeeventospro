@@ -60,6 +60,38 @@ export async function getCurrentSubscription(): Promise<PushSubscription | null>
   return await reg.pushManager.getSubscription();
 }
 
+function sameServerKey(sub: PushSubscription, publicKey: string): boolean {
+  const current = sub.options?.applicationServerKey;
+  if (!current) return false;
+  const expected = urlBase64ToUint8Array(publicKey);
+  const actual = new Uint8Array(current as ArrayBuffer);
+  if (actual.length !== expected.length) return false;
+  return actual.every((b, i) => b === expected[i]);
+}
+
+async function fetchPublicKey(): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke("push-public-key");
+  if (error) return null;
+  return (data as { publicKey?: string } | null)?.publicKey ?? null;
+}
+
+/** Envia um push de teste para os dispositivos deste usuário. */
+export async function sendTestPush(): Promise<{ ok: boolean; sent?: number; error?: string }> {
+  const { data, error } = await supabase.functions.invoke("push-test");
+  if (error) return { ok: false, error: error.message };
+  const res = data as { success?: boolean; sent?: number; reason?: string } | null;
+  if (!res?.success) {
+    return {
+      ok: false,
+      error:
+        res?.reason === "sem_dispositivos"
+          ? "Nenhum dispositivo inscrito. Ative as notificações novamente."
+          : "O servidor não conseguiu entregar o push.",
+    };
+  }
+  return { ok: true, sent: res.sent };
+}
+
 export async function enablePush(): Promise<{ ok: boolean; error?: string }> {
   if (!isPushSupported()) {
     return { ok: false, error: "Este dispositivo/navegador não suporta notificações push." };
@@ -79,13 +111,21 @@ export async function enablePush(): Promise<{ ok: boolean; error?: string }> {
   const reg = await getRegistration();
   if (!reg) return { ok: false, error: "Service worker indisponível." };
 
-  const { data: keyData, error: keyError } = await supabase.functions.invoke("push-public-key");
-  const publicKey = (keyData as { publicKey?: string } | null)?.publicKey;
-  if (keyError || !publicKey) {
+  const publicKey = await fetchPublicKey();
+  if (!publicKey) {
     return { ok: false, error: "Não foi possível obter a chave de notificações." };
   }
 
   let sub = await reg.pushManager.getSubscription();
+  // Inscrição criada com outra chave VAPID nunca receberá push: recria.
+  if (sub && !sameServerKey(sub, publicKey)) {
+    try {
+      await sub.unsubscribe();
+    } catch {
+      /* ignora */
+    }
+    sub = null;
+  }
   if (!sub) {
     try {
       sub = await reg.pushManager.subscribe({

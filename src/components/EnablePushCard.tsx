@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, BellOff, Loader2 } from "lucide-react";
+import { Bell, BellOff, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -10,11 +10,13 @@ import {
   isPushSupported,
   isStandalonePWA,
   permissionStatus,
+  sendTestPush,
 } from "@/lib/push";
 
 export function EnablePushCard({ compact = false }: { compact?: boolean }) {
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -61,16 +63,30 @@ export function EnablePushCard({ compact = false }: { compact?: boolean }) {
     }
   };
 
+  const handleTest = async () => {
+    setTesting(true);
+    const res = await sendTestPush();
+    setTesting(false);
+    if (res.ok) toast.success(`Push de teste enviado (${res.sent} dispositivo(s)).`);
+    else toast.error(res.error ?? "Falha ao enviar push de teste.");
+  };
+
   if (subscribed === null) return null;
 
   if (subscribed) {
     return (
-      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
         <span className="text-xs text-muted-foreground">Notificações ativas neste dispositivo</span>
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleDisable} disabled={busy}>
-          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <BellOff className="h-3.5 w-3.5" />}
-          Desativar
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleTest} disabled={testing}>
+            {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Testar
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={handleDisable} disabled={busy}>
+            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <BellOff className="h-3.5 w-3.5" />}
+            Desativar
+          </Button>
+        </div>
       </div>
     );
   }

@@ -66,15 +66,29 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Gestão de Eventos Pro";
   const url = payload.url || (payload.eventId ? `/#/eventos/${payload.eventId}` : "/#/eventos");
 
+  // A notificação PRECISA ser exibida (userVisibleOnly). Qualquer falha aqui
+  // faz o navegador mostrar o aviso genérico "site atualizado em segundo
+  // plano" — por isso há fallback e log explícito.
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: payload.body || "",
-      icon: "/pwa-192x192.png",
-      badge: "/pwa-192x192.png",
-      tag: payload.eventId ? `event-${payload.eventId}-${payload.type ?? ""}` : undefined,
-      renotify: !!payload.eventId,
-      data: { url, eventId: payload.eventId ?? null, notificationId: payload.notificationId ?? null },
-    } as NotificationOptions),
+    (async () => {
+      const options: NotificationOptions = {
+        body: payload.body || "",
+        icon: "/pwa-192x192.png",
+        badge: "/pwa-192x192.png",
+        // Tag única por ocorrência: nunca substitui/silencia um aviso anterior.
+        tag: payload.notificationId
+          ? `notif-${payload.notificationId}`
+          : `push-${Date.now()}`,
+        data: { url, eventId: payload.eventId ?? null, notificationId: payload.notificationId ?? null },
+      };
+      try {
+        await self.registration.showNotification(title, options);
+        console.info("[SW] push shown", payload.type ?? "");
+      } catch (e) {
+        console.error("[SW] showNotification falhou", e);
+        await self.registration.showNotification(title, { body: payload.body || "" });
+      }
+    })(),
   );
 });
 
