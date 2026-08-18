@@ -90,6 +90,11 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        // Tauri builds disable vite-plugin-pwa, so the virtual module does not
+        // exist. Point it at a no-op stub so rollup can resolve the import.
+        ...(isTauri
+          ? { "virtual:pwa-register": path.resolve(__dirname, "./src/lib/pwa-register-stub.ts") }
+          : {}),
       },
     },
   };
