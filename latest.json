@@ -1,11 +1,11 @@
 {
-  "version": "1.3.4",
-  "notes": "v1.3.4 - Correção da listagem de funcionários por empresa.",
-  "pub_date": "2026-05-19T00:00:00Z",
+  "version": "1.3.5",
+  "notes": "v1.3.5 - Notificações Push de eventos, vínculo Funcionário ↔ Usuário e registro seguro do Service Worker.",
+  "pub_date": "2026-08-18T14:36:47Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk2N0U5MEZEOTQwNjk0NEMKUldSTWxBYVUvWkIrbG5RWGtxL0liVlhDUkFzTEtYV1U4Zjd4Rms2YjZNcFhoQ1ZzRjNKL3VwNkkK",
-      "url": "https://github.com/djalexsander/gestaodeeventospro/releases/latest/download/Gestao.de.Eventos.Pro_1.3.4_x64-setup.exe"
+      "url": "https://github.com/djalexsander/gestaodeeventospro/releases/latest/download/Gestao.de.Eventos.Pro_1.3.5_x64-setup.exe"
     }
   }
 }
