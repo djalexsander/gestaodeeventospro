@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
+import { registerRoute, NavigationRoute } from "workbox-routing";
 import { NetworkFirst } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 
@@ -8,6 +8,19 @@ declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: Array<{ url: str
 
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
+
+// Navegações (HTML) sempre NetworkFirst — nunca cache-first, para o app
+// perceber novas versões assim que voltar a ter rede.
+registerRoute(
+  new NavigationRoute(
+    new NetworkFirst({
+      cacheName: "html-navigations",
+      networkTimeoutSeconds: 5,
+      plugins: [new ExpirationPlugin({ maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 })],
+    }),
+    { denylist: [/^\/~oauth/] },
+  ),
+);
 
 registerRoute(
   ({ url }) => /\.supabase\.co$/i.test(url.hostname),
