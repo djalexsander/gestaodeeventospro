@@ -1,21 +1,26 @@
-import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, Download, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { isTauri } from "@/lib/platform";
 
 const DISMISS_KEY = "tauri:dismissedUpdateVersion";
 
+type Phase = "idle" | "checking" | "downloading" | "installing" | "relaunching" | "error";
+
 export function TauriUpdateBanner() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [updating, setUpdating] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [updateObj, setUpdateObj] = useState<any>(null);
   const [availableVersion, setAvailableVersion] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState<number | null>(null);
   const [downloaded, setDownloaded] = useState(0);
   const [total, setTotal] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const runningRef = useRef(false);
+
+  const updating = phase === "downloading" || phase === "installing" || phase === "relaunching";
 
   useEffect(() => {
     if (!isTauri()) return;
@@ -73,25 +78,30 @@ export function TauriUpdateBanner() {
   };
 
   const handleUpdate = async () => {
+    if (runningRef.current) return;
     if (!updateObj) {
-      console.error("[Updater] handleUpdate called but updateObj is null");
+      console.error("[Updater] ERROR: handleUpdate called but update object is null");
+      setErrorMsg("Não foi possível iniciar a atualização. Reinicie o aplicativo e tente novamente.");
+      setPhase("error");
       return;
     }
-    console.log("[Updater] User clicked Atualizar agora");
-    setUpdating(true);
+    runningRef.current = true;
+    console.log("[Updater] update detected");
+    console.log("[Updater] version:", availableVersion);
     setProgress(0);
     setErrorMsg(null);
+    setPhase("downloading");
     try {
       let contentLength = 0;
       let received = 0;
-      console.log("[Updater] Starting downloadAndInstall...");
+      console.log("[Updater] starting download");
       await updateObj.downloadAndInstall((event: any) => {
-        console.log("[Updater] event:", event);
         switch (event?.event) {
           case "Started":
             contentLength = event.data?.contentLength ?? 0;
             setTotal(contentLength);
             setProgress(0);
+            console.log("[Updater] download started, bytes:", contentLength);
             break;
           case "Progress":
             received += event.data?.chunkLength ?? 0;
@@ -101,26 +111,54 @@ export function TauriUpdateBanner() {
             }
             break;
           case "Finished":
-            console.log("[Updater] Download finished, installing...");
+            console.log("[Updater] download completed");
+            console.log("[Updater] starting install");
             setProgress(100);
+            setPhase("installing");
             break;
         }
       });
-      console.log("[Updater] downloadAndInstall completed, relaunching...");
+      console.log("[Updater] install completed");
       // Clear dismissal so future updates show
       localStorage.removeItem(DISMISS_KEY);
+      setPhase("relaunching");
+      console.log("[Updater] relaunching");
       try {
         const { relaunch } = await import("@tauri-apps/plugin-process");
         await relaunch();
       } catch (relaunchErr) {
-        console.error("[Updater] relaunch failed, reloading window:", relaunchErr);
+        console.error("[Updater] ERROR: relaunch failed:", relaunchErr);
         window.location.reload();
       }
     } catch (err: any) {
-      console.error("[Updater] downloadAndInstall failed:", err);
-      setErrorMsg(String(err?.message ?? err));
-      setUpdating(false);
+      console.error("[Updater] ERROR:", err);
+      setErrorMsg(
+        "Não foi possível instalar a atualização. Tente novamente ou reinicie o aplicativo."
+      );
+      setPhase("error");
       setProgress(null);
+      runningRef.current = false;
+    }
+  };
+
+  const statusLabel = () => {
+    switch (phase) {
+      case "checking":
+        return "Verificando atualização...";
+      case "downloading":
+        return progress !== null && progress > 0
+          ? `Baixando atualização... ${progress}%`
+          : "Baixando atualização...";
+      case "installing":
+        return "Instalando atualização...";
+      case "relaunching":
+        return "Reiniciando...";
+      case "error":
+        return "Falha ao atualizar";
+      default:
+        return availableVersion
+          ? `Nova atualização disponível! (v${availableVersion})`
+          : "Nova atualização disponível!";
     }
   };
 
@@ -128,18 +166,14 @@ export function TauriUpdateBanner() {
     <div className="fixed top-0 left-0 right-0 z-[100] bg-primary text-primary-foreground px-4 py-3 shadow-lg animate-in slide-in-from-top-2">
       <div className="flex items-center justify-between gap-3 text-sm">
         <div className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          <span className="font-semibold">
-            {updating
-              ? progress !== null && progress < 100
-                ? `Baixando atualização... ${progress}%`
-                : progress === 100
-                ? "Instalando..."
-                : "Preparando atualização..."
-              : availableVersion
-              ? `Nova atualização disponível! (v${availableVersion})`
-              : "Nova atualização disponível!"}
-          </span>
+          {updating ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : phase === "error" ? (
+            <AlertTriangle className="h-4 w-4" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          <span className="font-semibold">{statusLabel()}</span>
         </div>
         <div className="flex items-center gap-2">
           {!updating && (
@@ -152,7 +186,7 @@ export function TauriUpdateBanner() {
                 className="gap-2 font-semibold"
               >
                 <Download className="h-3.5 w-3.5" />
-                Atualizar agora
+                {phase === "error" ? "Tentar novamente" : "Atualizar agora"}
               </Button>
               <Button
                 size="sm"
