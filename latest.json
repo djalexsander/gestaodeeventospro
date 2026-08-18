@@ -1,11 +1,11 @@
 {
   "version": "1.3.5",
-  "notes": "v1.3.5 - Notificações Push de eventos, vínculo Funcionário ↔ Usuário e registro seguro do Service Worker.",
+  "notes": "v1.3.5 - Notificações Push de eventos, vínculo Funcionário ↔ Usuário e correção do fluxo de atualização automática.",
   "pub_date": "2026-08-18T14:36:47Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk2N0U5MEZEOTQwNjk0NEMKUldSTWxBYVUvWkIrbG5RWGtxL0liVlhDUkFzTEtYV1U4Zjd4Rms2YjZNcFhoQ1ZzRjNKL3VwNkkK",
-      "url": "https://github.com/djalexsander/gestaodeeventospro/releases/latest/download/Gestao.de.Eventos.Pro_1.3.5_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSTWxBYVUvWkIrbHFxN09FMjJuWmRmVWhNSVkrSEUzV05QN2dQNDd5dlFkdzhGODk0bjBtYVVqb1g5ZVNSK2VnL3VqUEY3bmxGVnpRbjFrZzJ0NnpHcHQ0RGpwSTNSRndRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3MDY3NTkwCWZpbGU6R2VzdMOjbyBkZSBFdmVudG9zIFByb18xLjMuNV94NjQtc2V0dXAuZXhlCnFlM1kvTFkxays2ZXhJU2JxQ0c2ZzFuV21Hc1NNWVBRQ3JXa1MxZXAwSmZVSEJ3RW5sZm9iYmI1dnl4b3E4S1Y1d091MmFWdXk3bUxiOEV0OFJnbkF3PT0K",
+      "url": "https://github.com/djalexsander/gestaodeeventospro/releases/download/v1.3.5/Gestao.de.Eventos.Pro_1.3.5_x64-setup.exe"
     }
   }
 }
