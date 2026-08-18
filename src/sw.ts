@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
+import { clientsClaim } from "workbox-core";
 import { registerRoute, NavigationRoute } from "workbox-routing";
 import { NetworkFirst } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
@@ -9,13 +10,21 @@ declare const self: ServiceWorkerGlobalScope & { __WB_MANIFEST: Array<{ url: str
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
+// Assume o controle dos clientes já abertos assim que ativar (essencial no
+// Android, onde o processo do PWA permanece vivo entre "fechamentos").
+clientsClaim();
+
+self.addEventListener("activate", () => {
+  console.info("[SW] activated", self.registration.scope);
+});
+
 // Navegações (HTML) sempre NetworkFirst — nunca cache-first, para o app
 // perceber novas versões assim que voltar a ter rede.
 registerRoute(
   new NavigationRoute(
     new NetworkFirst({
       cacheName: "html-navigations",
-      networkTimeoutSeconds: 5,
+      networkTimeoutSeconds: 10,
       plugins: [new ExpirationPlugin({ maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 })],
     }),
     { denylist: [/^\/~oauth/] },
@@ -31,7 +40,10 @@ registerRoute(
 );
 
 self.addEventListener("message", (event) => {
-  if ((event.data as { type?: string })?.type === "SKIP_WAITING") self.skipWaiting();
+  if ((event.data as { type?: string })?.type === "SKIP_WAITING") {
+    console.info("[SW] SKIP_WAITING received");
+    void self.skipWaiting();
+  }
 });
 
 interface PushPayload {
