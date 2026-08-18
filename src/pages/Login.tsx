@@ -9,13 +9,20 @@ import { Calendar, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
+const REMEMBER_KEY = 'remembered_login_email';
+
 export default function Login() {
-  const { session, loading, signIn } = useAuth();
+  const { session, loading, signIn, passwordRecoveryRequired } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState(() => localStorage.getItem('saved_email') || '');
+  const [email, setEmail] = useState(
+    () => localStorage.getItem(REMEMBER_KEY) || localStorage.getItem('saved_email') || ''
+  );
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('saved_email'));
+  const [rememberMe, setRememberMe] = useState(
+    () => !!(localStorage.getItem(REMEMBER_KEY) || localStorage.getItem('saved_email'))
+  );
   const [submitting, setSubmitting] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
 
   if (loading) {
     return (
@@ -23,6 +30,10 @@ export default function Login() {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  if (session && passwordRecoveryRequired) {
+    return <Navigate to="/reset-password" replace />;
   }
 
   if (session) {
@@ -41,10 +52,11 @@ export default function Login() {
     e.preventDefault();
     setSubmitting(true);
     if (rememberMe) {
-      localStorage.setItem('saved_email', email);
+      localStorage.setItem(REMEMBER_KEY, email);
     } else {
-      localStorage.removeItem('saved_email');
+      localStorage.removeItem(REMEMBER_KEY);
     }
+    localStorage.removeItem('saved_email');
     const { error } = await signIn(email, password);
     if (error) {
       toast.error('Email ou senha inválidos');
@@ -72,6 +84,8 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
+                name="email"
+                autoComplete="username"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="seu@email.com"
@@ -83,6 +97,8 @@ export default function Login() {
               <Input
                 id="password"
                 type="password"
+                name="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -98,7 +114,7 @@ export default function Login() {
                 onCheckedChange={(checked) => setRememberMe(!!checked)}
               />
               <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                Lembrar meu email
+                Lembrar meu e-mail
               </Label>
             </div>
 
@@ -121,15 +137,19 @@ export default function Login() {
             </Button>
             <button
               type="button"
+              disabled={sendingReset}
               onClick={async () => {
                 if (!email) { toast.error('Preencha o email primeiro'); return; }
-                const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/#/set-password`,
+                setSendingReset(true);
+                await supabase.auth.resetPasswordForEmail(email.trim(), {
+                  redirectTo: `${window.location.origin}/#/reset-password`,
                 });
-                if (error) toast.error(error.message);
-                else toast.success('Email de recuperação enviado!');
+                setSendingReset(false);
+                toast.success(
+                  'Se existir uma conta associada a este e-mail, você receberá as instruções para redefinir sua senha.'
+                );
               }}
-              className="text-xs text-primary hover:underline"
+              className="text-xs text-primary hover:underline disabled:opacity-50"
             >
               Esqueceu sua senha?
             </button>

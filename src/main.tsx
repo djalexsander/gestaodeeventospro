@@ -2,7 +2,9 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { initPwa } from "@/lib/pwa";
+import { bootstrapRecovery } from "@/lib/recovery";
 
-createRoot(document.getElementById("root")!).render(<App />);
-
-initPwa();
+bootstrapRecovery().finally(() => {
+  createRoot(document.getElementById("root")!).render(<App />);
+  initPwa();
+});

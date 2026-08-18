@@ -27,13 +27,14 @@ import Configuracoes from "./pages/Configuracoes";
 import PlanoAssinatura from "./pages/PlanoAssinatura";
 import Login from "./pages/Login";
 import SetPassword from "./pages/SetPassword";
+import ResetPassword from "./pages/ResetPassword";
 import PrimeiroAcesso from "./pages/PrimeiroAcesso";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth();
+  const { session, loading, passwordRecoveryRequired } = useAuth();
 
   if (loading) {
     return (
@@ -50,6 +51,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     } catch { /* noop */ }
     return <Navigate to="/login" replace />;
   }
+
+  if (passwordRecoveryRequired) return <Navigate to="/reset-password" replace />;
 
   return <>{children}</>;
 }
@@ -91,6 +94,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/set-password" element={<SetPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/primeiro-acesso" element={<PrimeiroAcesso />} />
 
       <Route
