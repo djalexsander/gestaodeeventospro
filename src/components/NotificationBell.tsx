@@ -30,20 +30,25 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [showPrefs, setShowPrefs] = useState(false);
+  const [limit, setLimit] = useState(30);
+  const [hasMore, setHasMore] = useState(false);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (size = limit) => {
     if (!user) return;
     const { data } = await supabase
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(20);
-    if (data) setNotifications(data as any);
+      .limit(size + 1);
+    if (data) {
+      setHasMore(data.length > size);
+      setNotifications(data.slice(0, size) as any);
+    }
   };
 
   useEffect(() => {
-    fetchNotifications();
+    fetchNotifications(limit);
 
     if (!user) return;
     const channel = supabase
@@ -53,11 +58,22 @@ export function NotificationBell() {
         schema: "public",
         table: "notifications",
         filter: `user_id=eq.${user.id}`,
-      }, () => fetchNotifications())
+      }, () => fetchNotifications(limit))
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user]);
+  }, [user, limit]);
+
+  // Refetch ao abrir o sino e ao voltar do background (cobre push recebido com o app fechado)
+  useEffect(() => {
+    if (open) fetchNotifications(limit);
+  }, [open]);
+
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") fetchNotifications(limit); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [limit, user]);
 
   // Navegação vinda do clique na notificação do sistema (service worker)
   useEffect(() => {
@@ -165,12 +181,24 @@ export function NotificationBell() {
                         className={`w-full text-left px-4 py-3 border-b last:border-0 transition-colors hover:bg-muted/50 ${!n.is_read ? "bg-primary/5" : ""}`}
                       >
                         <p className={`text-xs font-semibold ${typeColor(n.type)}`}>{n.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-line">{n.message}</p>
                         <p className="text-[10px] text-muted-foreground/60 mt-1">
                           {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
                         </p>
                       </button>
                     ))
+                  )}
+                  {tab === "all" && hasMore && (
+                    <div className="p-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => setLimit(l => l + 30)}
+                      >
+                        Carregar mais
+                      </Button>
+                    </div>
                   )}
                 </ScrollArea>
               </TabsContent>

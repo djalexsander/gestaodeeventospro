@@ -132,8 +132,16 @@ export type NotifyType =
   | "event_date_changed"
   | "event_time_changed"
   | "event_location_changed"
+  | "event_artist_changed"
   | "event_assignment_added"
   | "event_assignment_removed";
+
+export interface EventChange {
+  field: string;
+  label?: string;
+  from?: string | null;
+  to?: string | null;
+}
 
 /** Dispara notificação sem bloquear o fluxo de salvamento. */
 export function notifyEvent(params: {
@@ -142,6 +150,7 @@ export function notifyEvent(params: {
   audience?: "company" | "team";
   message?: string;
   staffUserIds?: string[];
+  changes?: EventChange[];
 }): void {
   void supabase.functions
     .invoke("notify-event", {
@@ -151,6 +160,7 @@ export function notifyEvent(params: {
         audience: params.audience ?? "company",
         message: params.message,
         staff_user_ids: params.staffUserIds,
+        changes: params.changes ?? [],
       },
     })
     .then(({ error }) => {

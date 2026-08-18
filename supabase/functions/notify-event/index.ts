@@ -20,6 +20,7 @@ const TYPES = [
   "event_date_changed",
   "event_time_changed",
   "event_location_changed",
+  "event_artist_changed",
   "event_assignment_added",
   "event_assignment_removed",
 ] as const;
@@ -32,9 +33,31 @@ const TITLES: Record<NotifType, string> = {
   event_date_changed: "Data do evento alterada",
   event_time_changed: "Horário do evento alterado",
   event_location_changed: "Local do evento alterado",
+  event_artist_changed: "Artista do evento alterado",
   event_assignment_added: "Você foi escalado",
   event_assignment_removed: "Você saiu da escala",
 };
+
+// Preferências existentes no banco (colunas booleanas). Tipos sem coluna própria
+// caem no flag mais próximo.
+const PREF_COLUMN: Record<NotifType, string> = {
+  event_created: "event_created",
+  event_updated: "event_updated",
+  event_cancelled: "event_cancelled",
+  event_date_changed: "event_date_changed",
+  event_time_changed: "event_time_changed",
+  event_location_changed: "event_location_changed",
+  event_artist_changed: "event_updated",
+  event_assignment_added: "event_assignment_added",
+  event_assignment_removed: "event_assignment_removed",
+};
+
+interface Change { field: string; label?: string; from?: string | null; to?: string | null }
+
+async function sha1(input: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(input));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -50,7 +73,14 @@ serve(async (req) => {
     if (!caller) return json({ error: "Não autorizado" }, 401);
 
     const body = await req.json().catch(() => null) as
-      | { event_id?: string; type?: string; audience?: string; message?: string; staff_user_ids?: string[] }
+      | {
+          event_id?: string;
+          type?: string;
+          audience?: string;
+          message?: string;
+          staff_user_ids?: string[];
+          changes?: Change[];
+        }
       | null;
 
     const eventId = body?.event_id?.trim();
@@ -118,18 +148,37 @@ serve(async (req) => {
     const prefMap = new Map((prefs ?? []).map((p) => [p.user_id, p as Record<string, boolean>]));
     recipientIds = recipientIds.filter((id) => {
       const p = prefMap.get(id);
-      return !p || p[type] !== false;
+      return !p || p[PREF_COLUMN[type]] !== false;
     });
     if (recipientIds.length === 0) return json({ success: true, recipients: 0 });
+
+    const changes: Change[] = Array.isArray(body?.changes) ? body!.changes!.slice(0, 10) : [];
 
     const title = TITLES[type];
     const dateLabel = event.date
       ? new Date(`${event.date}T12:00:00`).toLocaleDateString("pt-BR")
       : "";
+    const base = `${event.name}${dateLabel ? ` — ${dateLabel}` : ""}`;
+    const changeSummary = changes.length > 0
+      ? changes
+          .map((c) =>
+            c.from && c.to
+              ? `${c.label ?? c.field}: ${c.from} → ${c.to}`
+              : (c.label ?? c.field)
+          )
+          .join(" • ")
+      : "";
     const message = (body?.message?.trim() ||
-      `${event.name}${dateLabel ? ` — ${dateLabel}` : ""}${event.venue ? ` • ${event.venue}` : ""}`).slice(0, 400);
+      (changeSummary
+        ? `${base}\n${changeSummary}`
+        : `${base}${event.venue ? ` • ${event.venue}` : ""}`)).slice(0, 400);
 
+    // Idempotência: mesma ocorrência (tipo + evento + campos alterados) dentro do
+    // mesmo minuto nunca gera duas notificações, mesmo em retry da função.
     const stamp = new Date().toISOString().slice(0, 16);
+    const fingerprint = await sha1(
+      JSON.stringify({ t: type, e: event.id, c: changes.map((c) => `${c.field}:${c.from}>${c.to}`).sort(), s: stamp }),
+    );
     const rows = recipientIds.map((uid) => ({
       user_id: uid,
       company_id: event.company_id,
@@ -139,15 +188,40 @@ serve(async (req) => {
       event_id: event.id,
       reference_id: event.id,
       reference_type: "event",
-      dedupe_key: `${type}:${event.id}:${stamp}`,
+      dedupe_key: `${type}:${event.id}:${fingerprint}`,
+      metadata: {
+        changed_fields: changes.map((c) => c.field),
+        changes,
+        event_name: event.name,
+        event_date: event.date,
+      },
     }));
 
-    const { data: inserted } = await admin
+    const { data: inserted, error: insertError } = await admin
       .from("notifications")
       .upsert(rows, { onConflict: "user_id,dedupe_key", ignoreDuplicates: true })
       .select("id, user_id");
 
-    const notifByUser = new Map((inserted ?? []).map((n) => [n.user_id, n.id]));
+    if (insertError) {
+      console.error("[notify-event] falha ao gravar notificações:", insertError);
+      return json({ error: `Falha ao registrar notificações: ${insertError.message}` }, 500);
+    }
+
+    let notifByUser = new Map((inserted ?? []).map((n) => [n.user_id, n.id]));
+
+    // Linhas ignoradas por duplicidade: recupera os ids existentes para que o
+    // push aponte para a mesma ocorrência já persistida.
+    if (notifByUser.size < recipientIds.length) {
+      const { data: existing } = await admin
+        .from("notifications")
+        .select("id, user_id")
+        .eq("dedupe_key", `${type}:${event.id}:${fingerprint}`)
+        .in("user_id", recipientIds);
+      notifByUser = new Map([
+        ...(existing ?? []).map((n) => [n.user_id, n.id] as [string, string]),
+        ...notifByUser,
+      ]);
+    }
 
     // Push
     const { data: devices } = await admin
