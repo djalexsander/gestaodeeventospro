@@ -171,6 +171,12 @@ export default function Funcionarios() {
                     {member.phone}
                   </span>
                 )}
+                {member.user_id && (
+                  <span className="text-xs text-primary flex items-center gap-1">
+                    <BellRing className="h-3 w-3" />
+                    Recebe notificações
+                  </span>
+                )}
               </div>
               {member.notes && (
                 <p className="text-xs text-muted-foreground mt-1 truncate">{member.notes}</p>
@@ -255,6 +261,28 @@ export default function Funcionarios() {
                     placeholder="Observações..."
                     rows={3}
                   />
+                </div>
+                <div>
+                  <Label>Usuário vinculado (para notificações)</Label>
+                  <Select
+                    value={form.userId}
+                    onValueChange={(v) => setForm({ ...form, userId: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Nenhum" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NO_USER}>Nenhum</SelectItem>
+                      {companyUsers.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name || u.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Vincule o funcionário a um usuário do app para que ele receba avisos quando for escalado.
+                  </p>
                 </div>
               </div>
               <DialogFooter>
