@@ -89,7 +89,9 @@ jobs:
           releaseBody: "Nova versão publicada automaticamente pelo GitHub Actions."
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: true
+          # latest.json is generated/validated by the step below (single source of truth,
+          # avoids an asset name conflict on upload)
+          includeUpdaterJson: false
 
       - name: List build artifacts
         shell: bash
