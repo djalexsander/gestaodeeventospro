@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
+import { isRecoveryPending, setRecoveryPending } from '@/lib/recovery';
 
 type AppRole = 'admin' | 'user' | 'admin_master' | 'company_admin';
 
@@ -11,6 +12,8 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isAdminMaster: boolean;
+  passwordRecoveryRequired: boolean;
+  clearPasswordRecovery: () => void;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -23,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const [passwordRecoveryRequired, setPasswordRecoveryRequired] = useState(() => isRecoveryPending());
 
   const fetchRole = useCallback(async (userId: string) => {
     try {
@@ -65,6 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Important: don't await other Supabase calls inside onAuthStateChange
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecoveryPending(true);
+        setPasswordRecoveryRequired(true);
+      }
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -107,6 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setRecoveryPending(false);
+    setPasswordRecoveryRequired(false);
     setSession(null);
     setUser(null);
     setRole(null);
@@ -117,6 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session, user, role, loading,
       isAdmin: role === 'admin' || role === 'admin_master' || role === 'company_admin',
       isAdminMaster: role === 'admin_master',
+      passwordRecoveryRequired,
+      clearPasswordRecovery: () => { setRecoveryPending(false); setPasswordRecoveryRequired(false); },
       signIn, signUp, signOut,
     }}>
       {children}
