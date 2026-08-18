@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Users, UserPlus, Phone, Briefcase, Pencil } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Trash2, Users, UserPlus, Phone, Briefcase, Pencil, BellRing } from "lucide-react";
 import { toast } from "sonner";
 
 interface StaffMember {
@@ -20,7 +21,16 @@ interface StaffMember {
   role: string;
   type: "equipe" | "freelancer";
   notes: string;
+  user_id: string | null;
 }
+
+interface CompanyUserOption {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const NO_USER = "__none__";
 
 export default function Funcionarios() {
   const { isAdmin } = useAuth();
@@ -31,7 +41,8 @@ export default function Funcionarios() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState<"equipe" | "freelancer">("equipe");
-  const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "" });
+  const [form, setForm] = useState({ name: "", phone: "", role: "", notes: "", userId: NO_USER });
+  const [companyUsers, setCompanyUsers] = useState<CompanyUserOption[]>([]);
 
   const fetchStaff = async () => {
     if (!activeCompanyId) { setLoading(false); return; }
@@ -52,15 +63,33 @@ export default function Funcionarios() {
     fetchStaff();
   }, [activeCompanyId]);
 
+  useEffect(() => {
+    if (!activeCompanyId) { setCompanyUsers([]); return; }
+    void (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, name, email")
+        .eq("company_id", activeCompanyId)
+        .order("name");
+      setCompanyUsers((data ?? []) as CompanyUserOption[]);
+    })();
+  }, [activeCompanyId]);
+
   const openAdd = () => {
     setEditingMember(null);
-    setForm({ name: "", phone: "", role: "", notes: "" });
+    setForm({ name: "", phone: "", role: "", notes: "", userId: NO_USER });
     setDialogOpen(true);
   };
 
   const openEdit = (member: StaffMember) => {
     setEditingMember(member);
-    setForm({ name: member.name, phone: member.phone, role: member.role, notes: member.notes });
+    setForm({
+      name: member.name,
+      phone: member.phone,
+      role: member.role,
+      notes: member.notes,
+      userId: member.user_id ?? NO_USER,
+    });
     setDialogOpen(true);
   };
 
@@ -75,6 +104,7 @@ export default function Funcionarios() {
         phone: form.phone.trim(),
         role: form.role.trim(),
         notes: form.notes.trim(),
+        user_id: form.userId === NO_USER ? null : form.userId,
       }).eq("id", editingMember.id);
       if (error) {
         toast.error("Erro ao atualizar funcionário");
@@ -91,6 +121,7 @@ export default function Funcionarios() {
         type: activeTab,
         notes: form.notes.trim(),
         company_id: activeCompanyId,
+        user_id: form.userId === NO_USER ? null : form.userId,
       });
       if (error) {
         toast.error("Erro ao adicionar funcionário");
