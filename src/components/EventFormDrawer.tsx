@@ -214,13 +214,48 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
           notifyEvent({ eventId, type: "event_assignment_added", staffUserIds: added });
         }
       } else {
-        const changes: NotifyType[] = [];
-        if (form.status === "Cancelado" && event.status !== "Cancelado") changes.push("event_cancelled");
-        if (form.date !== event.date) changes.push("event_date_changed");
-        if (form.showTime !== event.showTime || form.setupTime !== event.setupTime) changes.push("event_time_changed");
-        if (form.venue !== event.venue || form.cityId !== event.cityId) changes.push("event_location_changed");
-        if (changes.length === 0) changes.push("event_updated");
-        changes.slice(0, 2).forEach(type => notifyEvent({ eventId: eventId!, type, audience: "company" }));
+        // Comparação real do estado anterior x novo — só campos operacionais.
+        const cityName = (id: string) => cities.find(c => c.id === id)?.name ?? "";
+        const artistName = (id: string) => artists.find(a => a.id === id)?.name ?? "";
+        const fmtDate = (d: string) => (d ? d.split("-").reverse().join("/") : "—");
+
+        const changes: EventChange[] = [];
+        if (form.date !== event.date) {
+          changes.push({ field: "date", label: "Data", from: fmtDate(event.date), to: fmtDate(form.date) });
+        }
+        if (form.showTime !== event.showTime) {
+          changes.push({ field: "show_time", label: "Horário do show", from: event.showTime || "—", to: form.showTime || "—" });
+        }
+        if (form.setupTime !== event.setupTime) {
+          changes.push({ field: "setup_time", label: "Montagem", from: event.setupTime || "—", to: form.setupTime || "—" });
+        }
+        if (form.cityId !== event.cityId) {
+          changes.push({ field: "city", label: "Cidade", from: cityName(event.cityId), to: cityName(form.cityId) });
+        }
+        if (form.venue !== event.venue) {
+          changes.push({ field: "venue", label: "Local", from: event.venue || "—", to: form.venue || "—" });
+        }
+        if (form.artistId !== event.artistId) {
+          changes.push({ field: "artist", label: "Artista", from: artistName(event.artistId), to: artistName(form.artistId) });
+        }
+        if (form.status !== event.status) {
+          changes.push({ field: "status", label: "Status", from: event.status, to: form.status });
+        }
+
+        const cancelled = form.status === "Cancelado" && event.status !== "Cancelado";
+        if (cancelled) {
+          notifyEvent({ eventId, type: "event_cancelled", audience: "company", changes });
+        } else if (changes.length > 0) {
+          // Uma única ocorrência agrupada por salvamento.
+          const only = changes.length === 1 ? changes[0].field : null;
+          const type: NotifyType =
+            only === "date" ? "event_date_changed"
+            : only === "show_time" || only === "setup_time" ? "event_time_changed"
+            : only === "city" || only === "venue" ? "event_location_changed"
+            : only === "artist" ? "event_artist_changed"
+            : "event_updated";
+          notifyEvent({ eventId, type, audience: "company", changes });
+        }
 
         const added = userIdOf(selectedStaffIds.filter(id => !assignedBefore.includes(id)));
         const removed = userIdOf(assignedBefore.filter(id => !selectedStaffIds.includes(id)));
