@@ -172,7 +172,6 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
     };
 
     let eventId: string | undefined;
-    const previousStaffIds = event ? [...selectedStaffIds] : [];
     let assignedBefore: string[] = [];
     if (event) {
       const { data: before } = await supabase
@@ -187,7 +186,6 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         return;
       }
     }
-    void previousStaffIds;
 
     // Save staff assignments
     if (eventId) {
@@ -221,11 +219,7 @@ export function EventFormDrawer({ open, onOpenChange, event, defaultDate }: Even
         if (form.date !== event.date) changes.push("event_date_changed");
         if (form.showTime !== event.showTime || form.setupTime !== event.setupTime) changes.push("event_time_changed");
         if (form.venue !== event.venue || form.cityId !== event.cityId) changes.push("event_location_changed");
-        if (changes.length === 0 && JSON.stringify(payload) !== JSON.stringify({
-          ...event, id: undefined,
-        })) {
-          changes.push("event_updated");
-        }
+        if (changes.length === 0) changes.push("event_updated");
         changes.slice(0, 2).forEach(type => notifyEvent({ eventId: eventId!, type, audience: "company" }));
 
         const added = userIdOf(selectedStaffIds.filter(id => !assignedBefore.includes(id)));
