@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, setMonth, setYear, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Filter, FileDown, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Filter, FileDown, FileJson, X, MapPin, Music, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -19,6 +19,7 @@ import { EventDetailDrawer } from "@/components/EventDetailDrawer";
 import { StatusBadge } from "@/components/StatusBadge";
 import { motion, AnimatePresence } from "framer-motion";
 import { exportMonthlyPdf, exportPeriodPdf } from "@/lib/exportPdf";
+import { ExportBackstageDialog } from "@/components/ExportBackstageDialog";
 
 export default function Dashboard() {
   const { events, artists, cities, getArtistById, getCityById } = useAppContext();
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [backstageOpen, setBackstageOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [viewingEvent, setViewingEvent] = useState<EventItem | null>(null);
   const [filterCity, setFilterCity] = useState("all");
@@ -213,6 +215,11 @@ export default function Dashboard() {
               </Tabs>
             </PopoverContent>
           </Popover>
+          {isAdmin && (
+            <Button variant="outline" onClick={() => setBackstageOpen(true)}>
+              <FileJson className="h-4 w-4 mr-2" /> Exportar p/ Backstage Pro
+            </Button>
+          )}
           {isAdmin && !isReadOnly && (
             <Button onClick={() => { setEditingEvent(null); setFormOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Novo Evento
@@ -417,6 +424,7 @@ export default function Dashboard() {
         event={viewingEvent}
         onEdit={handleEdit}
       />
+      <ExportBackstageDialog open={backstageOpen} onOpenChange={setBackstageOpen} />
     </div>
   );
 }

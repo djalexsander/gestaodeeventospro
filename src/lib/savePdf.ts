@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { saveFile } from './saveFile';
 
 /**
  * Sanitize a string for use in file names:
@@ -53,44 +54,20 @@ function buildFileName({ tipo, evento, cidade, data }: Omit<SavePdfOptions, 'doc
  * Universal PDF save function with automatic fallback:
  * 1. If showSaveFilePicker is available (Win 11 / modern browsers) → native "Save As" dialog
  * 2. Otherwise → automatic download via temporary link (Win 10 / older browsers)
+ *
+ * O mecanismo de gravação (picker + fallback) vive em `./saveFile`; aqui ficam
+ * só a montagem do nome e o feedback ao usuário.
  */
 export async function savePdf(options: SavePdfOptions): Promise<void> {
   const fileName = buildFileName(options);
   const blob = options.doc.output('blob');
 
-  // Try native File System Access API first (modern browsers, Windows 11)
-  if ('showSaveFilePicker' in window) {
-    try {
-      const handle = await (window as any).showSaveFilePicker({
-        suggestedName: fileName,
-        types: [
-          {
-            description: 'Documento PDF',
-            accept: { 'application/pdf': ['.pdf'] },
-          },
-        ],
-      });
-      const writable = await handle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-      toast.success('PDF salvo com sucesso!');
-      return;
-    } catch (err: any) {
-      // User cancelled the dialog — not an error
-      if (err?.name === 'AbortError') return;
-      // Fall through to legacy method
-    }
-  }
+  const outcome = await saveFile({
+    blob,
+    suggestedName: fileName,
+    pickerTypes: [{ description: 'Documento PDF', accept: { 'application/pdf': ['.pdf'] } }],
+  });
 
-  // Fallback: create temporary link and force download
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  toast.success('PDF gerado com sucesso!');
+  if (outcome === 'cancelled') return;
+  toast.success(outcome === 'saved' ? 'PDF salvo com sucesso!' : 'PDF gerado com sucesso!');
 }
