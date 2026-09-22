@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Bell, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -134,8 +133,8 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between border-b px-4 py-3">
+      <PopoverContent className="flex w-80 flex-col p-0 max-h-[85vh] overflow-hidden" align="end">
+        <div className="flex items-center justify-between border-b px-4 py-3 shrink-0">
           <h4 className="font-semibold text-sm">Notificações</h4>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
@@ -155,21 +154,21 @@ export function NotificationBell() {
           </div>
         </div>
 
-        <div className="px-3 py-3 border-b space-y-3">
+        <div className="px-3 py-3 border-b space-y-3 shrink-0">
           <EnablePushCard />
           {showPrefs && <NotificationPreferences />}
         </div>
 
-        <Tabs defaultValue="unread">
-          <TabsList className="grid w-full grid-cols-2 rounded-none">
+        <Tabs defaultValue="unread" className="flex flex-1 flex-col min-h-0">
+          <TabsList className="grid w-full grid-cols-2 rounded-none shrink-0">
             <TabsTrigger value="unread" className="text-xs">Não lidas ({unreadCount})</TabsTrigger>
             <TabsTrigger value="all" className="text-xs">Todas</TabsTrigger>
           </TabsList>
           {(["unread", "all"] as const).map(tab => {
             const list = tab === "unread" ? notifications.filter(n => !n.is_read) : notifications;
             return (
-              <TabsContent key={tab} value={tab} className="m-0">
-                <ScrollArea className="max-h-[300px]">
+              <TabsContent key={tab} value={tab} className="m-0 flex flex-1 flex-col min-h-0">
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   {list.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-8">Nenhuma notificação</p>
                   ) : (
@@ -200,7 +199,7 @@ export function NotificationBell() {
                       </Button>
                     </div>
                   )}
-                </ScrollArea>
+                </div>
               </TabsContent>
             );
           })}
