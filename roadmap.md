@@ -10,6 +10,6 @@
 
 # Production publication of the first-access correction
 - [x] Re-run the 64 existing tests and verify deployed invitation rejection, service-only activation permissions, and preservation of all 12 original accounts.
-- [ ] Confirm a successful current production build. Blocker: current build telemetry is empty; prior successful build is documented but not a fresh confirmation.
+- [x] Confirm the current build completed without errors: harness recorded `build OK` at 2026-11-09 19:03:27 UTC.
 - [ ] Publish the correction after the owner decides how to handle the eight active critical findings outside first access. Blocker: security decision required before publication.
 - [ ] Verify the published frontend and production invitation protection after deployment completes. Blocker: publication has not yet been requested.

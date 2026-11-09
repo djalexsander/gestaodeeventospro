@@ -43,6 +43,6 @@ A função pública `first-access` recebia e-mail e senha, procurava usuários c
 - A função implantada rejeitou e-mail/senha sem convite e validação de token desconhecido com HTTP 403. A função de reivindicação exige estado pendente, hash correspondente e prazo válido; a proteção de reabertura continua definida no banco.
 - Navegador local: `/primeiro-acesso` sem token, com token desconhecido e `/set-password` não exibem campos de senha; nenhuma exceção de página foi observada.
 - A ativação real e o login por senha da conta nova foram verificados anteriormente; não foram repetidos criando outra conta nesta publicação.
-- O log atual de compilação está vazio, portanto não comprova uma nova compilação concluída; o sucesso anterior permanece registrado acima.
+- O log inicialmente vazio foi atualizado pelo ambiente: `build OK` em 2026-11-09 às 19:03:27 UTC confirma a compilação atual sem erros.
 - A verificação básica de segurança encontrou oito alertas críticos ativos fora do Primeiro Acesso, em empresas, assinaturas, pagamentos, configurações, solicitações de plano e arquivos de riders. Não foram corrigidos nem ignorados para preservar o escopo autorizado. A decisão do titular será solicitada antes de pedir publicação.
 - Nenhum deploy foi solicitado nesta etapa; conclusão e proteção do frontend publicado ainda não estão confirmadas. Permanecem pendentes a confirmação pelo titular do recebimento/abertura da recuperação e do login por senha de uma conta original.
