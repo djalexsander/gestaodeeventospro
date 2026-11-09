@@ -12,5 +12,5 @@
 - [x] Re-run the 64 existing tests and verify deployed invitation rejection, service-only activation permissions, and preservation of all 12 original accounts.
 - [x] Confirm the current build completed without errors: harness recorded `build OK` at 2026-11-09 19:03:27 UTC.
 - [x] Summarize the eight pre-existing critical findings and assess their relationship to first-access protection without changing application behavior.
-- [ ] Publish only the first-access correction after renewed explicit authorization. Blocker: owner requested a security summary before authorizing publication; the previous publish call was cancelled before execution.
-- [ ] Verify the published frontend and production invitation protection after deployment completes. Blocker: publication has not yet been requested.
+- [x] Publish only the first-access correction after renewed explicit authorization; platform scheduled publication without requiring changes to pre-existing findings.
+- [x] Verify production serves the corrected frontend (HTTP 200), rejects the real consumed invitation and the authenticated legacy activation route, and allows original-account session access and test-account password login.
