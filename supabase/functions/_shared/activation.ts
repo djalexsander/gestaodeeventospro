@@ -5,6 +5,11 @@ export interface ActivationClaim {
 export const INVITATION_TTL_MS = 24 * 60 * 60 * 1000;
 export const invalidInvitation = 'Convite inválido ou indisponível. Utilize o convite do administrador ou Esqueci minha senha.';
 
+// Supabase bcrypt accepts at most 72 bytes; retain 256 bits of entropy below that limit.
+export function temporaryInvitationPassword(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('') + 'Aa1!';
+}
+
 export async function hashInvitation(token: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
@@ -20,7 +25,7 @@ export function validActivationInput(body: unknown): body is { token: string; pa
   if (!body || typeof body !== 'object') return false;
   const value = body as Record<string, unknown>;
   return typeof value.token === 'string' && /^[a-f0-9]{64}$/.test(value.token) &&
-    typeof value.password === 'string' && value.password.length >= 8 && value.password.length <= 128;
+    typeof value.password === 'string' && value.password.length >= 8 && new TextEncoder().encode(value.password).length <= 72;
 }
 
 // Claim occurs atomically before changing credentials; failures remain locked, never reusable.

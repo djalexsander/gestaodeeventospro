@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { activateInvitation, canInvite, hashInvitation, INVITATION_TTL_MS } from '../../supabase/functions/_shared/activation';
+import { activateInvitation, canInvite, hashInvitation, INVITATION_TTL_MS, temporaryInvitationPassword } from '../../supabase/functions/_shared/activation';
 
 const token = 'ab'.repeat(32);
 const validBody = { token, password: 'Valid-test-password-123!' };
@@ -15,6 +15,12 @@ function pendingAccount(state = 'pending', expires = now + INVITATION_TTL_MS) {
 }
 
 describe('server initial activation', () => {
+  it('creates a random temporary password within the auth 72-byte maximum', () => {
+    const password = temporaryInvitationPassword();
+    expect(new TextEncoder().encode(password).length).toBe(68);
+    expect(password).toMatch(/^[a-f0-9]{64}Aa1!$/);
+    expect(temporaryInvitationPassword()).not.toBe(password);
+  });
   it('activates a new account only after a valid individual invitation is claimed', async () => {
     const update = vi.fn(async () => true);
     expect(await activateInvitation(validBody, pendingAccount(), update)).toBe(true);
@@ -23,6 +29,12 @@ describe('server initial activation', () => {
   it('does not change an existing legacy account password', async () => {
     const update = vi.fn(async () => true);
     expect(await activateInvitation(validBody, pendingAccount('legacy_locked'), update)).toBe(false);
+    expect(update).not.toHaveBeenCalled();
+  });
+  it('rejects oversized Unicode passwords before consuming a valid invitation', async () => {
+    const claim = vi.fn(); const update = vi.fn();
+    expect(await activateInvitation({ token, password: 'é'.repeat(37) }, claim, update)).toBe(false);
+    expect(claim).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
   });
   it('rejects repeat activation permanently', async () => {
