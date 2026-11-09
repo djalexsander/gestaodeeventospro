@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_activations: {
+        Row: {
+          activated_at: string | null
+          company_id: string
+          created_at: string
+          expires_at: string | null
+          state: string
+          token_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          company_id: string
+          created_at?: string
+          expires_at?: string | null
+          state: string
+          token_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          company_id?: string
+          created_at?: string
+          expires_at?: string | null
+          state?: string
+          token_hash?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_activations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_activations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           company_id: string | null
@@ -914,6 +959,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_initial_activation: {
+        Args: { _token_hash: string }
+        Returns: {
+          user_id: string
+        }[]
+      }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

@@ -31,6 +31,7 @@ export function CompanyUsers() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", role: "user" });
+  const [invitationUrl, setInvitationUrl] = useState('');
 
   const fetchUsers = async () => {
     if (!activeCompanyId) return;
@@ -112,6 +113,7 @@ export function CompanyUsers() {
         toast.error(res.data?.error || "Erro ao criar usuário");
       } else {
         toast.success("Usuário criado com sucesso!");
+        setInvitationUrl(res.data.invitation_url || '');
         await fetchUsers();
       }
     }
@@ -251,7 +253,7 @@ export function CompanyUsers() {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  O usuário deverá fazer o primeiro acesso para definir sua senha.
+                  A ativação exige um convite individual, válido por 24 horas e de uso único.
                 </p>
               </div>
             )}
@@ -282,6 +284,14 @@ export function CompanyUsers() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!invitationUrl} onOpenChange={open => { if (!open) setInvitationUrl(''); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Convite de ativação</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Envie este convite somente à pessoa cadastrada. Validade: 24 horas. Uso único.</p>
+          <Input aria-label="Convite de ativação" readOnly value={invitationUrl} />
+          <Button onClick={async () => { try { await navigator.clipboard.writeText(invitationUrl); toast.success('Convite copiado'); } catch { toast.error('Selecione e copie o convite'); } }}>Copiar convite</Button>
         </DialogContent>
       </Dialog>
     </div>

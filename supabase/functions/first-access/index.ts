@@ -1,105 +1,36 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { activateInvitation, hashInvitation, invalidInvitation } from '../_shared/activation.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+Deno.serve(async req => {
+  const reply = (body: unknown, status: number) => new Response(JSON.stringify(body), {
+    status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+  if (req.method === 'OPTIONS') return reply({}, 200);
+  if (req.method !== 'POST') return reply({ error: invalidInvitation }, 403);
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
-
-    const { email, password } = await req.json();
-
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email e senha são obrigatórios" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const url = Deno.env.get('SUPABASE_URL');
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) return reply({ error: invalidInvitation }, 503);
+    const admin = createClient(url, key);
+    const body = await req.json();
+    if (body?.action === 'validate' && typeof body.token === 'string' && /^[a-f0-9]{64}$/.test(body.token)) {
+      const { data, error } = await admin.from('account_activations').select('user_id')
+        .eq('token_hash', await hashInvitation(body.token)).eq('state', 'pending')
+        .gt('expires_at', new Date().toISOString()).maybeSingle();
+      return data && !error ? reply({ valid: true }, 200) : reply({ error: invalidInvitation }, 403);
     }
-
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "A senha deve ter no mínimo 6 caracteres" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Find user by email using admin API
-    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
+    const success = await activateInvitation(body, async hash => {
+      const { data, error } = await admin.rpc('claim_initial_activation', { _token_hash: hash });
+      if (error) return null;
+      return data?.[0] ?? null;
+    }, async (id, password) => {
+      const { error } = await admin.auth.admin.updateUserById(id, { password });
+      if (error) console.error('Activation password update failed', { code: error.code });
+      return !error;
     });
-
-    if (listError) {
-      return new Response(JSON.stringify({ error: listError.message }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const targetUser = users.find((u) => u.email?.toLowerCase() === normalizedEmail);
-
-    if (targetUser) {
-      // User exists — just update password
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(targetUser.id, {
-        password,
-      });
-
-      if (updateError) {
-        return new Response(JSON.stringify({ error: updateError.message }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // User not found — check if email belongs to a company
-    const { data: company } = await supabaseAdmin
-      .from("companies")
-      .select("id, name")
-      .eq("email", normalizedEmail)
-      .limit(1)
-      .maybeSingle();
-
-    if (!company) {
-      return new Response(JSON.stringify({ error: "Email não encontrado. Verifique com o administrador." }), {
-        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Create new user as company_admin linked to this company
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email: normalizedEmail,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        name: company.name,
-        role: "company_admin",
-        company_id: company.id,
-      },
-    });
-
-    if (createError) {
-      return new Response(JSON.stringify({ error: createError.message }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ success: true, created: true }), {
-      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return success ? reply({ success: true }, 200) : reply({ error: invalidInvitation }, 403);
+  } catch {
+    return reply({ error: invalidInvitation }, 403);
   }
 });

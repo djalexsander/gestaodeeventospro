@@ -45,6 +45,7 @@ export default function Empresas() {
   const [plans, setPlans] = useState<PlanOption[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("none");
   const [activeSubs, setActiveSubs] = useState<ActiveSub[]>([]);
+  const [invitationUrl, setInvitationUrl] = useState('');
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -182,6 +183,13 @@ export default function Empresas() {
           });
         }
         toast.success("Empresa criada");
+        if (newCompany && form.email.trim()) {
+          const { data, error: inviteError } = await supabase.functions.invoke('create-company-user', {
+            body: { name: form.name, email: form.email, company_id: newCompany.id, role: selectedRole },
+          });
+          if (inviteError || !data?.invitation_url) toast.error('Empresa criada, mas o convite não foi emitido. Solicite ao administrador.');
+          else setInvitationUrl(data.invitation_url);
+        }
         await fetchCompanies();
         await refreshCompanies();
       }
@@ -387,6 +395,14 @@ export default function Empresas() {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!invitationUrl} onOpenChange={open => { if (!open) setInvitationUrl(''); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Convite de ativação</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Envie somente ao responsável cadastrado. Validade: 24 horas. Uso único.</p>
+          <Input aria-label="Convite de ativação" readOnly value={invitationUrl} />
+          <Button onClick={async () => { try { await navigator.clipboard.writeText(invitationUrl); toast.success('Convite copiado'); } catch { toast.error('Selecione e copie o convite'); } }}>Copiar convite</Button>
         </DialogContent>
       </Dialog>
     </div>

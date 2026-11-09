@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794249683575,
+      "tag": "0000_secure_initial_activation",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794249849341,
+      "tag": "0001_restrict_activation_ledger_grants",
+      "breakpoints": true
+    }
+  ]
+}
