@@ -11,5 +11,6 @@
 # Production publication of the first-access correction
 - [x] Re-run the 64 existing tests and verify deployed invitation rejection, service-only activation permissions, and preservation of all 12 original accounts.
 - [x] Confirm the current build completed without errors: harness recorded `build OK` at 2026-11-09 19:03:27 UTC.
-- [ ] Publish the correction after the owner decides how to handle the eight active critical findings outside first access. Blocker: security decision required before publication.
+- [x] Summarize the eight pre-existing critical findings and assess their relationship to first-access protection without changing application behavior.
+- [ ] Publish only the first-access correction after renewed explicit authorization. Blocker: owner requested a security summary before authorizing publication; the previous publish call was cancelled before execution.
 - [ ] Verify the published frontend and production invitation protection after deployment completes. Blocker: publication has not yet been requested.
