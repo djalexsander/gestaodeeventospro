@@ -34,3 +34,15 @@ A função pública `first-access` recebia e-mail e senha, procurava usuários c
 - Não foram publicados frontend nem nova versão desktop/PWA. As funções de segurança e migrations já estão aplicadas no backend compartilhado, protegendo também clientes antigos.
 - Convites expirados ou provisionamentos interrompidos não são reabertos por e-mail nem recriam usuários; uma conta criada sem convite utilizável deve usar recuperação por e-mail. Não foi incluído reenviar convite para contas existentes.
 - Prontidão: ativação inicial real verificada, mas a publicação permanece suspensa até confirmar recebimento/abertura da recuperação e login com senha de uma conta existente pelo próprio usuário.
+
+## Verificação pré-publicação — 2026-11-09
+- O titular autorizou publicar exclusivamente a correção de Primeiro Acesso, sem alterar outras funcionalidades ou senhas.
+- Reexecutados os quatro arquivos de testes: 64 testes passaram, incluindo os 12 de segurança da ativação.
+- Conferência atual do banco compartilhado com produção: todas as 12 contas originais continuam presentes, com perfil, senha cadastrada e papéis; estado `legacy_locked`, sem token. A conta adicional de teste continua ativada, sem token. Nenhuma senha ou dado foi alterado nesta verificação.
+- Confirmados RLS ativo e ausência de políticas cliente na tabela de ativação; `anon`/`authenticated` não podem ler a tabela nem executar a reivindicação; `authenticated` não pode atualizar a tabela.
+- A função implantada rejeitou e-mail/senha sem convite e validação de token desconhecido com HTTP 403. A função de reivindicação exige estado pendente, hash correspondente e prazo válido; a proteção de reabertura continua definida no banco.
+- Navegador local: `/primeiro-acesso` sem token, com token desconhecido e `/set-password` não exibem campos de senha; nenhuma exceção de página foi observada.
+- A ativação real e o login por senha da conta nova foram verificados anteriormente; não foram repetidos criando outra conta nesta publicação.
+- O log atual de compilação está vazio, portanto não comprova uma nova compilação concluída; o sucesso anterior permanece registrado acima.
+- A verificação básica de segurança encontrou oito alertas críticos ativos fora do Primeiro Acesso, em empresas, assinaturas, pagamentos, configurações, solicitações de plano e arquivos de riders. Não foram corrigidos nem ignorados para preservar o escopo autorizado. A decisão do titular será solicitada antes de pedir publicação.
+- Nenhum deploy foi solicitado nesta etapa; conclusão e proteção do frontend publicado ainda não estão confirmadas. Permanecem pendentes a confirmação pelo titular do recebimento/abertura da recuperação e do login por senha de uma conta original.
